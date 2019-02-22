@@ -22,25 +22,26 @@ QT_BEGIN_NAMESPACE
 class Ui_ChessClass
 {
 public:
+    QWidget *centralWidget;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
-    QWidget *centralWidget;
     QStatusBar *statusBar;
 
     void setupUi(QMainWindow *ChessClass)
     {
         if (ChessClass->objectName().isEmpty())
             ChessClass->setObjectName(QString::fromUtf8("ChessClass"));
-        ChessClass->resize(600, 400);
-        menuBar = new QMenuBar(ChessClass);
-        menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        ChessClass->setMenuBar(menuBar);
-        mainToolBar = new QToolBar(ChessClass);
-        mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
-        ChessClass->addToolBar(mainToolBar);
+        ChessClass->resize(840, 840);
         centralWidget = new QWidget(ChessClass);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         ChessClass->setCentralWidget(centralWidget);
+        menuBar = new QMenuBar(ChessClass);
+        menuBar->setObjectName(QString::fromUtf8("menuBar"));
+        menuBar->setGeometry(QRect(0, 0, 840, 26));
+        ChessClass->setMenuBar(menuBar);
+        mainToolBar = new QToolBar(ChessClass);
+        mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
+        ChessClass->addToolBar(Qt::TopToolBarArea, mainToolBar);
         statusBar = new QStatusBar(ChessClass);
         statusBar->setObjectName(QString::fromUtf8("statusBar"));
         ChessClass->setStatusBar(statusBar);

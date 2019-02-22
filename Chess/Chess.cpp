@@ -51,17 +51,10 @@ void Chess::generateBoard()
 		board.push_back(row);
 	}
 
-	for (auto &row : board) {
-		for (auto &square : row) {
-			square.label->show();
-		}
-	}
-
 	generateLabelCoordinates(labelCoordinates);
 	generateInitialCoordinates(pieceCoordinates);
 	generatePieces(pieces);
 	printPieceInfo(pieces);
-
 }
 
 void Chess::printPieceInfo(std::vector<Piece> &pieces)
@@ -105,20 +98,20 @@ void Chess::getCoordinate(Coordinate &coordinate, int const pieceID)
 
 void Chess::generatePieces(std::vector<Piece> &pieces)
 {
-	QString imagePath = "C:/Users/Andvik/Documents/Qt/Chess/Images/";
+	QString imagePath = ":/Images/";
 	std::map<int, QString> imagePaths = {
-		{ whitePawn,    imagePath + "whitePawn.png"     },
-		{ whiteRook,    imagePath + "whiteRook.png"     },
-		{ whiteKnight,  imagePath + "whiteKnight.png"   },
-		{ whiteBishop,  imagePath + "whiteBishop.png"   },
-		{ whiteQueen,   imagePath + "whiteQueen.png"    },
-		{ whiteKing,    imagePath + "whiteKing.png"     },
-		{ blackPawn,    imagePath + "blackPawn.png"     },
-		{ blackRook,    imagePath + "blackRook.png"     },
-		{ blackKnight,  imagePath + "blackKnight.png"   },
-		{ blackBishop,  imagePath + "blackBishop.png"   },
-		{ blackQueen,   imagePath + "blackQueen.png"    },
-		{ blackKing,    imagePath + "blackKing.png"     }
+		{ whitePawn,    imagePath + "whitePawn"     },
+		{ whiteRook,    imagePath + "whiteRook"     },
+		{ whiteKnight,  imagePath + "whiteKnight"   },
+		{ whiteBishop,  imagePath + "whiteBishop"	},
+		{ whiteQueen,   imagePath + "whiteQueen"    },
+		{ whiteKing,    imagePath + "whiteKing"     },
+		{ blackPawn,    imagePath + "blackPawn"     },
+		{ blackRook,    imagePath + "blackRook"     },
+		{ blackKnight,  imagePath + "blackKnight"   },
+		{ blackBishop,  imagePath + "blackBishop"   },
+		{ blackQueen,   imagePath + "blackQueen"    },
+		{ blackKing,    imagePath + "blackKing"     }
 	};
 	std::map<int, int> pieceColors = {
 		{ whitePawn,    white },
@@ -155,17 +148,11 @@ void Chess::generatePieces(std::vector<Piece> &pieces)
 			QPixmap image(piece.imagePath);
 
 			piece.label->setPixmap(image.scaled(piece.label->width(), piece.label->height(), Qt::KeepAspectRatio));
-
-
-			//piece.label->setPixmap(image);
-
-
 		}
 		auto colorSearch = pieceColors.find(pieceType);
 		if (colorSearch != pieceColors.end()) {
 			piece.color = colorSearch->second;
 		}
-
 		pieces.push_back(piece);
 	}
 }
@@ -179,13 +166,11 @@ void Chess::generateBoarder()
 	boarder->setGeometry(QRect(boarderStartLeft, boarderStartTop, boarderSize, boarderSize));
 	boarder->setStyleSheet("QLabel { background-color: rgb(60, 60, 60); }");
 	boarder->show();
-
-
 }
 
 void Chess::generateLabelCoordinates(std::vector<QLabel*> &coordinates)
 {
-	std::vector<QString> colCoordinateNames = { "a","b","c","d","e","f","g","h" };
+	std::vector<QString> colCoordinateNames { "a","b","c","d","e","f","g","h" };
 	int rowNumber{ 0 };
 	int colNumber{ 0 };
 	for (; colNumber < squaresInARow; colNumber++) {
@@ -199,7 +184,7 @@ void Chess::generateLabelCoordinates(std::vector<QLabel*> &coordinates)
 		coordinates.push_back(coordinate);
 	}
 
-	std::vector<QString> rowCoordinateNames = { "1","2","3","4","5","6","7","8" };
+	std::vector<QString> rowCoordinateNames { "1","2","3","4","5","6","7","8" };
 	colNumber = 0;
 	for (rowNumber = 0; rowNumber < squaresInARow; rowNumber++) {
 		QLabel *coordinate = new QLabel(this);
@@ -216,7 +201,7 @@ void Chess::generateLabelCoordinates(std::vector<QLabel*> &coordinates)
 
 void Chess::generateRow(std::vector<Square> &row, int const rowNumber)
 {
-	int color = rowNumber;
+	int color{ rowNumber };
 	for (int colNumber = 0; colNumber < squaresInARow; colNumber++) {
 		color++;
 		Square square;
@@ -232,10 +217,6 @@ void Chess::generateSquare(Square &square, int const color, int const rowNumber,
 	int const xPos = boardStartLeft + colNumber * squarePixelSize;
 	int const yPos = boardStartTop + squarePixelSize * (squaresInARow - (rowNumber + 1));
 	label->setGeometry(QRect(xPos, yPos, squarePixelSize, squarePixelSize));
-
-	//QPixmap pixmap(":/Images/blackBishop");
-	//label->setPixmap(pixmap);
-	//label->setMask(pixmap.mask());
 
 	setLabelBackgroundColor(color, label);
 

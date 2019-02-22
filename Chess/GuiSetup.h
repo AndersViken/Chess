@@ -1,7 +1,7 @@
 #pragma once
 int const squaresInARow		{ 8 };
 int const maxNumOfPieces	{ 32 };
-int const squarePixelSize	{ 60 };
+int const squarePixelSize	{ 80 };
 int const imageSize			{ squarePixelSize };
 int const lightColor		{ 0 };
 int const darkColor			{ 1 };
