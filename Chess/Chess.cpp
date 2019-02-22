@@ -46,14 +46,13 @@ void Chess::generateBoard()
 	generateBoarder();
 
 	for (int rowNumber = 0; rowNumber < squaresInARow; rowNumber++) {
-		std::vector<Square> row;
-		generateRow(row, rowNumber);
+		std::vector<Square> row = generateRow(rowNumber);
 		board.push_back(row);
 	}
 
-	generateLabelCoordinates(labelCoordinates);
-	generateInitialCoordinates(pieceCoordinates);
-	generatePieces(pieces);
+	labelCoordinates = generateLabelCoordinates();
+	pieceCoordinates = generateInitialCoordinates();
+	pieces = generatePieces();
 	printPieceInfo(pieces);
 }
 
@@ -70,8 +69,9 @@ void Chess::printPieceInfo(std::vector<Piece> &pieces)
 	}
 }
 
-void Chess::generateInitialCoordinates(std::vector<Coordinate> &coordinates)
+std::vector<Chess::Coordinate> Chess::generateInitialCoordinates()
 {
+	std::vector<Coordinate> coordinates { };
 	for (int row = 0; row < squaresInARow; row++) {
 		for (int col = 0; col < squaresInARow; col++) {
 			int const xPosition = boardStartLeft + imageOffsetLeft + col * squarePixelSize;
@@ -82,22 +82,24 @@ void Chess::generateInitialCoordinates(std::vector<Coordinate> &coordinates)
 		if (row == 1)
 			row = 5;
 	}
+	return coordinates;
 }
 
-void Chess::getCoordinate(Coordinate &coordinate, int const pieceID)
+Chess::Coordinate Chess::getCoordinate(int const pieceID)
 {
 	if (pieceID < static_cast<int>(pieceCoordinates.size())) {
-		coordinate = pieceCoordinates.at(static_cast<std::size_t>(pieceID));
+		return pieceCoordinates.at(static_cast<std::size_t>(pieceID));
 	}
 	else {
-		coordinate = { 0, 0 };
+		return { 0, 0 };
 	}
 
 
 }
 
-void Chess::generatePieces(std::vector<Piece> &pieces)
+std::vector<Chess::Piece> Chess::generatePieces()
 {
+	std::vector<Piece> pieces{ };
 	QString imagePath = ":/Images/";
 	std::map<int, QString> imagePaths = {
 		{ whitePawn,    imagePath + "whitePawn"     },
@@ -138,7 +140,7 @@ void Chess::generatePieces(std::vector<Piece> &pieces)
 		Piece piece = { };
 		piece.pieceType = pieceTypes.at(static_cast<std::size_t>(pieceID));
 		piece.pieceId = pieceID++;
-		getCoordinate(piece.coordinate, piece.pieceId);
+		piece.coordinate = getCoordinate(piece.pieceId);
 
 		auto imageSearch = imagePaths.find(piece.pieceType);
 		if (imageSearch != imagePaths.end()) {
@@ -155,6 +157,7 @@ void Chess::generatePieces(std::vector<Piece> &pieces)
 		}
 		pieces.push_back(piece);
 	}
+	return pieces;
 }
 
 void Chess::generateBoarder()
@@ -168,8 +171,9 @@ void Chess::generateBoarder()
 	boarder->show();
 }
 
-void Chess::generateLabelCoordinates(std::vector<QLabel*> &coordinates)
+std::vector<QLabel*> Chess::generateLabelCoordinates()
 {
+	std::vector<QLabel*> coordinates { };
 	std::vector<QString> colCoordinateNames { "a","b","c","d","e","f","g","h" };
 	int rowNumber{ 0 };
 	int colNumber{ 0 };
@@ -197,17 +201,20 @@ void Chess::generateLabelCoordinates(std::vector<QLabel*> &coordinates)
 
 		coordinates.push_back(coordinate);
 	}
+	return coordinates;
 }
 
-void Chess::generateRow(std::vector<Square> &row, int const rowNumber)
+std::vector<Chess::Square> Chess::generateRow(int const rowNumber)
 {
-	int color{ rowNumber };
+	std::vector<Chess::Square> row { };
+	int color { rowNumber };
 	for (int colNumber = 0; colNumber < squaresInARow; colNumber++) {
 		color++;
 		Square square;
 		generateSquare(square, (color) % 2, rowNumber, colNumber);
 		row.push_back(square);
 	}
+	return row;
 }
 
 void Chess::generateSquare(Square &square, int const color, int const rowNumber, int const colNumber)

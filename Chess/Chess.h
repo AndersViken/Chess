@@ -45,15 +45,15 @@ private:
 
 	void showBoard();
 	void hideBoard();
-	void generatePieces(std::vector<Piece> &pieces);
+	std::vector<Chess::Piece> Chess::generatePieces();
 	void generateBoard();
 	void generateBoarder();
 	void generateSquare(Square &square, int const color, int const rowNumber, int const colNumber);
-	void generateInitialCoordinates(std::vector<Coordinate> &coordinates);
-	void generateLabelCoordinates(std::vector<QLabel*> &labelCoordinates);
-	void generateRow(std::vector<Square> &row, int const rowNumber);
+	std::vector<Chess::Coordinate> Chess::generateInitialCoordinates();
+	std::vector<QLabel*> Chess::generateLabelCoordinates();
+	std::vector<Chess::Square> Chess::generateRow(int const rowNumber);
 	
-	void getCoordinate(Coordinate &coordinate, int const pieceID);
+	Chess::Coordinate getCoordinate(int const pieceID);
 	void printPieceInfo(std::vector<Piece> &pieces);
 
 	void setLabelBackgroundColor(const int &color, QLabel * label);
