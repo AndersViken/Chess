@@ -1,9 +1,14 @@
 #pragma once
 
+#include <QtWidgets>
 #include <QtWidgets/QMainWindow>
 #include "ui_Chess.h"
 #include <vector>
 #include <QLabel>
+
+static inline QString chessMimeType() { return QStringLiteral("application/x-Chess"); }
+
+
 
 class Chess : public QMainWindow
 {
@@ -30,6 +35,12 @@ public:
 		int pieceType;
 		int color;
 	};
+
+protected:
+	void dragEnterEvent(QDragEnterEvent *event) override;
+	void dragMoveEvent(QDragMoveEvent *event) override;
+	void dropEvent(QDropEvent *event) override;
+	void mousePressEvent(QMouseEvent *event) override;
 private:
 	Ui::ChessClass ui;
 	
@@ -48,7 +59,7 @@ private:
 	std::vector<Chess::Piece> Chess::generatePieces();
 	void generateBoard();
 	void generateBoarder();
-	void generateSquare(Square &square, int const color, int const rowNumber, int const colNumber);
+	Chess::Square generateSquare(int const color, int const rowNumber, int const colNumber);
 	std::vector<Chess::Coordinate> Chess::generateInitialCoordinates();
 	std::vector<QLabel*> Chess::generateLabelCoordinates();
 	std::vector<Chess::Square> Chess::generateRow(int const rowNumber);

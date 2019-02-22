@@ -1,4 +1,6 @@
 #pragma once
+int const minWinSizeLeft	{ 840 };
+int const minWinSizeTop		{ 840 };
 int const squaresInARow		{ 8 };
 int const maxNumOfPieces	{ 32 };
 int const squarePixelSize	{ 80 };
