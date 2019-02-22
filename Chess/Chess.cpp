@@ -8,7 +8,7 @@ Chess::Chess(QWidget *parent)
 	ui.setupUi(this);
 
 	setMinimumSize(minWinSizeLeft, minWinSizeTop);
-	setWindowTitle(tr("Fridge Magnets"));
+	setWindowTitle(tr("Chess"));
 	setAcceptDrops(true);
 
 	generateBoard();
