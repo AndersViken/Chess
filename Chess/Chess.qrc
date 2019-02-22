@@ -1,4 +1,16 @@
 <RCC>
-    <qresource prefix="Chess">
+    <qresource prefix="/Chess">
+        <file alias="blackBishopImage">Resources/Images/blackBishop.png</file>
+        <file alias="blackKingImage">Resources/Images/blackKing.png</file>
+        <file alias="blackKnightImage">Resources/Images/blackKnight.png</file>
+        <file alias="blackPawnImage">Resources/Images/blackPawn.png</file>
+        <file alias="blackQueenImage">Resources/Images/blackQueen.png</file>
+        <file alias="blackRookImage">Resources/Images/blackRook.png</file>
+        <file alias="whiteBishopImage">Resources/Images/whiteBishop.png</file>
+        <file alias="whiteKingImage">Resources/Images/whiteKing.png</file>
+        <file alias="whiteKnightImage">Resources/Images/whiteKnight.png</file>
+        <file alias="whitePawnImage">Resources/Images/whitePawn.png</file>
+        <file alias="whiteQueenImage">Resources/Images/whiteQueen.png</file>
+        <file alias="whiteRookImage">Resources/Images/whiteRook.png</file>
     </qresource>
 </RCC>
