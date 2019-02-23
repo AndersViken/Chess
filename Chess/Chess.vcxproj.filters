@@ -62,7 +62,7 @@
     <ClInclude Include="Piece.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="chessTypes.h">
+    <ClInclude Include="ChessTypes.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
