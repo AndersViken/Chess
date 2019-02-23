@@ -30,6 +30,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
@@ -58,6 +60,13 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <EnablePREfast>false</EnablePREfast>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <WarningLevel>Level4</WarningLevel>
+      <SupportJustMyCode>false</SupportJustMyCode>
+      <DisableSpecificWarnings>5027;4626;4625;5026</DisableSpecificWarnings>
+      <WarningVersion>
+      </WarningVersion>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -128,7 +137,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GuiSetup.h" />
-    <ClInclude Include="chessTypes.h" />
+    <ClInclude Include="ChessTypes.h" />
     <ClInclude Include="Piece.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

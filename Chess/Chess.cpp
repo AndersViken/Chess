@@ -87,16 +87,15 @@ Square Chess::generateSquare(int const color, int const rowNumber, int const col
 	return square;
 }
 
-void Chess::printPieceInfo(std::vector<Piece*> &pieces)
+void Chess::printPieceInfo(std::vector<Piece*> &pieceVec)
 {
-	for (auto &piece : pieces) {
-		qDebug() << "Piece " << piece->getPieceId() <<
+	for (auto &piece : pieceVec) {
+		qDebug() << "Piece: " <<
 			" type: " << piece->getPieceType() <<
 			" color: " << piece->getColor() <<
 			" xPos: " << piece->getCoordinate().xPos <<
 			" yPos: " << piece->getCoordinate().yPos <<
-			" path: " << piece->getImagePath()
-			;
+			" path: " << piece->getImagePath();
 	}
 }
 
@@ -128,15 +127,15 @@ Coordinate Chess::getCoordinate(int const pieceID)
 
 std::vector<Piece*> Chess::generatePieces()
 {
-	std::vector<Piece*> pieces{ };
+	std::vector<Piece*> piecesVec{ };
 	
 	int pieceID = 0;
 	for (auto &pieceType : pieceTypes) {
 		
 		Coordinate coordinate = getCoordinate(pieceID++);
-		pieces.push_back(generatePiece(pieceType, coordinate));
+		piecesVec.push_back(generatePiece(pieceType, coordinate));
 	}
-	return pieces;
+	return piecesVec;
 }
 
 Piece* Chess::generatePiece(int const pieceType, Coordinate coordinate)
@@ -152,12 +151,12 @@ Piece* Chess::generatePiece(int const pieceType, Coordinate coordinate)
 		return{};
 	}
 
-	auto imageSearch = imagePaths.find(pieceType);
+	auto imageSearch{ imagePaths.find(pieceType) };
 	if (imageSearch != imagePaths.end()) {
 		QString imagePath = imageSearch->second;
-
-		Piece *piece = new Piece(coordinate, pieceType, color, imagePath , imageSize, this);
-		piece->setAttribute(Qt::WA_DeleteOnClose);
+		int tempImageSize = imageSize;
+		Piece *piece{ new Piece(coordinate, pieceType, color, imagePath , tempImageSize, this) };
+		//piece->setAttribute(Qt::WA_DeleteOnClose);
 		return piece;
 	}
 	return {};
@@ -166,9 +165,9 @@ Piece* Chess::generatePiece(int const pieceType, Coordinate coordinate)
 void Chess::generateBoarder()
 {
 	boarder = new QLabel(this);
-	int const boarderStartLeft = boardStartLeft - coordinateOffsetBoarder;
-	int const boarderStartTop = boardStartTop - coordinateOffsetBoarder;
-	int const boarderSize = squarePixelSize * squaresInARow + 2 * coordinateOffsetBoarder;
+	int const boarderStartLeft{ boardStartLeft - coordinateOffsetBoarder };
+	int const boarderStartTop{ boardStartTop - coordinateOffsetBoarder };
+	int const boarderSize{ squarePixelSize * squaresInARow + 2 * coordinateOffsetBoarder };
 	boarder->setGeometry(QRect(boarderStartLeft, boarderStartTop, boarderSize, boarderSize));
 	boarder->setStyleSheet("QLabel { background-color: rgb(60, 60, 60); }");
 	boarder->show();
@@ -183,8 +182,8 @@ std::vector<QLabel*> Chess::generateLabelCoordinates()
 	for (; colNumber < squaresInARow; colNumber++) {
 		QLabel *coordinate = new QLabel(this);
 
-		int const xPos = boardStartLeft + coordinateOffsetColLeft + colNumber * squarePixelSize;
-		int const yPos = boardStartTop + coordinateOffsetColTop + squarePixelSize * (squaresInARow - (rowNumber + 1));
+		int const xPos{ boardStartLeft + coordinateOffsetColLeft + colNumber * squarePixelSize };
+		int const yPos{ boardStartTop + coordinateOffsetColTop + squarePixelSize * (squaresInARow - (rowNumber + 1)) };
 		coordinate->setGeometry(QRect(xPos, yPos, squarePixelSize, squarePixelSize));
 		coordinate->setText(colCoordinateNames.at(static_cast<std::size_t>(colNumber)));
 		setLabelColor(colNumber % 2, coordinate);
@@ -196,8 +195,8 @@ std::vector<QLabel*> Chess::generateLabelCoordinates()
 	for (rowNumber = 0; rowNumber < squaresInARow; rowNumber++) {
 		QLabel *coordinate = new QLabel(this);
 
-		int const xPos = boardStartLeft + coordinateOffsetRowLeft + colNumber * squarePixelSize;
-		int const yPos = boardStartTop + coordinateOffsetRowTop + squarePixelSize * (squaresInARow - (rowNumber + 1));
+		int const xPos{ boardStartLeft + coordinateOffsetRowLeft + colNumber * squarePixelSize };
+		int const yPos{ boardStartTop + coordinateOffsetRowTop + squarePixelSize * (squaresInARow - (rowNumber + 1)) };
 		coordinate->setGeometry(QRect(xPos, yPos, squarePixelSize, squarePixelSize));
 		coordinate->setText(rowCoordinateNames.at(static_cast<std::size_t>(rowNumber)));
 		setLabelColor(rowNumber % 2, coordinate);
@@ -271,13 +270,23 @@ void Chess::dropEvent(QDropEvent *event)
 		QByteArray itemData = mime->data(chessMimeType());
 		QDataStream dataStream(&itemData, QIODevice::ReadOnly);
 
-		QString text;
-		QPoint offset;
-		dataStream >> text >> offset;
-		QLabel *newLabel = new QLabel(text, this);
+		Coordinate coordinate{ };
+		int pieceType{};
+		QPoint offset{};
+		dataStream >> pieceType >> offset;
+
+		QPoint newPosition{ event->pos() - offset };
+		int posX{ newPosition.rx() };
+		int posY{ newPosition.ry() };
+		Piece *piece = generatePiece(pieceType, { posX,posY });
+		piece->show();
+		piece->setAttribute(Qt::WA_DeleteOnClose);
+		piece->move(event->pos() - offset);
+
+		/*QLabel *newLabel = new QLabel("", this);
 		newLabel->move(event->pos() - offset);
 		newLabel->show();
-		newLabel->setAttribute(Qt::WA_DeleteOnClose);
+		newLabel->setAttribute(Qt::WA_DeleteOnClose);*/
 
 		if (event->source() == this) {
 			event->setDropAction(Qt::MoveAction);
@@ -288,11 +297,13 @@ void Chess::dropEvent(QDropEvent *event)
 		}
 	}
 	else if (event->mimeData()->hasText()) {
-		QStringList pieces = event->mimeData()->text().split(QRegularExpression(QStringLiteral("\\s+")),
+
+		qDebug() << "else if (event->mimeData()->hasText())";
+		QStringList eventText = event->mimeData()->text().split(QRegularExpression(QStringLiteral("\\s+")),
 			QString::SkipEmptyParts);
 		QPoint position = event->pos();
 
-		for (const QString &piece : pieces) {
+		for (const QString &piece : eventText) {
 			QLabel *newLabel = new QLabel(piece, this);
 			newLabel->move(position);
 			newLabel->show();
@@ -304,37 +315,38 @@ void Chess::dropEvent(QDropEvent *event)
 		event->acceptProposedAction();
 	}
 	else {
+		qDebug() << "else (event->ignore)";
 		event->ignore();
 	}
 }
 
 void Chess::mousePressEvent(QMouseEvent *event)
 {
-	QLabel *child = static_cast<QLabel*>(childAt(event->pos()));
+	Piece *piece{ static_cast<Piece*>(childAt(event->pos())) };
 	
-	if (!child || !child->hasTabletTracking()) // TabletTracking used only for Chess Pieces, not board
+	if (!piece || !piece->hasTabletTracking()) // TabletTracking used only for Chess Pieces, not board
 		return;
 	
-	QPoint hotSpot = event->pos() - child->pos();
+	QPoint hotSpot{ event->pos() - piece->pos() };
 
 	QByteArray itemData;
 	QDataStream dataStream(&itemData, QIODevice::WriteOnly);
-	dataStream << /*child->labelText() <<*/ QPoint(hotSpot);
+	dataStream	<< piece->getPieceType() << QPoint(hotSpot);
 
-	QMimeData *mimeData = new QMimeData;
+	QMimeData *mimeData{ new QMimeData };
 	mimeData->setData(chessMimeType(), itemData);
 	/*mimeData->setText(child->text);*/
 
-	QDrag *drag = new QDrag(this);
+	QDrag *drag{ new QDrag(this) };
 	drag->setMimeData(mimeData);
-	drag->setPixmap(*child->pixmap());
+	drag->setPixmap(*piece->pixmap());
 	drag->setHotSpot(hotSpot);
 
-	child->hide();
+	piece->hide();
 
 	if (drag->exec(Qt::MoveAction | Qt::CopyAction, Qt::CopyAction) == Qt::MoveAction)
-		child->close();
+		piece->close();
 	else
-		child->show();
+		piece->show();
 	
 }

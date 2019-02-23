@@ -10,6 +10,7 @@ Piece::Piece(Coordinate coordinate, int pieceType, int color, QString imagePath,
 	pieceType(pieceType),
 	color(color),
 	imagePath(imagePath),
+	imageSize(imageSize),
 	QLabel(parent)
 {
 	setGeometry(QRect(coordinate.xPos, coordinate.yPos, imageSize, imageSize));
@@ -27,11 +28,6 @@ Coordinate Piece::getCoordinate()
 	return coordinate;
 }
 
-int Piece::getPieceId()
-{
-	return pieceId;
-}
-
 int Piece::getPieceType()
 {
 	return pieceType;
@@ -46,4 +42,10 @@ QString Piece::getImagePath()
 {
 	return imagePath;
 }
+
+int Piece::getImageSize()
+{
+	return imageSize;
+}
+
 

@@ -3,7 +3,7 @@
 #include <QtWidgets>
 #include <QtWidgets/QMainWindow>
 #include "ui_Chess.h"
-#include "chessTypes.h"
+#include "ChessTypes.h"
 #include "Piece.h"
 #include <vector>
 #include <QLabel>
@@ -45,17 +45,16 @@ private:
 
 	void showBoard();
 	void hideBoard();
-	Piece* Chess::generatePiece(int const pieceType, int const pieceID);
-	std::vector<Piece*> Chess::generatePieces();
-	Piece * generatePiece(int const pieceType, Coordinate coordinate);
+	Piece* generatePiece(int const pieceType, Coordinate coordinate);
+	std::vector<Piece*> generatePieces();
 	void generateBoard();
 	void generateBoarder();
-	Chess::Square generateSquare(int const color, int const rowNumber, int const colNumber);
-	std::vector<Coordinate> Chess::generateInitialCoordinates();
-	std::vector<QLabel*> Chess::generateLabelCoordinates();
-	std::vector<Square> Chess::generateRow(int const rowNumber);
+	Square generateSquare(int const color, int const rowNumber, int const colNumber);
+	std::vector<Coordinate> generateInitialCoordinates();
+	std::vector<QLabel*> generateLabelCoordinates();
+	std::vector<Square> generateRow(int const rowNumber);
 	
-	Chess::Coordinate getCoordinate(int const pieceID);
+	Coordinate getCoordinate(int const pieceID);
 	void printPieceInfo(std::vector<Piece*> &pieces);
 
 	void setLabelBackgroundColor(const int &color, QLabel * label);

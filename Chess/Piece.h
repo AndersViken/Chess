@@ -1,6 +1,6 @@
 #pragma once
 #include <qlabel.h>
-#include <chessTypes.h>
+#include <ChessTypes.h>
 class Piece :
 	public QLabel
 {
@@ -10,17 +10,16 @@ public:
 	~Piece();
 
 	Coordinate	getCoordinate();
-	int			getPieceId();
 	int			getPieceType();
 	int			getColor();
 	QString		getImagePath();
+	int			getImageSize();
 
 private:
-	Coordinate coordinate;
-	int pieceId;
-	int pieceType;
-	int color;
-	QString imagePath;
-	int imageSize;
+	Coordinate coordinate{};
+	int pieceType{};
+	int color{};
+	QString imagePath{};
+	int imageSize{};
 };
 
