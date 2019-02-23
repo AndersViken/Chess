@@ -51,6 +51,7 @@ private:
 	void printPieceInfo(std::vector<Piece*> &pieces);
 
 	int Chess::getClosestNumber(int const num, std::vector<int> const &numbers);
+	QPoint giveCoordinateToDroppedPiece(QPoint droppedPosition, QPoint origPosition);
 
 	void generateLegalCoordinates(std::vector<int>& coordinatesX, std::vector<int>& coordinatesY);
 

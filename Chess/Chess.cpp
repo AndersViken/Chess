@@ -48,12 +48,11 @@ std::vector<Square*> Chess::generateRow(int const rowNumber)
 
 Square* Chess::generateSquare(int const color, int const rowNumber, int const colNumber)
 {
-	Square *square = new Square(this);
+	Square *square{ new Square(this) };
 
-	int const xPos = boardStartX + colNumber * squarePixelSize;
-	int const yPos = boardStartY + squarePixelSize * (squaresInARow - (rowNumber + 1));
+	int const xPos{ boardStartX + colNumber * squarePixelSize };
+	int const yPos{ boardStartY + squarePixelSize * (squaresInARow - (rowNumber + 1)) };
 	square->setGeometry(QRect(xPos, yPos, squarePixelSize, squarePixelSize));
-
 	setLabelBackgroundColor(color, square);
 
 	return square;
@@ -103,11 +102,30 @@ void Chess::printPieceInfo(std::vector<Piece*> &pieceVec)
 
 int Chess::getClosestNumber(int const num, std::vector<int> const &numbers)
 {
-	auto closestNumber = std::lower_bound(numbers.begin(), numbers.end(), num);
-	return static_cast<int>(*closestNumber);
+	auto closestNumber = std::upper_bound(numbers.begin(), numbers.end(), num);
+	if(closestNumber != numbers.end())
+		return static_cast<int>(*closestNumber);
+	else return 0; // error, out of bounce. The caller should handle this.
 }
 
-
+QPoint Chess::giveCoordinateToDroppedPiece(QPoint droppedPosition, QPoint origPosition)
+{
+	if (droppedPosition.rx() < boardStartX ||
+		droppedPosition.rx() > boardStartX + boardWidth ||
+		droppedPosition.ry() < boardStartY ||
+		droppedPosition.ry() > boardStartY + boardHeigth ) {
+		return origPosition;
+	}
+	int const posX = getClosestNumber(droppedPosition.rx() - squarePixelSize / 2, legalCoordinatesX);
+	int const posY = getClosestNumber(droppedPosition.ry() - squarePixelSize / 2, legalCoordinatesY);
+	QPoint point{ posX, posY };
+	
+	// piece dropped outside of board
+	if(point.rx() == 0 || point.ry() == 0) {
+		return origPosition;
+	}
+	return point;
+}
 
 void Chess::generateLegalCoordinates(std::vector<int> &coordinatesX, std::vector<int> &coordinatesY)
 {
@@ -294,24 +312,14 @@ void Chess::dropEvent(QDropEvent *event)
 
 		int pieceType{};
 		QPoint offset{};
-		dataStream >> pieceType >> offset;
+		QPoint origPosition{};
+		dataStream >> pieceType >> origPosition.rx() >> origPosition.ry() >> offset;
 
-		QPoint newPosition{ event->pos() - offset };
-		int posX{ newPosition.rx() };
-		int posY{ newPosition.ry() };
-
-		posX = getClosestNumber(posX - squarePixelSize/2, legalCoordinatesX);
-		posY = getClosestNumber(posY - squarePixelSize/2, legalCoordinatesY);
-
-		Piece *piece = generatePiece(pieceType, { posX,posY });
+		QPoint droppedPosition{ event->pos() - offset };
+		QPoint newPosition = giveCoordinateToDroppedPiece(droppedPosition, origPosition);
+		Piece *piece = generatePiece(pieceType, newPosition);
 		piece->show();
 		piece->setAttribute(Qt::WA_DeleteOnClose);
-		//piece->move(event->pos() - offset);
-
-		/*QLabel *newLabel = new QLabel("", this);
-		newLabel->move(event->pos() - offset);
-		newLabel->show();
-		newLabel->setAttribute(Qt::WA_DeleteOnClose);*/
 
 		if (event->source() == this) {
 			event->setDropAction(Qt::MoveAction);
@@ -323,7 +331,6 @@ void Chess::dropEvent(QDropEvent *event)
 	}
 	else if (event->mimeData()->hasText()) {
 
-		qDebug() << "else if (event->mimeData()->hasText())";
 		QStringList eventText = event->mimeData()->text().split(QRegularExpression(QStringLiteral("\\s+")),
 			QString::SkipEmptyParts);
 		QPoint position = event->pos();
@@ -340,7 +347,6 @@ void Chess::dropEvent(QDropEvent *event)
 		event->acceptProposedAction();
 	}
 	else {
-		qDebug() << "else (event->ignore)";
 		event->ignore();
 	}
 }
@@ -356,13 +362,10 @@ void Chess::mousePressEvent(QMouseEvent *event)
 
 	QByteArray itemData;
 	QDataStream dataStream(&itemData, QIODevice::WriteOnly);
-	dataStream	<< piece->getPieceType() << QPoint(hotSpot);
-
-	//qDebug() << piece->getCoordinate().xPos << " " << piece->getCoordinate().yPos;
+	dataStream	<< piece->getPieceType() << piece->getCoordinate().rx() << piece->getCoordinate().ry() << QPoint(hotSpot);
 
 	QMimeData *mimeData{ new QMimeData };
 	mimeData->setData(chessMimeType(), itemData);
-	/*mimeData->setText(child->text);*/
 
 	QDrag *drag{ new QDrag(this) };
 	drag->setMimeData(mimeData);
