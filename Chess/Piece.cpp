@@ -5,9 +5,8 @@ Piece::Piece()
 {
 }
 
-Piece::Piece(Coordinate coordinate, int pieceId, int pieceType, int color, QString imagePath, int imageSize, QWidget *parent) :
+Piece::Piece(Coordinate coordinate, int pieceType, int color, QString imagePath, int imageSize, QWidget *parent) :
 	coordinate(coordinate),
-	pieceId(pieceId),
 	pieceType(pieceType),
 	color(color),
 	imagePath(imagePath),

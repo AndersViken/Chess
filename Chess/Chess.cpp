@@ -13,6 +13,7 @@ Chess::Chess(QWidget *parent)
 	setAcceptDrops(true);
 
 	generateBoard();
+
 }
 
 void Chess::hideBoard()
@@ -130,15 +131,16 @@ std::vector<Piece*> Chess::generatePieces()
 	std::vector<Piece*> pieces{ };
 	
 	int pieceID = 0;
-	for (auto &pieceType : pieceTypes) {		
-		pieces.push_back(generatePiece(pieceType, pieceID++));
+	for (auto &pieceType : pieceTypes) {
+		
+		Coordinate coordinate = getCoordinate(pieceID++);
+		pieces.push_back(generatePiece(pieceType, coordinate));
 	}
 	return pieces;
 }
 
-Piece* Chess::generatePiece(int const pieceType, int const pieceID)
+Piece* Chess::generatePiece(int const pieceType, Coordinate coordinate)
 {
-	Coordinate coordinate = getCoordinate(pieceID);
 
 	auto colorSearch = pieceColors.find(pieceType);
 	int color{};
@@ -154,7 +156,7 @@ Piece* Chess::generatePiece(int const pieceType, int const pieceID)
 	if (imageSearch != imagePaths.end()) {
 		QString imagePath = imageSearch->second;
 
-		Piece *piece = new Piece(coordinate, pieceID, pieceType, color, imagePath , imageSize, this);
+		Piece *piece = new Piece(coordinate, pieceType, color, imagePath , imageSize, this);
 		piece->setAttribute(Qt::WA_DeleteOnClose);
 		return piece;
 	}

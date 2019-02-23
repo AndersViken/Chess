@@ -47,6 +47,7 @@ private:
 	void hideBoard();
 	Piece* Chess::generatePiece(int const pieceType, int const pieceID);
 	std::vector<Piece*> Chess::generatePieces();
+	Piece * generatePiece(int const pieceType, Coordinate coordinate);
 	void generateBoard();
 	void generateBoarder();
 	Chess::Square generateSquare(int const color, int const rowNumber, int const colNumber);
