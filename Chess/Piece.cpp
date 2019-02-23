@@ -5,7 +5,7 @@ Piece::Piece()
 {
 }
 
-Piece::Piece(Coordinate coordinate, int pieceType, int color, QString imagePath, int imageSize, QWidget *parent) :
+Piece::Piece(QPoint coordinate, int pieceType, int color, QString imagePath, int imageSize, QWidget *parent) :
 	coordinate(coordinate),
 	pieceType(pieceType),
 	color(color),
@@ -13,7 +13,7 @@ Piece::Piece(Coordinate coordinate, int pieceType, int color, QString imagePath,
 	imageSize(imageSize),
 	QLabel(parent)
 {
-	setGeometry(QRect(coordinate.xPos, coordinate.yPos, imageSize, imageSize));
+	setGeometry(QRect(coordinate.rx(), coordinate.ry(), imageSize, imageSize));
 	setTabletTracking(true);
 	QPixmap image(imagePath);
 	setPixmap(image.scaled(width(), height(), Qt::KeepAspectRatio));
@@ -23,7 +23,7 @@ Piece::~Piece()
 {
 }
 
-Coordinate Piece::getCoordinate()
+QPoint Piece::getCoordinate()
 {
 	return coordinate;
 }

@@ -3,47 +3,19 @@
 #include "GuiSetup.h"
 #include <QDebug>
 #include <map>
+#include <algorithm>
+#include <iterator>
 Chess::Chess(QWidget *parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
 
-	setMinimumSize(minWinSizeLeft, minWinSizeTop);
+	setMinimumSize(minWinSizeX, minWinSizeY);
 	setWindowTitle(tr("Chess"));
 	setAcceptDrops(true);
 
 	generateBoard();
 
-}
-
-void Chess::hideBoard()
-{
-	for (auto &row : board) {
-		for (auto &square : row) {
-			square.label->hide();
-		}
-	}
-
-	for (auto &coordinate : labelCoordinates) {
-		coordinate->hide();
-	}
-
-	boarder->hide();
-}
-
-void Chess::showBoard()
-{
-	for (auto &row : board) {
-		for (auto &square : row) {
-			square.label->show();
-		}
-	}
-
-	for (auto &coordinate : labelCoordinates) {
-		coordinate->show();
-	}
-
-	boarder->show();
 }
 
 void Chess::generateBoard()
@@ -58,13 +30,14 @@ void Chess::generateBoard()
 
 	labelCoordinates = generateLabelCoordinates();
 	pieceCoordinates = generateInitialCoordinates();
+	generateLegalCoordinates(legalCoordinatesX, legalCoordinatesY);
 	pieces = generatePieces();
 	printPieceInfo(pieces);
 }
 
-std::vector<Square> Chess::generateRow(int const rowNumber)
+std::vector<Square*> Chess::generateRow(int const rowNumber)
 {
-	std::vector<Square> row{ };
+	std::vector<Square*> row{ };
 	int color{ rowNumber };
 	for (int colNumber = 0; colNumber < squaresInARow; colNumber++) {
 		color++;
@@ -73,18 +46,47 @@ std::vector<Square> Chess::generateRow(int const rowNumber)
 	return row;
 }
 
-Square Chess::generateSquare(int const color, int const rowNumber, int const colNumber)
+Square* Chess::generateSquare(int const color, int const rowNumber, int const colNumber)
 {
-	Square square{};
-	square.label = new QLabel(this);
+	Square *square = new Square(this);
 
-	int const xPos = boardStartLeft + colNumber * squarePixelSize;
-	int const yPos = boardStartTop + squarePixelSize * (squaresInARow - (rowNumber + 1));
-	square.label->setGeometry(QRect(xPos, yPos, squarePixelSize, squarePixelSize));
+	int const xPos = boardStartX + colNumber * squarePixelSize;
+	int const yPos = boardStartY + squarePixelSize * (squaresInARow - (rowNumber + 1));
+	square->setGeometry(QRect(xPos, yPos, squarePixelSize, squarePixelSize));
 
-	setLabelBackgroundColor(color, square.label);
+	setLabelBackgroundColor(color, square);
 
 	return square;
+}
+
+void Chess::hideBoard()
+{
+	for (auto &row : board) {
+		for (auto &square : row) {
+			square->hide();
+		}
+	}
+
+	for (auto &coordinate : labelCoordinates) {
+		coordinate->hide();
+	}
+
+	boarder->hide();
+}
+
+void Chess::showBoard()
+{
+	for (auto &row : board) {
+		for (auto &square : row) {
+			square->show();
+		}
+	}
+
+	for (auto &coordinate : labelCoordinates) {
+		coordinate->show();
+	}
+
+	boarder->show();
 }
 
 void Chess::printPieceInfo(std::vector<Piece*> &pieceVec)
@@ -93,20 +95,40 @@ void Chess::printPieceInfo(std::vector<Piece*> &pieceVec)
 		qDebug() << "Piece: " <<
 			" type: " << piece->getPieceType() <<
 			" color: " << piece->getColor() <<
-			" xPos: " << piece->getCoordinate().xPos <<
-			" yPos: " << piece->getCoordinate().yPos <<
+			" xPos: " << piece->getCoordinate().rx() <<
+			" yPos: " << piece->getCoordinate().ry() <<
 			" path: " << piece->getImagePath();
 	}
 }
 
-std::vector<Coordinate> Chess::generateInitialCoordinates()
+int Chess::getClosestNumber(int const num, std::vector<int> const &numbers)
 {
-	std::vector<Coordinate> coordinates { };
+	auto closestNumber = std::lower_bound(numbers.begin(), numbers.end(), num);
+	return static_cast<int>(*closestNumber);
+}
+
+
+
+void Chess::generateLegalCoordinates(std::vector<int> &coordinatesX, std::vector<int> &coordinatesY)
+{
+	for (int col = 0; col < squaresInARow; col++) {
+		coordinatesX.push_back(boardStartX + col * squarePixelSize);
+	}
+	for (int row = 0; row < squaresInARow; row++) {
+		coordinatesY.push_back(boardStartY + squarePixelSize * (squaresInARow - (row + 1)));
+	}
+	std::sort(coordinatesX.begin(), coordinatesX.end());
+	std::sort(coordinatesY.begin(), coordinatesY.end());
+}
+
+std::vector<QPoint> Chess::generateInitialCoordinates()
+{
+	std::vector<QPoint> coordinates { };
 	for (int row = 0; row < squaresInARow; row++) {
 		for (int col = 0; col < squaresInARow; col++) {
-			int const xPosition = boardStartLeft + imageOffsetLeft + col * squarePixelSize;
-			int const yPosition = boardStartTop + imageOffsetLeft + squarePixelSize * (squaresInARow - (row + 1));
-			Coordinate coordinate = { xPosition, yPosition };
+			int const xPosition = boardStartX + col * squarePixelSize;
+			int const yPosition = boardStartY + squarePixelSize * (squaresInARow - (row + 1));
+			QPoint coordinate = { xPosition, yPosition };
 			coordinates.push_back(coordinate);
 		}
 		if (row == 1)
@@ -115,7 +137,7 @@ std::vector<Coordinate> Chess::generateInitialCoordinates()
 	return coordinates;
 }
 
-Coordinate Chess::getCoordinate(int const pieceID)
+QPoint Chess::getCoordinate(int const pieceID)
 {
 	if (pieceID < static_cast<int>(pieceCoordinates.size())) {
 		return pieceCoordinates.at(static_cast<std::size_t>(pieceID));
@@ -132,13 +154,13 @@ std::vector<Piece*> Chess::generatePieces()
 	int pieceID = 0;
 	for (auto &pieceType : pieceTypes) {
 		
-		Coordinate coordinate = getCoordinate(pieceID++);
+		QPoint coordinate = getCoordinate(pieceID++);
 		piecesVec.push_back(generatePiece(pieceType, coordinate));
 	}
 	return piecesVec;
 }
 
-Piece* Chess::generatePiece(int const pieceType, Coordinate coordinate)
+Piece* Chess::generatePiece(int const pieceType, QPoint coordinate)
 {
 
 	auto colorSearch = pieceColors.find(pieceType);
@@ -165,8 +187,8 @@ Piece* Chess::generatePiece(int const pieceType, Coordinate coordinate)
 void Chess::generateBoarder()
 {
 	boarder = new QLabel(this);
-	int const boarderStartLeft{ boardStartLeft - coordinateOffsetBoarder };
-	int const boarderStartTop{ boardStartTop - coordinateOffsetBoarder };
+	int const boarderStartLeft{ boardStartX - coordinateOffsetBoarder };
+	int const boarderStartTop{ boardStartY - coordinateOffsetBoarder };
 	int const boarderSize{ squarePixelSize * squaresInARow + 2 * coordinateOffsetBoarder };
 	boarder->setGeometry(QRect(boarderStartLeft, boarderStartTop, boarderSize, boarderSize));
 	boarder->setStyleSheet("QLabel { background-color: rgb(60, 60, 60); }");
@@ -182,8 +204,8 @@ std::vector<QLabel*> Chess::generateLabelCoordinates()
 	for (; colNumber < squaresInARow; colNumber++) {
 		QLabel *coordinate = new QLabel(this);
 
-		int const xPos{ boardStartLeft + coordinateOffsetColLeft + colNumber * squarePixelSize };
-		int const yPos{ boardStartTop + coordinateOffsetColTop + squarePixelSize * (squaresInARow - (rowNumber + 1)) };
+		int const xPos{ boardStartX + coordinateOffsetColLeft + colNumber * squarePixelSize };
+		int const yPos{ boardStartY + coordinateOffsetColTop + squarePixelSize * (squaresInARow - (rowNumber + 1)) };
 		coordinate->setGeometry(QRect(xPos, yPos, squarePixelSize, squarePixelSize));
 		coordinate->setText(colCoordinateNames.at(static_cast<std::size_t>(colNumber)));
 		setLabelColor(colNumber % 2, coordinate);
@@ -195,8 +217,8 @@ std::vector<QLabel*> Chess::generateLabelCoordinates()
 	for (rowNumber = 0; rowNumber < squaresInARow; rowNumber++) {
 		QLabel *coordinate = new QLabel(this);
 
-		int const xPos{ boardStartLeft + coordinateOffsetRowLeft + colNumber * squarePixelSize };
-		int const yPos{ boardStartTop + coordinateOffsetRowTop + squarePixelSize * (squaresInARow - (rowNumber + 1)) };
+		int const xPos{ boardStartX + coordinateOffsetRowLeft + colNumber * squarePixelSize };
+		int const yPos{ boardStartY + coordinateOffsetRowTop + squarePixelSize * (squaresInARow - (rowNumber + 1)) };
 		coordinate->setGeometry(QRect(xPos, yPos, squarePixelSize, squarePixelSize));
 		coordinate->setText(rowCoordinateNames.at(static_cast<std::size_t>(rowNumber)));
 		setLabelColor(rowNumber % 2, coordinate);
@@ -270,7 +292,6 @@ void Chess::dropEvent(QDropEvent *event)
 		QByteArray itemData = mime->data(chessMimeType());
 		QDataStream dataStream(&itemData, QIODevice::ReadOnly);
 
-		Coordinate coordinate{ };
 		int pieceType{};
 		QPoint offset{};
 		dataStream >> pieceType >> offset;
@@ -278,10 +299,14 @@ void Chess::dropEvent(QDropEvent *event)
 		QPoint newPosition{ event->pos() - offset };
 		int posX{ newPosition.rx() };
 		int posY{ newPosition.ry() };
+
+		posX = getClosestNumber(posX - squarePixelSize/2, legalCoordinatesX);
+		posY = getClosestNumber(posY - squarePixelSize/2, legalCoordinatesY);
+
 		Piece *piece = generatePiece(pieceType, { posX,posY });
 		piece->show();
 		piece->setAttribute(Qt::WA_DeleteOnClose);
-		piece->move(event->pos() - offset);
+		//piece->move(event->pos() - offset);
 
 		/*QLabel *newLabel = new QLabel("", this);
 		newLabel->move(event->pos() - offset);
@@ -332,6 +357,8 @@ void Chess::mousePressEvent(QMouseEvent *event)
 	QByteArray itemData;
 	QDataStream dataStream(&itemData, QIODevice::WriteOnly);
 	dataStream	<< piece->getPieceType() << QPoint(hotSpot);
+
+	//qDebug() << piece->getCoordinate().xPos << " " << piece->getCoordinate().yPos;
 
 	QMimeData *mimeData{ new QMimeData };
 	mimeData->setData(chessMimeType(), itemData);
