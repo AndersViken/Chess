@@ -1,4 +1,5 @@
 #include "Chess.h"
+#include "piece.h"
 #include "GuiSetup.h"
 #include <QDebug>
 #include <map>
@@ -60,9 +61,9 @@ void Chess::generateBoard()
 	printPieceInfo(pieces);
 }
 
-std::vector<Chess::Square> Chess::generateRow(int const rowNumber)
+std::vector<Square> Chess::generateRow(int const rowNumber)
 {
-	std::vector<Chess::Square> row{ };
+	std::vector<Square> row{ };
 	int color{ rowNumber };
 	for (int colNumber = 0; colNumber < squaresInARow; colNumber++) {
 		color++;
@@ -71,7 +72,7 @@ std::vector<Chess::Square> Chess::generateRow(int const rowNumber)
 	return row;
 }
 
-Chess::Square Chess::generateSquare(int const color, int const rowNumber, int const colNumber)
+Square Chess::generateSquare(int const color, int const rowNumber, int const colNumber)
 {
 	Square square{};
 	square.label = new QLabel(this);
@@ -85,7 +86,7 @@ Chess::Square Chess::generateSquare(int const color, int const rowNumber, int co
 	return square;
 }
 
-void Chess::printPieceInfo(std::vector<Piece> &pieces)
+void Chess::printPieceInfo(std::vector<ChessPiece> &pieces)
 {
 	for (auto &piece : pieces) {
 		qDebug() << "Piece " << piece.pieceId <<
@@ -98,7 +99,7 @@ void Chess::printPieceInfo(std::vector<Piece> &pieces)
 	}
 }
 
-std::vector<Chess::Coordinate> Chess::generateInitialCoordinates()
+std::vector<Coordinate> Chess::generateInitialCoordinates()
 {
 	std::vector<Coordinate> coordinates { };
 	for (int row = 0; row < squaresInARow; row++) {
@@ -114,7 +115,7 @@ std::vector<Chess::Coordinate> Chess::generateInitialCoordinates()
 	return coordinates;
 }
 
-Chess::Coordinate Chess::getCoordinate(int const pieceID)
+Coordinate Chess::getCoordinate(int const pieceID)
 {
 	if (pieceID < static_cast<int>(pieceCoordinates.size())) {
 		return pieceCoordinates.at(static_cast<std::size_t>(pieceID));
@@ -122,13 +123,11 @@ Chess::Coordinate Chess::getCoordinate(int const pieceID)
 	else {
 		return { 0, 0 };
 	}
-
-
 }
 
-std::vector<Chess::Piece> Chess::generatePieces()
+std::vector<Chess::ChessPiece> Chess::generatePieces()
 {
-	std::vector<Piece> pieces{ };
+	std::vector<ChessPiece> pieces{ };
 	
 	int pieceID = 0;
 	for (auto &pieceType : pieceTypes) {		
@@ -137,9 +136,9 @@ std::vector<Chess::Piece> Chess::generatePieces()
 	return pieces;
 }
 
-Chess::Piece Chess::generatePiece(int const pieceType, int const pieceID)
+Chess::ChessPiece Chess::generatePiece(int const pieceType, int const pieceID)
 {
-	Chess::Piece piece{};
+	Chess::ChessPiece piece{};
 
 	piece.pieceType = pieceTypes.at(static_cast<std::size_t>(pieceID));
 	piece.pieceId = pieceID;
@@ -159,6 +158,8 @@ Chess::Piece Chess::generatePiece(int const pieceType, int const pieceID)
 	if (colorSearch != pieceColors.end()) {
 		piece.color = colorSearch->second;
 	}
+	Piece piece2{ piece.coordinate, piece.pieceId, piece.pieceType, piece.color, piece.imagePath };
+
 	return piece;
 }
 
