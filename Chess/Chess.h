@@ -4,6 +4,7 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_Chess.h"
 #include "chessTypes.h"
+#include "Piece.h"
 #include <vector>
 #include <QLabel>
 
@@ -28,8 +29,6 @@ public:
 		QString imagePath;
 	};
 
-	Chess::ChessPiece generatePiece(int const pieceType, int const pieceID);
-
 protected:
 	void dragEnterEvent(QDragEnterEvent *event) override;
 	void dragMoveEvent(QDragMoveEvent *event) override;
@@ -38,19 +37,16 @@ protected:
 private:
 	Ui::ChessClass ui;
 	
-
-
-
 	std::vector< std::vector <Square> > board = {};
 	std::vector<QLabel*> labelCoordinates = {};
 	std::vector<Coordinate> pieceCoordinates = {};
-	std::vector<ChessPiece> pieces = {};
+	std::vector<Piece*> pieces = {};
 	QLabel *boarder;
-
 
 	void showBoard();
 	void hideBoard();
-	std::vector<Chess::ChessPiece> Chess::generatePieces();
+	Piece* Chess::generatePiece(int const pieceType, int const pieceID);
+	std::vector<Piece*> Chess::generatePieces();
 	void generateBoard();
 	void generateBoarder();
 	Chess::Square generateSquare(int const color, int const rowNumber, int const colNumber);
@@ -59,7 +55,7 @@ private:
 	std::vector<Square> Chess::generateRow(int const rowNumber);
 	
 	Chess::Coordinate getCoordinate(int const pieceID);
-	void printPieceInfo(std::vector<ChessPiece> &pieces);
+	void printPieceInfo(std::vector<Piece*> &pieces);
 
 	void setLabelBackgroundColor(const int &color, QLabel * label);
 	void setLabelColor(const int &color, QLabel * label);

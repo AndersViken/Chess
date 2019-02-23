@@ -1,4 +1,5 @@
 #pragma once
+
 int const minWinSizeLeft	{ 840 };
 int const minWinSizeTop		{ 840 };
 int const squaresInARow		{ 8 };
@@ -25,20 +26,20 @@ enum { imageOffsetLeft = 0, imageOffsetTop = 0 };
 QString const darkColorString	{ "background - color: rgb(181, 135, 99);"	};
 QString const lightColorString	{ "background - color: rgb(240, 218, 181);" };
 
-QString imagePath = ":/Images/";
+QString imageDir = ":/Images/";
 std::map<int, QString> imagePaths = {
-	{ whitePawn,    imagePath + "whitePawn"     },
-	{ whiteRook,    imagePath + "whiteRook"     },
-	{ whiteKnight,  imagePath + "whiteKnight"   },
-	{ whiteBishop,  imagePath + "whiteBishop"	},
-	{ whiteQueen,   imagePath + "whiteQueen"    },
-	{ whiteKing,    imagePath + "whiteKing"     },
-	{ blackPawn,    imagePath + "blackPawn"     },
-	{ blackRook,    imagePath + "blackRook"     },
-	{ blackKnight,  imagePath + "blackKnight"   },
-	{ blackBishop,  imagePath + "blackBishop"   },
-	{ blackQueen,   imagePath + "blackQueen"    },
-	{ blackKing,    imagePath + "blackKing"     }
+	{ whitePawn,    imageDir + "whitePawn"     },
+	{ whiteRook,    imageDir + "whiteRook"     },
+	{ whiteKnight,  imageDir + "whiteKnight"   },
+	{ whiteBishop,  imageDir + "whiteBishop"	},
+	{ whiteQueen,   imageDir + "whiteQueen"    },
+	{ whiteKing,    imageDir + "whiteKing"     },
+	{ blackPawn,    imageDir + "blackPawn"     },
+	{ blackRook,    imageDir + "blackRook"     },
+	{ blackKnight,  imageDir + "blackKnight"   },
+	{ blackBishop,  imageDir + "blackBishop"   },
+	{ blackQueen,   imageDir + "blackQueen"    },
+	{ blackKing,    imageDir + "blackKing"     }
 };
 std::map<int, int> pieceColors = {
 	{ whitePawn,    white },

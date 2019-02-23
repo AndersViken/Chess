@@ -86,15 +86,15 @@ Square Chess::generateSquare(int const color, int const rowNumber, int const col
 	return square;
 }
 
-void Chess::printPieceInfo(std::vector<ChessPiece> &pieces)
+void Chess::printPieceInfo(std::vector<Piece*> &pieces)
 {
 	for (auto &piece : pieces) {
-		qDebug() << "Piece " << piece.pieceId <<
-			" type: " << piece.pieceType <<
-			" color: " << piece.color <<
-			" xPos: " << piece.coordinate.xPos <<
-			" yPos: " << piece.coordinate.yPos <<
-			" path: " << piece.imagePath
+		qDebug() << "Piece " << piece->getPieceId() <<
+			" type: " << piece->getPieceType() <<
+			" color: " << piece->getColor() <<
+			" xPos: " << piece->getCoordinate().xPos <<
+			" yPos: " << piece->getCoordinate().yPos <<
+			" path: " << piece->getImagePath()
 			;
 	}
 }
@@ -125,9 +125,9 @@ Coordinate Chess::getCoordinate(int const pieceID)
 	}
 }
 
-std::vector<Chess::ChessPiece> Chess::generatePieces()
+std::vector<Piece*> Chess::generatePieces()
 {
-	std::vector<ChessPiece> pieces{ };
+	std::vector<Piece*> pieces{ };
 	
 	int pieceID = 0;
 	for (auto &pieceType : pieceTypes) {		
@@ -136,31 +136,29 @@ std::vector<Chess::ChessPiece> Chess::generatePieces()
 	return pieces;
 }
 
-Chess::ChessPiece Chess::generatePiece(int const pieceType, int const pieceID)
+Piece* Chess::generatePiece(int const pieceType, int const pieceID)
 {
-	Chess::ChessPiece piece{};
+	Coordinate coordinate = getCoordinate(pieceID);
 
-	piece.pieceType = pieceTypes.at(static_cast<std::size_t>(pieceID));
-	piece.pieceId = pieceID;
-	piece.coordinate = getCoordinate(piece.pieceId);
-
-	auto imageSearch = imagePaths.find(piece.pieceType);
-	if (imageSearch != imagePaths.end()) {
-		piece.label = new QLabel(this);
-		piece.label->setGeometry(QRect(piece.coordinate.xPos, piece.coordinate.yPos, imageSize, imageSize));
-		piece.label->setTabletTracking(true);
-		piece.imagePath = imageSearch->second;
-		QPixmap image(piece.imagePath);
-
-		piece.label->setPixmap(image.scaled(piece.label->width(), piece.label->height(), Qt::KeepAspectRatio));
-	}
 	auto colorSearch = pieceColors.find(pieceType);
+	int color{};
 	if (colorSearch != pieceColors.end()) {
-		piece.color = colorSearch->second;
+		color = colorSearch->second;
 	}
-	Piece piece2{ piece.coordinate, piece.pieceId, piece.pieceType, piece.color, piece.imagePath };
+	else {
+		qDebug() << "generatePiece(): no color found.";
+		return{};
+	}
 
-	return piece;
+	auto imageSearch = imagePaths.find(pieceType);
+	if (imageSearch != imagePaths.end()) {
+		QString imagePath = imageSearch->second;
+
+		Piece *piece = new Piece(coordinate, pieceID, pieceType, color, imagePath , imageSize, this);
+		piece->setAttribute(Qt::WA_DeleteOnClose);
+		return piece;
+	}
+	return {};
 }
 
 void Chess::generateBoarder()
