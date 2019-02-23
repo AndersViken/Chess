@@ -60,6 +60,31 @@ void Chess::generateBoard()
 	printPieceInfo(pieces);
 }
 
+std::vector<Chess::Square> Chess::generateRow(int const rowNumber)
+{
+	std::vector<Chess::Square> row{ };
+	int color{ rowNumber };
+	for (int colNumber = 0; colNumber < squaresInARow; colNumber++) {
+		color++;
+		row.push_back(generateSquare((color) % 2, rowNumber, colNumber));
+	}
+	return row;
+}
+
+Chess::Square Chess::generateSquare(int const color, int const rowNumber, int const colNumber)
+{
+	Square square{};
+	square.label = new QLabel(this);
+
+	int const xPos = boardStartLeft + colNumber * squarePixelSize;
+	int const yPos = boardStartTop + squarePixelSize * (squaresInARow - (rowNumber + 1));
+	square.label->setGeometry(QRect(xPos, yPos, squarePixelSize, squarePixelSize));
+
+	setLabelBackgroundColor(color, square.label);
+
+	return square;
+}
+
 void Chess::printPieceInfo(std::vector<Piece> &pieces)
 {
 	for (auto &piece : pieces) {
@@ -104,65 +129,37 @@ Chess::Coordinate Chess::getCoordinate(int const pieceID)
 std::vector<Chess::Piece> Chess::generatePieces()
 {
 	std::vector<Piece> pieces{ };
-	QString imagePath = ":/Images/";
-	std::map<int, QString> imagePaths = {
-		{ whitePawn,    imagePath + "whitePawn"     },
-		{ whiteRook,    imagePath + "whiteRook"     },
-		{ whiteKnight,  imagePath + "whiteKnight"   },
-		{ whiteBishop,  imagePath + "whiteBishop"	},
-		{ whiteQueen,   imagePath + "whiteQueen"    },
-		{ whiteKing,    imagePath + "whiteKing"     },
-		{ blackPawn,    imagePath + "blackPawn"     },
-		{ blackRook,    imagePath + "blackRook"     },
-		{ blackKnight,  imagePath + "blackKnight"   },
-		{ blackBishop,  imagePath + "blackBishop"   },
-		{ blackQueen,   imagePath + "blackQueen"    },
-		{ blackKing,    imagePath + "blackKing"     }
-	};
-	std::map<int, int> pieceColors = {
-		{ whitePawn,    white },
-		{ whiteRook,    white },
-		{ whiteKnight,  white },
-		{ whiteBishop,  white },
-		{ whiteQueen,   white },
-		{ whiteKing,    white },
-		{ blackPawn,    black },
-		{ blackRook,    black },
-		{ blackKnight,  black },
-		{ blackBishop,  black },
-		{ blackQueen,   black },
-		{ blackKing,    black }
-	};
-	std::vector<int> pieceTypes = {
-		whiteRook, whiteKnight, whiteBishop, whiteQueen, whiteKing, whiteBishop, whiteKnight, whiteRook,
-		whitePawn, whitePawn, whitePawn, whitePawn, whitePawn, whitePawn, whitePawn, whitePawn,
-		blackPawn, blackPawn, blackPawn, blackPawn, blackPawn, blackPawn, blackPawn, blackPawn,
-		blackRook, blackKnight, blackBishop, blackQueen, blackKing, blackBishop, blackKnight, blackRook
-	};
+	
 	int pieceID = 0;
-	for (auto &pieceType : pieceTypes) {
-		Piece piece = { };
-		piece.pieceType = pieceTypes.at(static_cast<std::size_t>(pieceID));
-		piece.pieceId = pieceID++;
-		piece.coordinate = getCoordinate(piece.pieceId);
-
-		auto imageSearch = imagePaths.find(piece.pieceType);
-		if (imageSearch != imagePaths.end()) {
-			piece.label = new QLabel(this);
-			piece.label->setGeometry(QRect(piece.coordinate.xPos, piece.coordinate.yPos, imageSize, imageSize));
-			piece.label->setTabletTracking(true);
-			piece.imagePath = imageSearch->second;
-			QPixmap image(piece.imagePath);
-
-			piece.label->setPixmap(image.scaled(piece.label->width(), piece.label->height(), Qt::KeepAspectRatio));
-		}
-		auto colorSearch = pieceColors.find(pieceType);
-		if (colorSearch != pieceColors.end()) {
-			piece.color = colorSearch->second;
-		}
-		pieces.push_back(piece);
+	for (auto &pieceType : pieceTypes) {		
+		pieces.push_back(generatePiece(pieceType, pieceID++));
 	}
 	return pieces;
+}
+
+Chess::Piece Chess::generatePiece(int const pieceType, int const pieceID)
+{
+	Chess::Piece piece{};
+
+	piece.pieceType = pieceTypes.at(static_cast<std::size_t>(pieceID));
+	piece.pieceId = pieceID;
+	piece.coordinate = getCoordinate(piece.pieceId);
+
+	auto imageSearch = imagePaths.find(piece.pieceType);
+	if (imageSearch != imagePaths.end()) {
+		piece.label = new QLabel(this);
+		piece.label->setGeometry(QRect(piece.coordinate.xPos, piece.coordinate.yPos, imageSize, imageSize));
+		piece.label->setTabletTracking(true);
+		piece.imagePath = imageSearch->second;
+		QPixmap image(piece.imagePath);
+
+		piece.label->setPixmap(image.scaled(piece.label->width(), piece.label->height(), Qt::KeepAspectRatio));
+	}
+	auto colorSearch = pieceColors.find(pieceType);
+	if (colorSearch != pieceColors.end()) {
+		piece.color = colorSearch->second;
+	}
+	return piece;
 }
 
 void Chess::generateBoarder()
@@ -209,30 +206,7 @@ std::vector<QLabel*> Chess::generateLabelCoordinates()
 	return coordinates;
 }
 
-std::vector<Chess::Square> Chess::generateRow(int const rowNumber)
-{
-	std::vector<Chess::Square> row { };
-	int color { rowNumber };
-	for (int colNumber = 0; colNumber < squaresInARow; colNumber++) {
-		color++;
-		row.push_back(generateSquare((color) % 2, rowNumber, colNumber));
-	}
-	return row;
-}
 
-Chess::Square Chess::generateSquare(int const color, int const rowNumber, int const colNumber)
-{
-	Square square{};
-	square.label = new QLabel(this);
-
-	int const xPos = boardStartLeft + colNumber * squarePixelSize;
-	int const yPos = boardStartTop + squarePixelSize * (squaresInARow - (rowNumber + 1));
-	square.label->setGeometry(QRect(xPos, yPos, squarePixelSize, squarePixelSize));
-
-	setLabelBackgroundColor(color, square.label);
-
-	return square;
-}
 
 void Chess::setLabelBackgroundColor(const int &color, QLabel * label)
 {

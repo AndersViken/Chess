@@ -36,6 +36,8 @@ public:
 		int color;
 	};
 
+	Chess::Piece generatePiece(int const pieceType, int const pieceID);
+
 protected:
 	void dragEnterEvent(QDragEnterEvent *event) override;
 	void dragMoveEvent(QDragMoveEvent *event) override;
