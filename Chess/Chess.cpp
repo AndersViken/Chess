@@ -1,6 +1,7 @@
 #include "Chess.h"
 #include "piece.h"
 #include "GuiSetup.h"
+#include "Position.h"
 #include <QDebug>
 #include <map>
 #include <algorithm>
@@ -15,6 +16,8 @@ Chess::Chess(QWidget *parent)
 	setAcceptDrops(true);
 
 	generateBoard();
+
+	Position p{ "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 42 1" };
 
 }
 

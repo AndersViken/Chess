@@ -1,5 +1,6 @@
 #pragma once
-
+#include <map>
+#include <vector>
 int const minWinSizeX		{ 840 };
 int const minWinSizeY		{ 840 };
 int const squaresInARow		{ 8 };
