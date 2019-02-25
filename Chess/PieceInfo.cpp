@@ -11,15 +11,6 @@ namespace PieceTypes {
 
 	//rnbqkbnr / pppppppp / 8 / 8 / 8 / 8 / PPPPPPPP / RNBQKBNR
 
-	std::vector<int> const pieceTypesVec = {
-		whiteRook, whiteKnight, whiteBishop, whiteQueen, whiteKing, whiteBishop, whiteKnight, whiteRook,
-		whitePawn, whitePawn, whitePawn, whitePawn, whitePawn, whitePawn, whitePawn, whitePawn,
-		blackPawn, blackPawn, blackPawn, blackPawn, blackPawn, blackPawn, blackPawn, blackPawn,
-		blackRook, blackKnight, blackBishop, blackQueen, blackKing, blackBishop, blackKnight, blackRook
-	};
+	
 }
 
-std::vector<int> const getPieceTypes()
-{
-	return PieceTypes::pieceTypesVec;
-}

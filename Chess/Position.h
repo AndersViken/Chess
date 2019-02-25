@@ -27,29 +27,30 @@ public:
 	Position(QString fenString);
 	~Position();
 
-	QString getFenString()			{ return fenString; };
-	QChar getActiveColor()			{ return activeColor; };
-	bool canWhiteCastleKingside()	{ return whiteCanCastleKingside; };
-	bool canWhiteCastleQueenside()	{ return whiteCanCastleQueenside; };
-	bool canBlackCastleKingside()	{ return blackCanCastleKingside; };
-	bool canBlackCastleQueenside()	{ return blackCanCastleQueenside; };
-	QString getEnPassantSquare()	{ return enPassantSquare; };
-	int getHalfMoveClock()			{ return halfMoveClock; };
-	int getFullMove()				{ return fullMove; };
+	QString getFenString() { return fenString; };
+	QChar getActiveColor() { return activeColor; };
+	bool canWhiteCastleKingside() { return whiteCanCastleKingside; };
+	bool canWhiteCastleQueenside() { return whiteCanCastleQueenside; };
+	bool canBlackCastleKingside() { return blackCanCastleKingside; };
+	bool canBlackCastleQueenside() { return blackCanCastleQueenside; };
+	QString getEnPassantSquare() { return enPassantSquare; };
+	int getHalfMoveClock() { return halfMoveClock; };
+	int getFullMove() { return fullMove; };
+	std::vector<int> getPiecePlacement() { return piecePlacement; };
+private:
 
 	void processFenString(QString const text);
 	void getHalfMoveClock(QChar * &it, QString &text, const QChar &space);
-	void getFullMove(QChar *& it, QString & text);
-	int	getIntFromString(QChar *& it, QString & text, const QChar & space);
-	void getEnPassantSquareValue(QChar * &it, QString &text, const QChar &space);
-	void getColorValue(QChar * &it);
+	void findFullMove(QChar *& it, QString & text);
+	int	findIntFromString(QChar *& it, QString & text, const QChar & space);
+	void findEnPassantSquareValue(QChar * &it, QString &text, const QChar &space);
+	void findColorValue(QChar * &it);
 	void setCastleValues(std::vector<QChar> &castleVector);
-	void getCastleValues(QChar * &it, QString &text, const QChar &space);
-	void getPiecePlacement(QChar * &it, QString &text, const QChar &space);
+	void findCastleValues(QChar * &it, QString &text, const QChar &space);
+	void findPiecePlacement(QChar * &it, QString &text, const QChar &space);
 	void pushBackEmptySquares(int const n);
 	void pushBackPieceInSquare(QChar const pieceChar);
 
-private:
 	QString fenString;
 	std::vector<int> piecePlacement;
 	QChar activeColor;

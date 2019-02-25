@@ -24,21 +24,21 @@ void Position::processFenString(QString text)
 	QChar const space{ ' ' };
 	auto it{ text.begin() };
 
-	getPiecePlacement(it, text, space);
-	getColorValue(it);
-	getCastleValues(it, text, space);
-	getEnPassantSquareValue(it, text, space);
+	findPiecePlacement(it, text, space);
+	findColorValue(it);
+	findCastleValues(it, text, space);
+	findEnPassantSquareValue(it, text, space);
 	getHalfMoveClock(it, text, space);
-	getFullMove(it, text);
+	findFullMove(it, text);
 }
 
 void Position::getHalfMoveClock(QChar * &it, QString &text, const QChar &space)
 {
-	halfMoveClock = getIntFromString(it, text, space);
+	halfMoveClock = findIntFromString(it, text, space);
 	std::advance(it, 1);
 }
 
-void Position::getFullMove(QChar * &it, QString &text)
+void Position::findFullMove(QChar * &it, QString &text)
 {
 	std::vector<QChar> qCharVector;
 	std::copy(it, text.end(), back_inserter(qCharVector));
@@ -48,7 +48,7 @@ void Position::getFullMove(QChar * &it, QString &text)
 		qDebug() << "Position::getIntFromString: error, no int found in string. " << qCharVector.at(0) << " size: " << qCharVector.size();
 }
 
-int Position::getIntFromString(QChar * &it, QString &text, const QChar &space)
+int Position::findIntFromString(QChar * &it, QString &text, const QChar &space)
 {
 	std::vector<QChar> qCharVector;
 	std::copy(it, std::find(it, text.end(), space), back_inserter(qCharVector));
@@ -60,7 +60,7 @@ int Position::getIntFromString(QChar * &it, QString &text, const QChar &space)
 	return numberString.toInt();
 }
 
-void Position::getEnPassantSquareValue(QChar * &it, QString &text, QChar const &space)
+void Position::findEnPassantSquareValue(QChar * &it, QString &text, QChar const &space)
 {
 	std::vector<QChar> enPassantVector;
 	std::copy(it, std::find(it, text.end(), space), back_inserter(enPassantVector));
@@ -70,13 +70,13 @@ void Position::getEnPassantSquareValue(QChar * &it, QString &text, QChar const &
 	}
 }
 
-void Position::getColorValue(QChar * &it)
+void Position::findColorValue(QChar * &it)
 {
 	activeColor = *(std::next(it));
 	std::advance(it, 3);
 }
 
-void Position::getCastleValues(QChar * &it, QString &text, const QChar &space)
+void Position::findCastleValues(QChar * &it, QString &text, const QChar &space)
 {
 	std::vector<QChar> castleVector;
 	std::copy_if(it, std::find(it, text.end(), space), back_inserter(castleVector),
@@ -86,7 +86,7 @@ void Position::getCastleValues(QChar * &it, QString &text, const QChar &space)
 	setCastleValues(castleVector);
 }
 
-void Position::getPiecePlacement(QChar *& it, QString & text, const QChar & space)
+void Position::findPiecePlacement(QChar *& it, QString & text, const QChar & space)
 {
 	std::vector<QChar> pieceFenString;
 	std::copy(it, std::find(it, text.end(), space), back_inserter(pieceFenString));

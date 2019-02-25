@@ -24,7 +24,7 @@ Chess::Chess(QWidget *parent)
 
 	Move m{ 42, 42042, "E4" };
 
-	Leaf leaf{ m,p };
+	Leaf leaf{ m,initialPosition };
 
 }
 
@@ -196,25 +196,25 @@ std::vector<QPoint> Chess::generateInitialCoordinates()
 	return coordinates;
 }
 
-QPoint Chess::getCoordinate(int const pieceID)
+QPoint Chess::getCoordinate(int const squareNumber)
 {
-	if (pieceID < static_cast<int>(pieceCoordinates.size())) {
-		return pieceCoordinates.at(static_cast<std::size_t>(pieceID));
-	}
-	else {
-		return { 0, 0 };
-	}
+	int const row = squareNumber / 8;
+	int const col = squareNumber % 8;
+	return { boardStartX + col * squarePixelSize, boardStartY + row * squarePixelSize };
 }
 
 std::vector<Piece*> Chess::generatePieces(Position &position)
 {
 	std::vector<Piece*> piecesVec{ };
 	
-	int pieceID = 0;
-	for (auto &pieceType : getPieceTypes() ) {
-		
-		QPoint coordinate = getCoordinate(pieceID++);
-		piecesVec.push_back(generatePiece(pieceType, coordinate));
+	int pieceCount = 0;
+	for (auto &pieceType : position.getPiecePlacement() ) {
+		if (pieceType != empty)
+		{
+			QPoint coordinate = getCoordinate(pieceCount);
+			piecesVec.push_back(generatePiece(pieceType, coordinate));
+		}
+		pieceCount++;
 	}
 	return piecesVec;
 }

@@ -5,6 +5,7 @@
 #include "ui_Chess.h"
 #include "Piece.h"
 #include "Square.h"
+#include "Position.h"
 #include <vector>
 #include <QLabel>
 
