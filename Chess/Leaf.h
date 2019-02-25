@@ -14,6 +14,5 @@ public:
 	Position previousPosition;
 	Position position;
 	std::vector<std::map<Move, Leaf>> childLeafs;
-	Position generateCurrentPosition(Move mov, Position pos);
 };
 

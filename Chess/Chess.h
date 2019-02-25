@@ -3,7 +3,6 @@
 #include <QtWidgets>
 #include <QtWidgets/QMainWindow>
 #include "ui_Chess.h"
-#include "ChessTypes.h"
 #include "Piece.h"
 #include "Square.h"
 #include <vector>
@@ -39,8 +38,8 @@ private:
 	void showBoard();
 	void hideBoard();
 	Piece* generatePiece(int const pieceType, QPoint coordinate);
-	std::vector<Piece*> generatePieces();
-	void generateBoard();
+	std::vector<Piece*> generatePieces(Position &position);
+	void generateBoard(Position &position);
 	void generateBoarder();
 	Square* generateSquare(int const color, int const rowNumber, int const colNumber);
 	std::vector<QPoint> Chess::generateInitialCoordinates();

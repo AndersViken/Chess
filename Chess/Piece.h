@@ -1,6 +1,5 @@
 #pragma once
 #include <qlabel.h>
-#include <ChessTypes.h>
 class Piece :
 	public QLabel
 {

@@ -2,7 +2,9 @@
 #include <qdebug.h>
 #include <algorithm>
 #include <array>
-
+#include <map>
+#include <QString>
+#include "PieceInfo.h"
 Position::Position()
 {
   
@@ -20,8 +22,9 @@ Position::~Position()
 void Position::processFenString(QString text)
 {
 	QChar const space{ ' ' };
-	auto it{ std::find(text.begin(), text.end(), space) }; // start at first space
+	auto it{ text.begin() };
 
+	getPiecePlacement(it, text, space);
 	getColorValue(it);
 	getCastleValues(it, text, space);
 	getEnPassantSquareValue(it, text, space);
@@ -50,10 +53,11 @@ int Position::getIntFromString(QChar * &it, QString &text, const QChar &space)
 	std::vector<QChar> qCharVector;
 	std::copy(it, std::find(it, text.end(), space), back_inserter(qCharVector));
 	std::advance(it, qCharVector.size());
-	int retVal = (int)(qCharVector.at(0).digitValue());
-	if(retVal == -1)
-		qDebug() << "Position::getIntFromString: error, no int found in string." << qCharVector.size();
-	return retVal;
+	QString numberString{};
+	for (QChar c : qCharVector) {
+		numberString.append(c);
+	}
+	return numberString.toInt();
 }
 
 void Position::getEnPassantSquareValue(QChar * &it, QString &text, QChar const &space)
@@ -81,6 +85,47 @@ void Position::getCastleValues(QChar * &it, QString &text, const QChar &space)
 
 	setCastleValues(castleVector);
 }
+
+void Position::getPiecePlacement(QChar *& it, QString & text, const QChar & space)
+{
+	std::vector<QChar> pieceFenString;
+	std::copy(it, std::find(it, text.end(), space), back_inserter(pieceFenString));
+	std::advance(it, pieceFenString.size() + 1);
+
+	int i = 0;
+
+	piecePlacement = {};
+	for (QChar c : pieceFenString) {
+		if (c.isDigit()) {
+			pushBackEmptySquares(c.digitValue());
+		}
+		else if (c != '/') {
+			pushBackPieceInSquare(c);
+		}
+
+		i++;
+	}
+	
+}
+void Position::pushBackEmptySquares(int n)
+{
+	while (n--) {
+		pushBackPieceInSquare('-');
+	}
+}
+
+void Position::pushBackPieceInSquare(QChar const pieceChar)
+{
+	auto search = pieceLetters.find(pieceChar);
+	if (search != pieceLetters.end()) {
+		piecePlacement.push_back(search->second);
+	}
+	else {
+		pushBackPieceInSquare('-');
+	}
+
+}
+
 
 void Position::setCastleValues(std::vector<QChar> &castleVector)
 {

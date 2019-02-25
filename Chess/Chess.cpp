@@ -2,6 +2,9 @@
 #include "piece.h"
 #include "GuiSetup.h"
 #include "Position.h"
+#include "Move.h"
+#include "Leaf.h"
+#include "PieceInfo.h"
 #include <QDebug>
 #include <map>
 #include <algorithm>
@@ -14,14 +17,49 @@ Chess::Chess(QWidget *parent)
 	setMinimumSize(minWinSizeX, minWinSizeY);
 	setWindowTitle(tr("Chess"));
 	setAcceptDrops(true);
+	Position initialPosition{ "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" };
 
-	generateBoard();
+	generateBoard(initialPosition);
 
-	Position p{ "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 42 1" };
+
+	Move m{ 42, 42042, "E4" };
+
+	Leaf leaf{ m,p };
 
 }
 
-void Chess::generateBoard()
+std::map<int, int> const pieceColors = {
+	{ whitePawn,    white },
+	{ whiteRook,    white },
+	{ whiteKnight,  white },
+	{ whiteBishop,  white },
+	{ whiteQueen,   white },
+	{ whiteKing,    white },
+	{ blackPawn,    black },
+	{ blackRook,    black },
+	{ blackKnight,  black },
+	{ blackBishop,  black },
+	{ blackQueen,   black },
+	{ blackKing,    black }
+};
+
+QString imageDir = ":/Images/";
+std::map<int, QString> imagePaths = {
+	{ whitePawn,    imageDir + "whitePawn"     },
+	{ whiteRook,    imageDir + "whiteRook"     },
+	{ whiteKnight,  imageDir + "whiteKnight"   },
+	{ whiteBishop,  imageDir + "whiteBishop"	},
+	{ whiteQueen,   imageDir + "whiteQueen"    },
+	{ whiteKing,    imageDir + "whiteKing"     },
+	{ blackPawn,    imageDir + "blackPawn"     },
+	{ blackRook,    imageDir + "blackRook"     },
+	{ blackKnight,  imageDir + "blackKnight"   },
+	{ blackBishop,  imageDir + "blackBishop"   },
+	{ blackQueen,   imageDir + "blackQueen"    },
+	{ blackKing,    imageDir + "blackKing"     }
+};
+
+void Chess::generateBoard(Position &position)
 {
 	board = {};
 
@@ -34,7 +72,7 @@ void Chess::generateBoard()
 	labelCoordinates = generateLabelCoordinates();
 	pieceCoordinates = generateInitialCoordinates();
 	generateLegalCoordinates(legalCoordinatesX, legalCoordinatesY);
-	pieces = generatePieces();
+	pieces = generatePieces(position);
 	printPieceInfo(pieces);
 }
 
@@ -168,12 +206,12 @@ QPoint Chess::getCoordinate(int const pieceID)
 	}
 }
 
-std::vector<Piece*> Chess::generatePieces()
+std::vector<Piece*> Chess::generatePieces(Position &position)
 {
 	std::vector<Piece*> piecesVec{ };
 	
 	int pieceID = 0;
-	for (auto &pieceType : pieceTypes) {
+	for (auto &pieceType : getPieceTypes() ) {
 		
 		QPoint coordinate = getCoordinate(pieceID++);
 		piecesVec.push_back(generatePiece(pieceType, coordinate));

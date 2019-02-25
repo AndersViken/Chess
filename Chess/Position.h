@@ -1,6 +1,25 @@
 #pragma once
 #include <qstring.h>
 #include <vector>
+#include <map>
+#include "PieceInfo.h"
+
+std::map<QChar, int> const pieceLetters = {
+	{ 'p', blackPawn },
+	{ 'r', blackRook },
+	{ 'n', blackKnight },
+	{ 'b', blackBishop },
+	{ 'q', blackQueen },
+	{ 'k', blackKing },
+	{ 'P', whitePawn },
+	{ 'R', whiteRook },
+	{ 'N', whiteKnight },
+	{ 'B', whiteBishop },
+	{ 'Q', whiteQueen },
+	{ 'K', whiteKing },
+	{ '-', empty } // using '-' when need for empty square
+};
+
 class Position
 {
 public:
@@ -26,9 +45,13 @@ public:
 	void getColorValue(QChar * &it);
 	void setCastleValues(std::vector<QChar> &castleVector);
 	void getCastleValues(QChar * &it, QString &text, const QChar &space);
+	void getPiecePlacement(QChar * &it, QString &text, const QChar &space);
+	void pushBackEmptySquares(int const n);
+	void pushBackPieceInSquare(QChar const pieceChar);
 
 private:
 	QString fenString;
+	std::vector<int> piecePlacement;
 	QChar activeColor;
 	bool	whiteCanCastleKingside;
 	bool	whiteCanCastleQueenside;

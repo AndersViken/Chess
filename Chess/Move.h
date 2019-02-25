@@ -4,6 +4,7 @@ class Move
 {
 public:
 	Move();
+	Move(int fromSquareId, int toSquareId, QString moveString);
 	~Move();
 	int fromSquareId;
 	int toSquareId;
