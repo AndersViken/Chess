@@ -92,8 +92,6 @@ void Position::findPiecePlacement(QChar *& it, QString & text, const QChar & spa
 	std::copy(it, std::find(it, text.end(), space), back_inserter(pieceFenString));
 	std::advance(it, pieceFenString.size() + 1);
 
-	int i = 0;
-
 	piecePlacement = {};
 	for (QChar c : pieceFenString) {
 		if (c.isDigit()) {
@@ -102,8 +100,6 @@ void Position::findPiecePlacement(QChar *& it, QString & text, const QChar & spa
 		else if (c != '/') {
 			pushBackPieceInSquare(c);
 		}
-
-		i++;
 	}
 	
 }
@@ -116,7 +112,7 @@ void Position::pushBackEmptySquares(int n)
 
 void Position::pushBackPieceInSquare(QChar const pieceChar)
 {
-	auto search = pieceLetters.find(pieceChar);
+	auto search{ pieceLetters.find(pieceChar) };
 	if (search != pieceLetters.end()) {
 		piecePlacement.push_back(search->second);
 	}
@@ -124,6 +120,69 @@ void Position::pushBackPieceInSquare(QChar const pieceChar)
 		pushBackPieceInSquare('-');
 	}
 
+}
+
+void Position::pushBackLetterInFenString(int pieceNumber, QString &inputString)
+{
+	auto search{ pieceLettersReverse.find(pieceNumber) };
+	if (search != pieceLettersReverse.end()) {
+		inputString.append(search->second);
+	}
+	else {
+		qDebug() << "Position::pushBackLetterInFenString: error. wrong input to function.";
+	}
+
+}
+
+void Position::pushBackNumberInFenString(int &number, QString &inputString)
+{
+	inputString.append(QString::number(number));
+	number = 0;
+}
+
+QString Position::createFenStringFromPiecePlacement()
+{
+	QString pieceFenString{};
+	int emptySquares{ 0 };
+	int index = 1;
+	for(int piece : piecePlacement) {
+		if (piece == 0) {
+			emptySquares++;
+		}
+		else if (emptySquares > 0) {
+			pushBackNumberInFenString(emptySquares, pieceFenString);
+		}
+		if (emptySquares == 8) {
+			pushBackNumberInFenString(emptySquares, pieceFenString);
+		}
+
+		pushBackLetterInFenString(piece, pieceFenString);
+
+		if (index++ % 8 == 0) {
+			if (emptySquares > 0) {
+				pushBackNumberInFenString(emptySquares, pieceFenString);
+			}
+			pieceFenString.push_back('/');
+		}
+	}
+	QString tempFenString{};
+	
+	std::copy(pieceFenString.begin(), pieceFenString.end(), std::back_inserter(tempFenString));
+
+	auto it = fenString.begin();
+	QChar space{ ' ' };
+	 // first space is after piece letters
+	std::copy(std::find(it, fenString.end(), space), fenString.end(), std::back_inserter(tempFenString));
+
+	return tempFenString;
+}
+
+void Position::insertNewMove(Move const &move)
+{
+	piecePlacement.at(move.toSquareId) = piecePlacement.at(move.fromSquareId);
+	piecePlacement.at(move.fromSquareId) = 0;
+
+	fenString = createFenStringFromPiecePlacement();
 }
 
 

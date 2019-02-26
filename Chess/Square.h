@@ -6,5 +6,6 @@ class Square :
 public:
 	Square(QWidget *parent);
 	~Square();
+
 };
 

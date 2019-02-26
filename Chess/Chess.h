@@ -46,17 +46,13 @@ private:
 	std::vector<QPoint> Chess::generateInitialCoordinates();
 	std::vector<QLabel*> generateLabelCoordinates();
 	std::vector<Square*> generateRow(int const rowNumber);
-	
 	QPoint getCoordinate(int const pieceID);
 	void printPieceInfo(std::vector<Piece*> &pieces);
-
 	int Chess::getClosestNumber(int const num, std::vector<int> const &numbers);
 	QPoint giveCoordinateToDroppedPiece(QPoint droppedPosition, QPoint origPosition);
-
 	void generateLegalCoordinates(std::vector<int>& coordinatesX, std::vector<int>& coordinatesY);
-
-
 	void setLabelBackgroundColor(const int &color, QLabel * label);
 	void setLabelColor(const int &color, QLabel * label);
+	QString Chess::getPositionFromDialog(QInputDialog & dialog);
 
 };

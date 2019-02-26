@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 #include "PieceInfo.h"
+#include "Move.h"
 
 std::map<QChar, int> const pieceLetters = {
 	{ 'p', blackPawn },
@@ -18,6 +19,21 @@ std::map<QChar, int> const pieceLetters = {
 	{ 'Q', whiteQueen },
 	{ 'K', whiteKing },
 	{ '-', empty } // using '-' when need for empty square
+};
+
+std::map<int, QChar> const pieceLettersReverse = {
+	{ blackPawn,'p' },
+	{ blackRook, 'r' },
+	{ blackKnight, 'n'  },
+	{ blackBishop, 'b'  },
+	{ blackQueen, 'q'  },
+	{ blackKing, 'k'  },
+	{ whitePawn, 'P'  },
+	{ whiteRook, 'R'  },
+	{ whiteKnight, 'N'  },
+	{ whiteBishop, 'B'  },
+	{ whiteQueen, 'Q'  },
+	{ whiteKing, 'K'  }
 };
 
 class Position
@@ -37,8 +53,9 @@ public:
 	int getHalfMoveClock() { return halfMoveClock; };
 	int getFullMove() { return fullMove; };
 	std::vector<int> getPiecePlacement() { return piecePlacement; };
-private:
+	void insertNewMove(Move const &move);
 
+private:
 	void processFenString(QString const text);
 	void getHalfMoveClock(QChar * &it, QString &text, const QChar &space);
 	void findFullMove(QChar *& it, QString & text);
@@ -50,6 +67,9 @@ private:
 	void findPiecePlacement(QChar * &it, QString &text, const QChar &space);
 	void pushBackEmptySquares(int const n);
 	void pushBackPieceInSquare(QChar const pieceChar);
+	void pushBackLetterInFenString(int pieceNumber, QString &inputString);
+	void pushBackNumberInFenString(int &number, QString &inputString);
+	QString createFenStringFromPiecePlacement();
 
 	QString fenString;
 	std::vector<int> piecePlacement;

@@ -7,6 +7,6 @@ public:
 	PositionController();
 	~PositionController();
 
-	Position generateNewPosition(Move const &mov, Position &pos);
+	Position generateNewPosition(Move &mov, Position &oldPos);
 };
 

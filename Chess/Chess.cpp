@@ -5,10 +5,13 @@
 #include "Move.h"
 #include "Leaf.h"
 #include "PieceInfo.h"
+#include "PositionController.h"
+#include <qinputdialog.h>
 #include <QDebug>
 #include <map>
 #include <algorithm>
 #include <iterator>
+#include <stdio.h>
 Chess::Chess(QWidget *parent)
 	: QMainWindow(parent)
 {
@@ -17,14 +20,32 @@ Chess::Chess(QWidget *parent)
 	setMinimumSize(minWinSizeX, minWinSizeY);
 	setWindowTitle(tr("Chess"));
 	setAcceptDrops(true);
-	Position initialPosition{ "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" };
+
+
+	QInputDialog positionDialog{};
+	QString positionString{};
+
+	positionString = getPositionFromDialog(positionDialog);
+ 
+	Position initialPosition{ positionString };
+
+	Move move1{ 52,	36,	"e4"	};
+	Move move2{ 6,	21,	"Nf6"	};
+	Move move3{ 36,	28,	"e4"	};
+	Move move4{ 7,	6,	"Rg8"	};
+
+	PositionController positioncontroller{};
+	initialPosition = positioncontroller.generateNewPosition(move1, initialPosition);
+	initialPosition = positioncontroller.generateNewPosition(move2, initialPosition);
+	initialPosition = positioncontroller.generateNewPosition(move3, initialPosition);
+	initialPosition = positioncontroller.generateNewPosition(move4, initialPosition);
 
 	generateBoard(initialPosition);
 
-
-	Move m{ 42, 42042, "E4" };
-
 	Leaf leaf{ m,initialPosition };
+
+
+
 
 }
 
@@ -303,6 +324,19 @@ void Chess::setLabelColor(const int &color, QLabel * label)
 		label->setStyleSheet("QLabel { color: rgb(181, 135, 99); }");
 	else if (color == lightColor)
 		label->setStyleSheet("QLabel { color: rgb(240, 218, 181); }");
+}
+
+QString Chess::getPositionFromDialog(QInputDialog & dialog)
+{
+	QString const windowTitle{ "Input FEN String" };
+	QString const positionSuggestion{ "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" };
+	dialog.setWindowTitle(windowTitle);
+	dialog.setInputMode(QInputDialog::TextInput);
+	dialog.setLabelText(windowTitle);
+	dialog.resize(500, 108);
+	dialog.setTextValue(positionSuggestion);
+	dialog.exec();
+	return dialog.textValue();
 }
 
 
