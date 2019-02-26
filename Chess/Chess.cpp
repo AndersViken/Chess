@@ -1,10 +1,17 @@
 #include "Chess.h"
 #include "piece.h"
 #include "GuiSetup.h"
+#include "Position.h"
+#include "Move.h"
+#include "Leaf.h"
+#include "PieceInfo.h"
+#include "PositionController.h"
+#include <qinputdialog.h>
 #include <QDebug>
 #include <map>
 #include <algorithm>
 #include <iterator>
+#include <stdio.h>
 Chess::Chess(QWidget *parent)
 	: QMainWindow(parent)
 {
@@ -14,11 +21,66 @@ Chess::Chess(QWidget *parent)
 	setWindowTitle(tr("Chess"));
 	setAcceptDrops(true);
 
-	generateBoard();
+
+	QInputDialog positionDialog{};
+	QString positionString{};
+
+	positionString = getPositionFromDialog(positionDialog);
+ 
+	Position initialPosition{ positionString };
+
+	Move move1{ 52,	36,	"e4"	};
+	Move move2{ 6,	21,	"Nf6"	};
+	Move move3{ 36,	28,	"e4"	};
+	Move move4{ 7,	6,	"Rg8"	};
+
+	PositionController positioncontroller{};
+	initialPosition = positioncontroller.generateNewPosition(move1, initialPosition);
+	initialPosition = positioncontroller.generateNewPosition(move2, initialPosition);
+	initialPosition = positioncontroller.generateNewPosition(move3, initialPosition);
+	initialPosition = positioncontroller.generateNewPosition(move4, initialPosition);
+
+	generateBoard(initialPosition);
+
+	Leaf leaf{ m,initialPosition };
+
+
+
 
 }
 
-void Chess::generateBoard()
+std::map<int, int> const pieceColors = {
+	{ whitePawn,    white },
+	{ whiteRook,    white },
+	{ whiteKnight,  white },
+	{ whiteBishop,  white },
+	{ whiteQueen,   white },
+	{ whiteKing,    white },
+	{ blackPawn,    black },
+	{ blackRook,    black },
+	{ blackKnight,  black },
+	{ blackBishop,  black },
+	{ blackQueen,   black },
+	{ blackKing,    black }
+};
+
+QString imageDir = ":/Images/";
+std::map<int, QString> imagePaths = {
+	{ whitePawn,    imageDir + "whitePawn"     },
+	{ whiteRook,    imageDir + "whiteRook"     },
+	{ whiteKnight,  imageDir + "whiteKnight"   },
+	{ whiteBishop,  imageDir + "whiteBishop"	},
+	{ whiteQueen,   imageDir + "whiteQueen"    },
+	{ whiteKing,    imageDir + "whiteKing"     },
+	{ blackPawn,    imageDir + "blackPawn"     },
+	{ blackRook,    imageDir + "blackRook"     },
+	{ blackKnight,  imageDir + "blackKnight"   },
+	{ blackBishop,  imageDir + "blackBishop"   },
+	{ blackQueen,   imageDir + "blackQueen"    },
+	{ blackKing,    imageDir + "blackKing"     }
+};
+
+void Chess::generateBoard(Position &position)
 {
 	board = {};
 
@@ -31,7 +93,7 @@ void Chess::generateBoard()
 	labelCoordinates = generateLabelCoordinates();
 	pieceCoordinates = generateInitialCoordinates();
 	generateLegalCoordinates(legalCoordinatesX, legalCoordinatesY);
-	pieces = generatePieces();
+	pieces = generatePieces(position);
 	printPieceInfo(pieces);
 }
 
@@ -155,25 +217,25 @@ std::vector<QPoint> Chess::generateInitialCoordinates()
 	return coordinates;
 }
 
-QPoint Chess::getCoordinate(int const pieceID)
+QPoint Chess::getCoordinate(int const squareNumber)
 {
-	if (pieceID < static_cast<int>(pieceCoordinates.size())) {
-		return pieceCoordinates.at(static_cast<std::size_t>(pieceID));
-	}
-	else {
-		return { 0, 0 };
-	}
+	int const row = squareNumber / 8;
+	int const col = squareNumber % 8;
+	return { boardStartX + col * squarePixelSize, boardStartY + row * squarePixelSize };
 }
 
-std::vector<Piece*> Chess::generatePieces()
+std::vector<Piece*> Chess::generatePieces(Position &position)
 {
 	std::vector<Piece*> piecesVec{ };
 	
-	int pieceID = 0;
-	for (auto &pieceType : pieceTypes) {
-		
-		QPoint coordinate = getCoordinate(pieceID++);
-		piecesVec.push_back(generatePiece(pieceType, coordinate));
+	int pieceCount = 0;
+	for (auto &pieceType : position.getPiecePlacement() ) {
+		if (pieceType != empty)
+		{
+			QPoint coordinate = getCoordinate(pieceCount);
+			piecesVec.push_back(generatePiece(pieceType, coordinate));
+		}
+		pieceCount++;
 	}
 	return piecesVec;
 }
@@ -262,6 +324,19 @@ void Chess::setLabelColor(const int &color, QLabel * label)
 		label->setStyleSheet("QLabel { color: rgb(181, 135, 99); }");
 	else if (color == lightColor)
 		label->setStyleSheet("QLabel { color: rgb(240, 218, 181); }");
+}
+
+QString Chess::getPositionFromDialog(QInputDialog & dialog)
+{
+	QString const windowTitle{ "Input FEN String" };
+	QString const positionSuggestion{ "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" };
+	dialog.setWindowTitle(windowTitle);
+	dialog.setInputMode(QInputDialog::TextInput);
+	dialog.setLabelText(windowTitle);
+	dialog.resize(500, 108);
+	dialog.setTextValue(positionSuggestion);
+	dialog.exec();
+	return dialog.textValue();
 }
 
 

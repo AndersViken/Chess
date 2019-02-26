@@ -1,5 +1,4 @@
 #include "Piece.h"
-#include "chessTypes.h"
 
 Piece::Piece()
 {
