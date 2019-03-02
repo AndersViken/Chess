@@ -4,8 +4,9 @@ Piece::Piece()
 {
 }
 
-Piece::Piece(QPoint coordinate, int pieceType, int color, QString imagePath, int imageSize, QWidget *parent) :
+Piece::Piece(QPoint coordinate, int squareID, int pieceType, int color, QString imagePath, int imageSize, QWidget *parent) :
 	coordinate(coordinate),
+	squareID(squareID),
 	pieceType(pieceType),
 	color(color),
 	imagePath(imagePath),
@@ -25,6 +26,11 @@ Piece::~Piece()
 QPoint Piece::getCoordinate()
 {
 	return coordinate;
+}
+
+int Piece::getSquareID()
+{
+	return squareID;
 }
 
 int Piece::getPieceType()

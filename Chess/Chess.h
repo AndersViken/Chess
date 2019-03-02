@@ -6,6 +6,7 @@
 #include "Piece.h"
 #include "Square.h"
 #include "Position.h"
+#include "PositionController.h"
 #include <vector>
 #include <QLabel>
 
@@ -34,19 +35,23 @@ private:
 	std::vector<int> legalCoordinatesX{};
 	std::vector<int> legalCoordinatesY{};
 	std::vector<Piece*> pieces = {};
+	Position position = {};
+	PositionController positioncontroller = {};
 	QLabel *boarder;
 
 	void showBoard();
 	void hideBoard();
-	Piece* generatePiece(int const pieceType, QPoint coordinate);
+	Piece* generatePiece(int const pieceType, QPoint coordinate, int squareID);
 	std::vector<Piece*> generatePieces(Position &position);
+	void removePiece(std::vector<Piece*> &pieceVec, int squareID);
+	void showAllPieces(std::vector<Piece*>& pieceVec);
 	void generateBoard(Position &position);
 	void generateBoarder();
 	Square* generateSquare(int const color, int const rowNumber, int const colNumber);
 	std::vector<QPoint> Chess::generateInitialCoordinates();
 	std::vector<QLabel*> generateLabelCoordinates();
 	std::vector<Square*> generateRow(int const rowNumber);
-	QPoint getCoordinate(int const pieceID);
+	QPoint getPointFromSquareID(int const pieceID);
 	void printPieceInfo(std::vector<Piece*> &pieces);
 	int Chess::getClosestNumber(int const num, std::vector<int> const &numbers);
 	QPoint giveCoordinateToDroppedPiece(QPoint droppedPosition, QPoint origPosition);

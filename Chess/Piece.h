@@ -5,17 +5,19 @@ class Piece :
 {
 public:
 	Piece();
-	Piece(QPoint coordinate, int pieceType, int color, QString imagePath, int imageSize, QWidget *parent);
+	Piece(QPoint coordinate, int squareID, int pieceType, int color, QString imagePath, int imageSize, QWidget *parent);
 	~Piece();
 
 	QPoint	getCoordinate();
-	int			getPieceType();
-	int			getColor();
-	QString		getImagePath();
-	int			getImageSize();
+	int		getSquareID();
+	int		getPieceType();
+	int		getColor();
+	QString	getImagePath();
+	int		getImageSize();
 
 private:
 	QPoint coordinate{};
+	int squareID{};
 	int pieceType{};
 	int color{};
 	QString imagePath{};
