@@ -28,21 +28,17 @@ Chess::Chess(QWidget *parent)
 	positionString = getPositionFromDialog(positionDialog);
  
 	Position initialPosition{ positionString };
+	position = initialPosition;
 
-	Move move1{ 52,	36,	"e4"	};
-	Move move2{ 6,	21,	"Nf6"	};
-	Move move3{ 36,	28,	"e4"	};
-	Move move4{ 7,	6,	"Rg8"	};
+	
+	//initialPosition = positioncontroller.generateNewPosition(move1, initialPosition);
+	//initialPosition = positioncontroller.generateNewPosition(move2, initialPosition);
+	//initialPosition = positioncontroller.generateNewPosition(move3, initialPosition);
+	//initialPosition = positioncontroller.generateNewPosition(move4, initialPosition);
 
-	PositionController positioncontroller{};
-	initialPosition = positioncontroller.generateNewPosition(move1, initialPosition);
-	initialPosition = positioncontroller.generateNewPosition(move2, initialPosition);
-	initialPosition = positioncontroller.generateNewPosition(move3, initialPosition);
-	initialPosition = positioncontroller.generateNewPosition(move4, initialPosition);
+	generateBoard(position);
 
-	generateBoard(initialPosition);
-
-	Leaf leaf{ m,initialPosition };
+	//Leaf leaf{ m,initialPosition };
 
 
 
@@ -80,7 +76,11 @@ std::map<int, QString> imagePaths = {
 	{ blackKing,    imageDir + "blackKing"     }
 };
 
-void Chess::generateBoard(Position &position)
+//std::map<int, QPoint> squareIdToCoordinate = {
+//	{ }
+//}
+
+void Chess::generateBoard(Position &t_position)
 {
 	board = {};
 
@@ -93,7 +93,7 @@ void Chess::generateBoard(Position &position)
 	labelCoordinates = generateLabelCoordinates();
 	pieceCoordinates = generateInitialCoordinates();
 	generateLegalCoordinates(legalCoordinatesX, legalCoordinatesY);
-	pieces = generatePieces(position);
+	pieces = generatePieces(t_position);
 	printPieceInfo(pieces);
 }
 
@@ -172,14 +172,15 @@ int Chess::getClosestNumber(int const num, std::vector<int> const &numbers)
 
 QPoint Chess::giveCoordinateToDroppedPiece(QPoint droppedPosition, QPoint origPosition)
 {
-	if (droppedPosition.rx() < boardStartX ||
-		droppedPosition.rx() > boardStartX + boardWidth ||
-		droppedPosition.ry() < boardStartY ||
-		droppedPosition.ry() > boardStartY + boardHeigth ) {
+	int const halfSquare = squarePixelSize / 2;
+	if (droppedPosition.rx() < boardStartX - halfSquare ||
+		droppedPosition.rx() > boardStartX + halfSquare + boardWidth  ||
+		droppedPosition.ry() < boardStartY - halfSquare ||
+		droppedPosition.ry() > boardStartY + halfSquare + boardHeigth) {
 		return origPosition;
 	}
-	int const posX = getClosestNumber(droppedPosition.rx() - squarePixelSize / 2, legalCoordinatesX);
-	int const posY = getClosestNumber(droppedPosition.ry() - squarePixelSize / 2, legalCoordinatesY);
+	int const posX = getClosestNumber(droppedPosition.rx() - halfSquare, legalCoordinatesX);
+	int const posY = getClosestNumber(droppedPosition.ry() - halfSquare, legalCoordinatesY);
 	QPoint point{ posX, posY };
 	
 	// piece dropped outside of board
@@ -217,30 +218,37 @@ std::vector<QPoint> Chess::generateInitialCoordinates()
 	return coordinates;
 }
 
-QPoint Chess::getCoordinate(int const squareNumber)
+int getSquareIdFromPoint(QPoint point)
 {
-	int const row = squareNumber / 8;
+	int const col = (point.rx() - boardStartX) / squarePixelSize;
+	int const row = (point.ry() - boardStartY) / squarePixelSize;
+	return ((8 * row) + (col));
+}
+
+QPoint Chess::getPointFromSquareID(int const squareNumber)
+{
 	int const col = squareNumber % 8;
+	int const row = squareNumber / 8;
 	return { boardStartX + col * squarePixelSize, boardStartY + row * squarePixelSize };
 }
 
-std::vector<Piece*> Chess::generatePieces(Position &position)
+std::vector<Piece*> Chess::generatePieces(Position &t_position)
 {
 	std::vector<Piece*> piecesVec{ };
 	
-	int pieceCount = 0;
-	for (auto &pieceType : position.getPiecePlacement() ) {
+	int squareID = 0;
+	for (auto &pieceType : t_position.getPiecePlacement() ) {
 		if (pieceType != empty)
 		{
-			QPoint coordinate = getCoordinate(pieceCount);
-			piecesVec.push_back(generatePiece(pieceType, coordinate));
+			QPoint coordinate = getPointFromSquareID(squareID);
+			piecesVec.push_back(generatePiece(pieceType, coordinate, squareID));
 		}
-		pieceCount++;
+		squareID++;
 	}
 	return piecesVec;
 }
 
-Piece* Chess::generatePiece(int const pieceType, QPoint coordinate)
+Piece* Chess::generatePiece(int const pieceType, QPoint coordinate, int squareID)
 {
 
 	auto colorSearch = pieceColors.find(pieceType);
@@ -257,11 +265,24 @@ Piece* Chess::generatePiece(int const pieceType, QPoint coordinate)
 	if (imageSearch != imagePaths.end()) {
 		QString imagePath = imageSearch->second;
 		int tempImageSize = imageSize;
-		Piece *piece{ new Piece(coordinate, pieceType, color, imagePath , tempImageSize, this) };
+		Piece *piece{ new Piece(coordinate, squareID, pieceType, color, imagePath , tempImageSize, this) };
 		//piece->setAttribute(Qt::WA_DeleteOnClose);
 		return piece;
 	}
 	return {};
+}
+
+void Chess::removePiece(std::vector<Piece*>& pieceVec, int squareID)
+{
+	pieceVec.erase(std::remove_if(pieceVec.begin(), pieceVec.end(),
+		[&squareID](Piece *piece) {piece->hide(); return (piece->getSquareID() == squareID); }),
+		pieceVec.end());
+}
+
+void Chess::showAllPieces(std::vector<Piece*>& pieceVec)
+{
+	std::for_each(pieceVec.begin(), pieceVec.end(),
+		[](Piece* piece) {piece->show(); });
 }
 
 void Chess::generateBoarder()
@@ -386,15 +407,37 @@ void Chess::dropEvent(QDropEvent *event)
 		QDataStream dataStream(&itemData, QIODevice::ReadOnly);
 
 		int pieceType{};
+		int origSquareID{};
 		QPoint offset{};
-		QPoint origPosition{};
-		dataStream >> pieceType >> origPosition.rx() >> origPosition.ry() >> offset;
+		QPoint origPoint{};
+		dataStream >> pieceType >> origSquareID >> origPoint.rx() >> origPoint.ry() >> offset;
 
-		QPoint droppedPosition{ event->pos() - offset };
-		QPoint newPosition = giveCoordinateToDroppedPiece(droppedPosition, origPosition);
-		Piece *piece = generatePiece(pieceType, newPosition);
+		QPoint droppedPoint{ event->pos() - offset };
+		QPoint newPoint = giveCoordinateToDroppedPiece(droppedPoint, origPoint);
+		int newSquareID = getSquareIdFromPoint(newPoint);
+
+		Move move{ origSquareID, newSquareID, "MoveStringNA" };
+		Position origPosition = position;
+		position = positioncontroller.generateNewPosition(move, position);
+		Piece *piece;
+		bool legalMove = positioncontroller.validateMove(position, origPosition, move);
+		if (legalMove)
+		{
+			piece = generatePiece(pieceType, newPoint, newSquareID);
+			removePiece(pieces, newSquareID);
+		}
+		else
+		{
+			piece = generatePiece(pieceType, origPoint, origSquareID);
+		}
+		removePiece(pieces, origSquareID);
 		piece->show();
 		piece->setAttribute(Qt::WA_DeleteOnClose);
+
+		pieces.push_back(piece);
+
+		showAllPieces(pieces);
+
 
 		if (event->source() == this) {
 			event->setDropAction(Qt::MoveAction);
@@ -408,15 +451,15 @@ void Chess::dropEvent(QDropEvent *event)
 
 		QStringList eventText = event->mimeData()->text().split(QRegularExpression(QStringLiteral("\\s+")),
 			QString::SkipEmptyParts);
-		QPoint position = event->pos();
+		QPoint point = event->pos();
 
 		for (const QString &piece : eventText) {
 			QLabel *newLabel = new QLabel(piece, this);
-			newLabel->move(position);
+			newLabel->move(point);
 			newLabel->show();
 			newLabel->setAttribute(Qt::WA_DeleteOnClose);
 
-			position += QPoint(newLabel->width(), 0);
+			point += QPoint(newLabel->width(), 0);
 		}
 
 		event->acceptProposedAction();
@@ -437,7 +480,11 @@ void Chess::mousePressEvent(QMouseEvent *event)
 
 	QByteArray itemData;
 	QDataStream dataStream(&itemData, QIODevice::WriteOnly);
-	dataStream	<< piece->getPieceType() << piece->getCoordinate().rx() << piece->getCoordinate().ry() << QPoint(hotSpot);
+	dataStream	<< piece->getPieceType()
+				<< piece->getSquareID()
+				<< piece->getCoordinate().rx()
+				<< piece->getCoordinate().ry()
+				<< QPoint(hotSpot);
 
 	QMimeData *mimeData{ new QMimeData };
 	mimeData->setData(chessMimeType(), itemData);
