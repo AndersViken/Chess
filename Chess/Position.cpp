@@ -19,6 +19,16 @@ Position::~Position()
 {
 }
 
+int Position::getActiveColorInt()
+{
+	if (activeColor == 'w') {
+		return 0;
+	}
+	else {
+		return 1;
+	}
+}
+
 void Position::processFenString(QString text)
 {
 	QChar const space{ ' ' };
@@ -54,9 +64,9 @@ int Position::findIntFromString(QChar * &it, QString &text, const QChar &space)
 	std::copy(it, std::find(it, text.end(), space), back_inserter(qCharVector));
 	std::advance(it, qCharVector.size());
 	QString numberString{};
-	for (QChar c : qCharVector) {
-		numberString.append(c);
-	}
+	std::for_each(qCharVector.begin(), qCharVector.end(), [&numberString](QChar ch) {
+		numberString.append(ch);
+	});
 	return numberString.toInt();
 }
 
@@ -65,14 +75,14 @@ void Position::findEnPassantSquareValue(QChar * &it, QString &text, QChar const 
 	std::vector<QChar> enPassantVector;
 	std::copy(it, std::find(it, text.end(), space), back_inserter(enPassantVector));
 	std::advance(it, enPassantVector.size()+1);
-	for (auto c : enPassantVector) {
-		enPassantSquare.append(c);
-	}
+	std::for_each(enPassantVector.begin(), enPassantVector.end(), [&enPassantSquare = enPassantSquare](auto ch) {
+		enPassantSquare.append(ch);
+	});
 }
 
 void Position::findColorValue(QChar * &it)
 {
-	activeColor = *(std::next(it));
+	activeColor = *(it);
 	std::advance(it, 3);
 }
 
@@ -156,7 +166,9 @@ QString Position::createFenStringFromPiecePlacement()
 			pushBackNumberInFenString(emptySquares, pieceFenString);
 		}
 
-		pushBackLetterInFenString(piece, pieceFenString);
+		if (piece != empty) {
+			pushBackLetterInFenString(piece, pieceFenString);
+		}
 
 		if (index++ % 8 == 0) {
 			if (emptySquares > 0) {

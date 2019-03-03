@@ -14,6 +14,8 @@ public:
 	int		getColor();
 	QString	getImagePath();
 	int		getImageSize();
+	void	makeActive();
+	void	makeDisabled();
 
 private:
 	QPoint coordinate{};

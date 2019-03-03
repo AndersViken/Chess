@@ -44,7 +44,10 @@ public:
 	~Position();
 
 	QString getFenString() { return fenString; };
+	void setFenString(QString t_fenString) { fenString = t_fenString; };
 	QChar getActiveColor() { return activeColor; };
+	int getActiveColorInt();
+	void setActiveColor(QChar t_activeColor) { activeColor = t_activeColor; };
 	bool canWhiteCastleKingside() { return whiteCanCastleKingside; };
 	bool canWhiteCastleQueenside() { return whiteCanCastleQueenside; };
 	bool canBlackCastleKingside() { return blackCanCastleKingside; };

@@ -37,10 +37,9 @@ Chess::Chess(QWidget *parent)
 	//initialPosition = positioncontroller.generateNewPosition(move4, initialPosition);
 
 	generateBoard(position);
+	generateFenStringLabel();
 
 	//Leaf leaf{ m,initialPosition };
-
-
 
 
 }
@@ -122,44 +121,42 @@ Square* Chess::generateSquare(int const color, int const rowNumber, int const co
 
 void Chess::hideBoard()
 {
-	for (auto &row : board) {
-		for (auto &square : row) {
+	std::for_each(board.begin(), board.end(), [](auto &row) {
+		std::for_each(row.begin(), row.end(), [](auto &square) {
 			square->hide();
-		}
-	}
-
-	for (auto &coordinate : labelCoordinates) {
+		});
+	});
+	std::for_each(labelCoordinates.begin(), labelCoordinates.end(),[](auto &coordinate) {
 		coordinate->hide();
-	}
+	});
 
 	boarder->hide();
 }
 
 void Chess::showBoard()
 {
-	for (auto &row : board) {
-		for (auto &square : row) {
+	std::for_each(board.begin(), board.end(), [](auto &row) {
+		std::for_each(row.begin(), row.end(), [](auto &square) {
 			square->show();
-		}
-	}
-
-	for (auto &coordinate : labelCoordinates) {
+		});
+	});
+	std::for_each(labelCoordinates.begin(), labelCoordinates.end(), [](auto &coordinate) {
 		coordinate->show();
-	}
+	});
 
 	boarder->show();
 }
 
 void Chess::printPieceInfo(std::vector<Piece*> &pieceVec)
 {
-	for (auto &piece : pieceVec) {
+	std::for_each(pieceVec.begin(), pieceVec.end(), [](auto &piece) {
 		qDebug() << "Piece: " <<
 			" type: " << piece->getPieceType() <<
 			" color: " << piece->getColor() <<
 			" xPos: " << piece->getCoordinate().rx() <<
 			" yPos: " << piece->getCoordinate().ry() <<
 			" path: " << piece->getImagePath();
-	}
+	});
 }
 
 int Chess::getClosestNumber(int const num, std::vector<int> const &numbers)
@@ -274,9 +271,17 @@ Piece* Chess::generatePiece(int const pieceType, QPoint coordinate, int squareID
 
 void Chess::removePiece(std::vector<Piece*>& pieceVec, int squareID)
 {
-	pieceVec.erase(std::remove_if(pieceVec.begin(), pieceVec.end(),
-		[&squareID](Piece *piece) {piece->hide(); return (piece->getSquareID() == squareID); }),
-		pieceVec.end());
+	auto it = std::find_if(pieceVec.begin(), pieceVec.end(),
+		[&squareID](Piece *piece) {return (piece->getSquareID() == squareID); });
+	if (it != pieceVec.end())
+	{
+		if (*it)
+		{
+			Piece* pieceToErase = static_cast<Piece*>(*it);
+			pieceToErase->hide();
+			pieceVec.erase(it);
+		}
+	}
 }
 
 void Chess::showAllPieces(std::vector<Piece*>& pieceVec)
@@ -294,6 +299,19 @@ void Chess::generateBoarder()
 	boarder->setGeometry(QRect(boarderStartLeft, boarderStartTop, boarderSize, boarderSize));
 	boarder->setStyleSheet("QLabel { background-color: rgb(60, 60, 60); }");
 	boarder->show();
+}
+
+void Chess::generateFenStringLabel()
+{
+	fenStringLabel = new QLabel(this);
+	int const startX{ boardStartX + boardWidth/6 };
+	int const startY{ boardStartY + boardHeigth };
+	int const labelWidth{ boardWidth - boardWidth / 6 };
+	int const labelHeight{ 30 };
+	fenStringLabel->setGeometry(QRect(startX, startY, labelWidth, labelHeight));
+	//fenStringLabel->setStyleSheet("QLabel { background-color: rgb(60, 60, 60); }");
+	updateFenString();
+	fenStringLabel->show();
 }
 
 std::vector<QLabel*> Chess::generateLabelCoordinates()
@@ -361,6 +379,32 @@ QString Chess::getPositionFromDialog(QInputDialog & dialog)
 }
 
 
+void Chess::updateFenString()
+{
+	fenStringLabel->setText("FEN:   "+position.getFenString());
+}
+
+void Chess::updateBoard()
+{
+	//showAllPieces(pieces);
+	updateFenString();
+	updateColorRules();
+}
+
+void Chess::updateColorRules()
+{
+
+	int activeColor = position.getActiveColorInt();
+	std::for_each(pieces.begin(), pieces.end(), [&activeColor](Piece*& piece) {
+		if (piece && piece->getSquareID() >= 0 && piece->getColor() == activeColor) {
+			piece->makeActive();
+		}
+		else if (piece && piece->getSquareID() >= 0) {
+			piece->makeDisabled();
+		}
+	});
+}
+
 void Chess::dragEnterEvent(QDragEnterEvent *event)
 {
 	if (event->mimeData()->hasFormat(chessMimeType())) {
@@ -419,24 +463,28 @@ void Chess::dropEvent(QDropEvent *event)
 		Move move{ origSquareID, newSquareID, "MoveStringNA" };
 		Position origPosition = position;
 		position = positioncontroller.generateNewPosition(move, position);
+		
 		Piece *piece;
 		bool legalMove = positioncontroller.validateMove(position, origPosition, move);
 		if (legalMove)
 		{
 			piece = generatePiece(pieceType, newPoint, newSquareID);
 			removePiece(pieces, newSquareID);
+			removePiece(pieces, origSquareID);
+			pieces.push_back(piece);
+			updateBoard();
 		}
 		else
 		{
 			piece = generatePiece(pieceType, origPoint, origSquareID);
+			position = origPosition;
 		}
-		removePiece(pieces, origSquareID);
+			
 		piece->show();
 		piece->setAttribute(Qt::WA_DeleteOnClose);
+	
+		
 
-		pieces.push_back(piece);
-
-		showAllPieces(pieces);
 
 
 		if (event->source() == this) {
@@ -453,14 +501,14 @@ void Chess::dropEvent(QDropEvent *event)
 			QString::SkipEmptyParts);
 		QPoint point = event->pos();
 
-		for (const QString &piece : eventText) {
+		std::for_each(eventText.begin(), eventText.end(), [this,&point](QString &piece) {
 			QLabel *newLabel = new QLabel(piece, this);
 			newLabel->move(point);
 			newLabel->show();
 			newLabel->setAttribute(Qt::WA_DeleteOnClose);
 
 			point += QPoint(newLabel->width(), 0);
-		}
+		});
 
 		event->acceptProposedAction();
 	}

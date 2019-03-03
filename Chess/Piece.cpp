@@ -53,4 +53,14 @@ int Piece::getImageSize()
 	return imageSize;
 }
 
+void Piece::makeActive()
+{
+	setTabletTracking(true);
+}
+
+void Piece::makeDisabled()
+{
+	setTabletTracking(false);
+}
+
 
