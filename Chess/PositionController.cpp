@@ -14,13 +14,27 @@ PositionController::~PositionController()
 
 Position PositionController::generateNewPosition(Move & mov, Position & oldPos)
 {
-	//QString fenString = oldPos.getFenString();
-	//QChar const pieceToMove = getFenCharFromSquareID(oldPos.getFenString(), mov.fromSquareId);
-	//fenString.replace(mov.toSquareId,pieceToMove);
 	Position newPosition{ oldPos.getFenString() };
 	newPosition.insertNewMove(mov);
-
+	updateFenStringForNewPosition(newPosition);
 	return newPosition;
+}
+
+void PositionController::updateFenStringForNewPosition(Position &position)
+{
+	QString fenString = position.getFenString();
+	QChar space = ' ';
+	QChar whiteColor = 'w';
+	QChar blackColor = 'b';
+	auto it = std::find(fenString.begin(), fenString.end(), space);
+	std::advance(it, 1);
+	if (it != fenString.end()) {
+		QChar activeColor = *(it);
+		activeColor = (activeColor == whiteColor) ? blackColor : whiteColor;
+		*(it) = activeColor;
+		position.setActiveColor(activeColor);
+		position.setFenString(fenString);
+	}
 }
 
 bool PositionController::validateMove(Position newPosition, Position oldPosition, Move move)

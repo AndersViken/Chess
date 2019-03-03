@@ -38,15 +38,19 @@ private:
 	Position position = {};
 	PositionController positioncontroller = {};
 	QLabel *boarder;
-
+	QLabel* fenStringLabel;
 	void showBoard();
 	void hideBoard();
+	void updateFenString();
+	void updateBoard();
+	void updateColorRules();
 	Piece* generatePiece(int const pieceType, QPoint coordinate, int squareID);
 	std::vector<Piece*> generatePieces(Position &position);
 	void removePiece(std::vector<Piece*> &pieceVec, int squareID);
 	void showAllPieces(std::vector<Piece*>& pieceVec);
 	void generateBoard(Position &position);
 	void generateBoarder();
+	void generateFenStringLabel();
 	Square* generateSquare(int const color, int const rowNumber, int const colNumber);
 	std::vector<QPoint> Chess::generateInitialCoordinates();
 	std::vector<QLabel*> generateLabelCoordinates();
