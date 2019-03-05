@@ -46,6 +46,7 @@ public:
 	QString getFenString() { return fenString; };
 	void setFenString(QString t_fenString) { fenString = t_fenString; };
 	QChar getActiveColor() { return activeColor; };
+	void updateActiveColor();
 	int getActiveColorInt();
 	void setActiveColor(QChar t_activeColor) { activeColor = t_activeColor; };
 	bool canWhiteCastleKingside() { return whiteCanCastleKingside; };
@@ -55,8 +56,15 @@ public:
 	QString getEnPassantSquare() { return enPassantSquare; };
 	int getHalfMoveClock() { return halfMoveClock; };
 	int getFullMove() { return fullMove; };
+	void setFullMove(int t_fullMove) { fullMove = t_fullMove; };
 	std::vector<int> getPiecePlacement() { return piecePlacement; };
 	void insertNewMove(Move const &move);
+	//rnbqkbnr / pppppppp / 8 / 8 / 8 / 8 / PPPPPPPP / RNBQKBNR w KQkq - 0 1
+	QString createPiecePlacementFenString();
+	QString createCastleFenString();
+	QString createEnPassantFenString();
+	QString createHalfMoveFenString();
+	QString createFullMoveFenString();
 
 private:
 	void processFenString(QString const text);
@@ -72,7 +80,6 @@ private:
 	void pushBackPieceInSquare(QChar const pieceChar);
 	void pushBackLetterInFenString(int pieceNumber, QString &inputString);
 	void pushBackNumberInFenString(int &number, QString &inputString);
-	QString createFenStringFromPiecePlacement();
 
 	QString fenString;
 	std::vector<int> piecePlacement;

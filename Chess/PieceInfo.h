@@ -9,4 +9,6 @@ enum {
 };
 enum { white = 0, black = 1 };
 
+enum {whiteColorChar = 'w', blackColorChar='b' };
+
 

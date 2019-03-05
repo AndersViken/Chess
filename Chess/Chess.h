@@ -39,6 +39,10 @@ private:
 	PositionController positioncontroller = {};
 	QLabel *boarder;
 	QLabel* fenStringLabel;
+	QTableView* moveTableView;
+	QTableView* analysisTableView;
+	QStandardItemModel* moveTableModel;
+	QStandardItemModel* analysisTableModel;
 	void showBoard();
 	void hideBoard();
 	void updateFenString();
@@ -51,6 +55,9 @@ private:
 	void generateBoard(Position &position);
 	void generateBoarder();
 	void generateFenStringLabel();
+	void generateMoveTable();
+	void generateAnalysisTable();
+	void insertMoveInMoveTable(QStandardItemModel *& model, int halfMove, QString move, int activeColor);
 	Square* generateSquare(int const color, int const rowNumber, int const colNumber);
 	std::vector<QPoint> Chess::generateInitialCoordinates();
 	std::vector<QLabel*> generateLabelCoordinates();

@@ -12,29 +12,42 @@ PositionController::~PositionController()
 {
 }
 
-Position PositionController::generateNewPosition(Move & mov, Position & oldPos)
+Position PositionController::generateNewPosition(Move & mov, Position & oldPosition)
 {
-	Position newPosition{ oldPos.getFenString() };
+	Position newPosition{ oldPosition.getFenString() };
 	newPosition.insertNewMove(mov);
-	updateFenStringForNewPosition(newPosition);
+
+	if (oldPosition.getActiveColorInt() == black) {
+		newPosition.setFullMove(oldPosition.getFullMove() + 1);
+	}
+	newPosition.updateActiveColor();
+
+	// need to update all position parameters here.
+	// - waiting with castle
+	// - waiting with en passant
+	// - waiting with half move
+
+	QChar space = ' ';
+	QString fenString = newPosition.createPiecePlacementFenString();
+	fenString.append(space);
+	fenString.append(newPosition.getActiveColor());
+	fenString.append(space);
+	fenString.append(newPosition.createCastleFenString());
+	fenString.append(space);
+	fenString.append(newPosition.getEnPassantSquare());
+	fenString.append(space);
+	fenString.append(newPosition.createHalfMoveFenString());
+	fenString.append(space);
+	fenString.append(newPosition.createFullMoveFenString());
+
+	newPosition.setFenString(fenString);
+
+
 	return newPosition;
 }
 
 void PositionController::updateFenStringForNewPosition(Position &position)
 {
-	QString fenString = position.getFenString();
-	QChar space = ' ';
-	QChar whiteColor = 'w';
-	QChar blackColor = 'b';
-	auto it = std::find(fenString.begin(), fenString.end(), space);
-	std::advance(it, 1);
-	if (it != fenString.end()) {
-		QChar activeColor = *(it);
-		activeColor = (activeColor == whiteColor) ? blackColor : whiteColor;
-		*(it) = activeColor;
-		position.setActiveColor(activeColor);
-		position.setFenString(fenString);
-	}
 }
 
 bool PositionController::validateMove(Position newPosition, Position oldPosition, Move move)

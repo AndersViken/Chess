@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <iterator>
 #include <stdio.h>
+#include <QTableView>
+#include <QHeaderView>
 Chess::Chess(QWidget *parent)
 	: QMainWindow(parent)
 {
@@ -38,6 +40,10 @@ Chess::Chess(QWidget *parent)
 
 	generateBoard(position);
 	generateFenStringLabel();
+	generateAnalysisTable();
+	generateMoveTable();
+
+	
 
 	//Leaf leaf{ m,initialPosition };
 
@@ -314,6 +320,64 @@ void Chess::generateFenStringLabel()
 	fenStringLabel->show();
 }
 
+void Chess::generateMoveTable()
+{
+	int const rows = 0;
+	int const cols = 2;
+	moveTableModel = new QStandardItemModel(rows, cols, this);
+
+	// Generate data
+	for (int row = 0; row < 4; row++)
+	{
+		for (int col = 0; col < 2; col++)
+		{
+			QModelIndex index = moveTableModel->index(row, col, QModelIndex());
+			// 0 for all data
+			moveTableModel->setData(index, 0);
+		}
+	}
+
+	moveTableView = new QTableView(this);
+	int const startX{ boardStartX + boardWidth + moveTableOffsetFromBoardX };
+	int const startY{ boardStartY + moveTableOffsetFromBoardY };
+	moveTableView->setGeometry(QRect(startX, startY, moveTableWidth, moveTableHeight));
+	moveTableView->horizontalHeader()->hide();
+
+	moveTableView->setModel(moveTableModel);
+}
+
+void Chess::generateAnalysisTable()
+{
+	analysisTableModel = new QStandardItemModel(this);
+
+	analysisTableView = new QTableView(this);
+	int const startX{ boardStartX + boardWidth + analysisTableOffsetFromBoardX };
+	int const startY{ boardStartY + analysisTableOffsetFromBoardY };
+	analysisTableView->setGeometry(QRect(startX, startY, analysisTableWidth, analysisTableHeight));
+	analysisTableView->horizontalHeader()->hide();
+
+	analysisTableView->setModel(analysisTableModel);
+}
+
+void Chess::insertMoveInMoveTable(QStandardItemModel *& model, int fullMove, QString move, int activeColor)
+{
+	if (activeColor == white) {
+		QStandardItem* itm = new QStandardItem(QString(""));
+		model->appendRow(itm);
+	}
+	int const row{ (fullMove -1) }; // -1 because fullmove starts at one, but model starts at 0
+	int const col{ activeColor };
+	qDebug() << "fullMove=" << fullMove << " row=" << row << " col=" << col;
+
+
+	QModelIndex index = model->index(row, col, QModelIndex());
+	// 0 for all data
+	model->setData(index, move);
+	
+}
+
+
+
 std::vector<QLabel*> Chess::generateLabelCoordinates()
 {
 	std::vector<QLabel*> coordinates { };
@@ -462,7 +526,10 @@ void Chess::dropEvent(QDropEvent *event)
 
 		Move move{ origSquareID, newSquareID, "MoveStringNA" };
 		Position origPosition = position;
+	
+		qDebug() << position.getFullMove();
 		position = positioncontroller.generateNewPosition(move, position);
+		qDebug() << position.getFullMove();
 		
 		Piece *piece;
 		bool legalMove = positioncontroller.validateMove(position, origPosition, move);
@@ -472,6 +539,11 @@ void Chess::dropEvent(QDropEvent *event)
 			removePiece(pieces, newSquareID);
 			removePiece(pieces, origSquareID);
 			pieces.push_back(piece);
+			QString moveString{};
+			moveString.append(QString::number(origSquareID));
+			moveString.append(" - ");
+			moveString.append(QString::number(newSquareID));
+			insertMoveInMoveTable(moveTableModel, origPosition.getFullMove(), moveString, origPosition.getActiveColorInt());
 			updateBoard();
 		}
 		else
@@ -545,7 +617,9 @@ void Chess::mousePressEvent(QMouseEvent *event)
 	piece->hide();
 
 	if (drag->exec(Qt::MoveAction | Qt::CopyAction, Qt::CopyAction) == Qt::MoveAction)
-		piece->close();
+		//piece->close();
+	{
+	}
 	else
 		piece->show();
 	
