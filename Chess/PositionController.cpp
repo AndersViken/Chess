@@ -1,6 +1,7 @@
 #include "PositionController.h"
 #include "PieceInfo.h"
 #include "qchar.h"
+#include <qdebug.h>
 
 
 PositionController::PositionController()
@@ -26,6 +27,8 @@ Position PositionController::generateNewPosition(Move & mov, Position & oldPosit
 	// - waiting with castle
 	// - waiting with en passant
 	// - waiting with half move
+
+	qDebug() << " new position. fullmove=" << newPosition.getFullMove();
 
 	QChar space = ' ';
 	QString fenString = newPosition.createPiecePlacementFenString();

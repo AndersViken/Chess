@@ -24,10 +24,10 @@ int const analysisTableOffsetFromBoardY{ -coordinateOffsetBoarder };
 int const analysisTableWidth{ 300 };
 int const analysisTableHeight{ 100 };
 
-int const moveTableOffsetFromBoardX	{ 10 };
+int const moveTableOffsetFromBoardX	{ analysisTableOffsetFromBoardX };
 int const moveTableOffsetFromAnalysisBoard{ -5 };
 int const moveTableOffsetFromBoardY	{ analysisTableOffsetFromBoardY + analysisTableHeight + moveTableOffsetFromAnalysisBoard };
-int const moveTableWidth			{ 300 };
+int const moveTableWidth			{ analysisTableWidth };
 int const moveTableHeight			{ 2*coordinateOffsetBoarder - analysisTableHeight + boardHeigth - moveTableOffsetFromAnalysisBoard};
 
 int const minWinSizeX{ boardStartX + boardWidth + moveTableOffsetFromBoardX + moveTableWidth + boardStartX};

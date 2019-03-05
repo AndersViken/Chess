@@ -58,9 +58,12 @@ void Position::findFullMove(QChar * &it, QString &text)
 	std::vector<QChar> qCharVector;
 	std::copy(it, text.end(), back_inserter(qCharVector));
 	std::advance(it, qCharVector.size());
-	fullMove = (int)(qCharVector.at(0).digitValue()); // TODO: need to handle all digits.
-	if (fullMove == -1)
-		qDebug() << "Position::getIntFromString: error, no int found in string. " << qCharVector.at(0) << " size: " << qCharVector.size();
+	qCharVector.push_back('\0');
+	//fullMove = (int)(qCharVector.at(0).digitValue()); // TODO: need to handle all digits.
+
+	QString s(&qCharVector[0]);
+	fullMove = s.toInt();
+
 }
 
 int Position::findIntFromString(QChar * &it, QString &text, const QChar &space)

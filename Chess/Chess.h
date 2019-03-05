@@ -70,5 +70,9 @@ private:
 	void setLabelBackgroundColor(const int &color, QLabel * label);
 	void setLabelColor(const int &color, QLabel * label);
 	QString Chess::getPositionFromDialog(QInputDialog & dialog);
+	void handleLegalMove(Piece * &piece, int pieceType, const QPoint &newPoint, int newSquareID, int origSquareID, Position &origPosition);
+	void getMoveString(QString & moveString, int const & origSquareID, int const & newSquareID, int const pieceType);
+	void getSquareString(const int & origSquareID, QString &origSquareString);
+	QChar getPieceChar(int const pieceType);
 
 };
