@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <iterator>
 #include <stdio.h>
+#include <QTableView>
+#include <QHeaderView>
 Chess::Chess(QWidget *parent)
 	: QMainWindow(parent)
 {
@@ -38,11 +40,16 @@ Chess::Chess(QWidget *parent)
 
 	generateBoard(position);
 	generateFenStringLabel();
+	generateAnalysisTable();
+	generateMoveTable();
+
+	
 
 	//Leaf leaf{ m,initialPosition };
 
 
 }
+
 
 std::map<int, int> const pieceColors = {
 	{ whitePawn,    white },
@@ -73,6 +80,19 @@ std::map<int, QString> imagePaths = {
 	{ blackBishop,  imageDir + "blackBishop"   },
 	{ blackQueen,   imageDir + "blackQueen"    },
 	{ blackKing,    imageDir + "blackKing"     }
+};
+
+std::map<int, QChar> pieceChars = {
+	{ whiteRook,    'R' },
+	{ whiteKnight,  'N' },
+	{ whiteBishop,  'B'	},
+	{ whiteQueen,   'Q' },
+	{ whiteKing,    'K' },
+	{ blackRook,    'R' },
+	{ blackKnight,  'N' },
+	{ blackBishop,  'B' },
+	{ blackQueen,   'Q' },
+	{ blackKing,    'K' }
 };
 
 //std::map<int, QPoint> squareIdToCoordinate = {
@@ -314,6 +334,53 @@ void Chess::generateFenStringLabel()
 	fenStringLabel->show();
 }
 
+void Chess::generateMoveTable()
+{
+	int const rows = 0;
+	int const cols = 2;
+	moveTableModel = new QStandardItemModel(rows, cols, this);
+
+	moveTableView = new QTableView(this);
+	int const startX{ boardStartX + boardWidth + moveTableOffsetFromBoardX };
+	int const startY{ boardStartY + moveTableOffsetFromBoardY };
+	moveTableView->setGeometry(QRect(startX, startY, moveTableWidth, moveTableHeight));
+	moveTableView->horizontalHeader()->hide();
+
+	moveTableView->setModel(moveTableModel);
+}
+
+void Chess::generateAnalysisTable()
+{
+	analysisTableModel = new QStandardItemModel(this);
+
+	analysisTableView = new QTableView(this);
+	int const startX{ boardStartX + boardWidth + analysisTableOffsetFromBoardX };
+	int const startY{ boardStartY + analysisTableOffsetFromBoardY };
+	analysisTableView->setGeometry(QRect(startX, startY, analysisTableWidth, analysisTableHeight));
+	analysisTableView->horizontalHeader()->hide();
+
+	analysisTableView->setModel(analysisTableModel);
+}
+
+void Chess::insertMoveInMoveTable(QStandardItemModel *& model, int fullMove, QString move, int activeColor)
+{
+	if (activeColor == white) {
+		QStandardItem* itm = new QStandardItem(QString(""));
+		model->appendRow(itm);
+	}
+	int const row{ (fullMove -1) }; // -1 because fullmove starts at one, but model starts at 0
+	int const col{ activeColor };
+	qDebug() << "fullMove=" << fullMove << " row=" << row << " col=" << col;
+
+
+	QModelIndex index = model->index(row, col, QModelIndex());
+	// 0 for all data
+	model->setData(index, move);
+	
+}
+
+
+
 std::vector<QLabel*> Chess::generateLabelCoordinates()
 {
 	std::vector<QLabel*> coordinates { };
@@ -462,17 +529,16 @@ void Chess::dropEvent(QDropEvent *event)
 
 		Move move{ origSquareID, newSquareID, "MoveStringNA" };
 		Position origPosition = position;
+	
+		qDebug() << position.getFullMove();
 		position = positioncontroller.generateNewPosition(move, position);
+		qDebug() << position.getFullMove();
 		
 		Piece *piece;
 		bool legalMove = positioncontroller.validateMove(position, origPosition, move);
 		if (legalMove)
 		{
-			piece = generatePiece(pieceType, newPoint, newSquareID);
-			removePiece(pieces, newSquareID);
-			removePiece(pieces, origSquareID);
-			pieces.push_back(piece);
-			updateBoard();
+			handleLegalMove(piece, pieceType, newPoint, newSquareID, origSquareID, origPosition);
 		}
 		else
 		{
@@ -517,6 +583,52 @@ void Chess::dropEvent(QDropEvent *event)
 	}
 }
 
+void Chess::handleLegalMove(Piece * &piece, int const pieceType, QPoint const &newPoint, int const newSquareID, int const origSquareID, Position &origPosition)
+{
+	piece = generatePiece(pieceType, newPoint, newSquareID);
+	removePiece(pieces, newSquareID);
+	removePiece(pieces, origSquareID);
+	pieces.push_back(piece);
+	QString moveString{};
+	getMoveString(moveString, origSquareID, newSquareID, pieceType);
+	insertMoveInMoveTable(moveTableModel, origPosition.getFullMove(), moveString, origPosition.getActiveColorInt());
+	updateBoard();
+}
+
+void Chess::getMoveString(QString &moveString, int const &origSquareID, int const &newSquareID, int const pieceType)
+{
+	QString origSquareString{};
+	QString newSquareString{};
+	getSquareString(origSquareID, origSquareString);
+	getSquareString(newSquareID, newSquareString);
+
+
+
+	moveString.append(getPieceChar(pieceType));
+	//moveString.append(origSquareString);
+	//moveString.append(" - ");
+	moveString.append(newSquareString);
+}
+
+void Chess::getSquareString(int const &squareID, QString &squareString)
+{
+	std::vector<QChar> boardLetters { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' };
+	int const origRow = squaresInARow - (squareID / squaresInARow);
+	QChar const origCol = boardLetters.at(squareID % squaresInARow);
+	squareString.append(origCol);
+	squareString.append(QString::number(origRow));
+}
+
+QChar Chess::getPieceChar(int const pieceType)
+{
+	QChar pieceChar{};
+	auto pieceCharSearch{ pieceChars.find(pieceType) };
+	if (pieceCharSearch != pieceChars.end()) {
+		pieceChar = pieceCharSearch->second;
+	}
+	return pieceChar;
+}
+
 void Chess::mousePressEvent(QMouseEvent *event)
 {
 	Piece *piece{ static_cast<Piece*>(childAt(event->pos())) };
@@ -545,7 +657,9 @@ void Chess::mousePressEvent(QMouseEvent *event)
 	piece->hide();
 
 	if (drag->exec(Qt::MoveAction | Qt::CopyAction, Qt::CopyAction) == Qt::MoveAction)
-		piece->close();
+		//piece->close();
+	{
+	}
 	else
 		piece->show();
 	

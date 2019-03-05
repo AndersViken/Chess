@@ -19,6 +19,11 @@ Position::~Position()
 {
 }
 
+void Position::updateActiveColor()
+{
+	activeColor = (activeColor == whiteColorChar) ? blackColorChar : whiteColorChar;
+}
+
 int Position::getActiveColorInt()
 {
 	if (activeColor == 'w') {
@@ -53,9 +58,12 @@ void Position::findFullMove(QChar * &it, QString &text)
 	std::vector<QChar> qCharVector;
 	std::copy(it, text.end(), back_inserter(qCharVector));
 	std::advance(it, qCharVector.size());
-	fullMove = (int)(qCharVector.at(0).digitValue()); // TODO: need to handle all digits.
-	if (fullMove == -1)
-		qDebug() << "Position::getIntFromString: error, no int found in string. " << qCharVector.at(0) << " size: " << qCharVector.size();
+	qCharVector.push_back('\0');
+	//fullMove = (int)(qCharVector.at(0).digitValue()); // TODO: need to handle all digits.
+
+	QString s(&qCharVector[0]);
+	fullMove = s.toInt();
+
 }
 
 int Position::findIntFromString(QChar * &it, QString &text, const QChar &space)
@@ -83,7 +91,7 @@ void Position::findEnPassantSquareValue(QChar * &it, QString &text, QChar const 
 void Position::findColorValue(QChar * &it)
 {
 	activeColor = *(it);
-	std::advance(it, 3);
+	std::advance(it, 2);
 }
 
 void Position::findCastleValues(QChar * &it, QString &text, const QChar &space)
@@ -150,7 +158,7 @@ void Position::pushBackNumberInFenString(int &number, QString &inputString)
 	number = 0;
 }
 
-QString Position::createFenStringFromPiecePlacement()
+QString Position::createPiecePlacementFenString()
 {
 	QString pieceFenString{};
 	int emptySquares{ 0 };
@@ -181,20 +189,63 @@ QString Position::createFenStringFromPiecePlacement()
 	
 	std::copy(pieceFenString.begin(), pieceFenString.end(), std::back_inserter(tempFenString));
 
-	auto it = fenString.begin();
-	QChar space{ ' ' };
+	//auto it = fenString.begin();
+	//QChar space{ ' ' };
 	 // first space is after piece letters
-	std::copy(std::find(it, fenString.end(), space), fenString.end(), std::back_inserter(tempFenString));
+	// copy new piece placement to fenString
+	//std::copy(std::find(it, fenString.end(), space), fenString.end(), std::back_inserter(tempFenString));
+
 
 	return tempFenString;
+}
+
+QString Position::createCastleFenString()
+{
+	QChar whiteCastleKingSide  = 'K';
+	QChar whiteCastleQueenSide = 'Q';
+	QChar blackCastleKingSide  = 'k';
+	QChar blackCastleQueenSide = 'q';
+	QChar noCastling = '-';
+	QString castleFenString{};
+	if (canWhiteCastleKingside()) {
+		castleFenString.append(whiteCastleKingSide);
+	}
+	if (canWhiteCastleQueenside()) {
+		castleFenString.append(whiteCastleQueenSide);
+	}
+	if (canBlackCastleKingside()) {
+		castleFenString.append(blackCastleKingSide);
+	}
+	if (canBlackCastleQueenside()) {
+		castleFenString.append(blackCastleQueenSide);
+	}
+	if (std::size(castleFenString) == 0) {
+		castleFenString.append(noCastling);
+	}
+	return castleFenString;
+}
+
+QString Position::createEnPassantFenString()
+{
+	//TODO: write this function
+	QChar noEnPassant = '-';
+	return noEnPassant;
+}
+
+QString Position::createHalfMoveFenString()
+{
+	return QString::number(halfMoveClock);
+}
+
+QString Position::createFullMoveFenString()
+{
+	return QString::number(fullMove);
 }
 
 void Position::insertNewMove(Move const &move)
 {
 	piecePlacement.at(move.toSquareId) = piecePlacement.at(move.fromSquareId);
 	piecePlacement.at(move.fromSquareId) = 0;
-
-	fenString = createFenStringFromPiecePlacement();
 }
 
 
