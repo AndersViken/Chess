@@ -535,7 +535,7 @@ void Chess::dropEvent(QDropEvent *event)
 		qDebug() << position.getFullMove();
 		
 		Piece *piece;
-		bool legalMove = positioncontroller.validateMove(position, origPosition, move);
+		bool legalMove = positioncontroller.validateMove(position, origPosition, move, pieceType);
 		if (legalMove)
 		{
 			handleLegalMove(piece, pieceType, newPoint, newSquareID, origSquareID, origPosition);

@@ -1,7 +1,6 @@
 #pragma once
 #include <qstring.h>
 #include <qlabel.h>
-#include <map>
 
 enum {
 	empty = 0, whitePawn, whiteRook, whiteKnight, whiteBishop, whiteQueen, whiteKing,
