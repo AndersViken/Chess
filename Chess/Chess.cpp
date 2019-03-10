@@ -533,10 +533,11 @@ void Chess::dropEvent(QDropEvent *event)
 		position = positioncontroller.generateNewPosition(move, position);
 		
 		Piece *piece;
-		bool legalMove = positioncontroller.validateMove(position, origPosition, move, pieceType);
+		std::vector<specialMove> specialMoves{};
+		bool legalMove = positioncontroller.validateMove(position, origPosition, move, pieceType, specialMoves);
 		if (legalMove)
 		{
-			handleLegalMove(piece, pieceType, newPoint, move, origPosition, position);
+			handleLegalMove(piece, pieceType, newPoint, move, origPosition, position, specialMoves);
 		}
 		else
 		{
@@ -581,8 +582,20 @@ void Chess::dropEvent(QDropEvent *event)
 	}
 }
 
-void Chess::handleLegalMove(Piece * &piece, int const pieceType, QPoint const &newPoint, Move const &move, Position &origPosition, Position &newPosition)
+void Chess::handleLegalMove(Piece * &piece, int const pieceType, QPoint const &newPoint, Move const &move,
+	Position &origPosition, Position &newPosition, std::vector<specialMove> &specialMoves)
 {
+	std::for_each(specialMoves.begin(), specialMoves.end(), [this](specialMove move) mutable {
+		removePiece(pieces, move.square);
+		if (move.pieceOnSquareAfterMove != empty) {
+			Piece *newRook = generatePiece(move.pieceOnSquareAfterMove, getPointFromSquareID(move.square), move.square);
+			pieces.push_back(newRook);
+			newRook->show();
+			newRook->setAttribute(Qt::WA_DeleteOnClose);
+		}
+	});
+
+	// TODO: handle castle here: move rook.
 	piece = generatePiece(pieceType, newPoint, move.toSquareId);
 	removePiece(pieces, move.toSquareId);
 	removePiece(pieces, move.fromSquareId);
