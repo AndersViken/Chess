@@ -12,6 +12,8 @@ int const boardWidth		{ squaresInARow *squarePixelSize };
 int const boardHeigth		{ boardWidth };
 int const boardStartX		{ 100 };
 int const boardStartY		{ 115 };
+int const whiteStartRow		{ 6 };
+int const blackStartRow		{ 1 };
 
 int const coordinateOffsetColTop{ squarePixelSize / 2 - squarePixelSize / 8 };
 int const coordinateOffsetColLeft{ squarePixelSize - squarePixelSize / 7 };

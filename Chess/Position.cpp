@@ -27,10 +27,10 @@ void Position::updateActiveColor()
 int Position::getActiveColorInt()
 {
 	if (activeColor == 'w') {
-		return 0;
+		return white;
 	}
 	else {
-		return 1;
+		return black;
 	}
 }
 

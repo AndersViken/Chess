@@ -1,5 +1,6 @@
 #include "PositionController.h"
 #include "PieceInfo.h"
+#include "GuiSetup.h"
 #include "qchar.h"
 #include <qdebug.h>
 
@@ -74,23 +75,51 @@ bool PositionController::validateMove(Position newPosition, Position oldPosition
 		return false;
 	}
 	// TODO: obviously needs more logic
-	if (pieceType == blackKnight || pieceType == whiteKnight) {
-		if (ValidateKnightMove(move) == false) {
-			return false;
-		}
-	}
 	if (pieceType == blackRook || pieceType == whiteRook) {
 		if (validateRookMove(move) == false) {
 			return false;
 		};
 	}
-	if (checkIfMovingToOwnColorPiece(oldPosition, move, newPosition) == false) {
+	if (pieceType == blackKnight || pieceType == whiteKnight) {
+		if (validateKnightMove(move) == false) {
+			return false;
+		}
+	}
+	if (pieceType == blackBishop || pieceType == whiteBishop) {
+		if (validateBishopMove(move) == false) {
+			return false;
+		}
+	}
+	if (pieceType == blackQueen || pieceType == whiteQueen) {
+		if (validateQueenMove(move) == false) {
+			return false;
+		}
+	}
+	if (pieceType == blackKing || pieceType == whiteKing) {
+		if (validateKingMove(move) == false) {
+			return false;
+		}
+	}
+	if (pieceType == blackPawn || pieceType == whitePawn) {
+		if (validatePawnMove(oldPosition, move, newPosition, pieceType) == false) {
+			return false;
+		}
+	}
+	if (checkIfMovingToOwnColorPiece(oldPosition, move, newPosition)) {
 		return false;
 	}
 	return true;
 }
 
-bool PositionController::validateRookMove(Move &move)
+bool PositionController::validateBishopMove(Move const &move)
+{
+	if (colsMoved(move) != rowsMoved(move)) {
+		return false;
+	}
+	return true;
+}
+
+bool PositionController::validateRookMove(Move const &move)
 {
 	if (colsMoved(move) > 0 && rowsMoved(move) > 0) {
 		return false;
@@ -98,7 +127,7 @@ bool PositionController::validateRookMove(Move &move)
 	return true;
 }
 
-bool PositionController::ValidateKnightMove(Move &move)
+bool PositionController::validateKnightMove(Move const &move)
 {
 	if (colsMoved(move) == 2) {
 		if (rowsMoved(move) != 1) {
@@ -116,27 +145,103 @@ bool PositionController::ValidateKnightMove(Move &move)
 	return true;
 }
 
-bool PositionController::checkIfMovingToOwnColorPiece(Position &oldPosition, Move &move, Position &newPosition)
+bool PositionController::validateQueenMove(Move const &move)
 {
-	// Check if trying to move to a square with piece of own color
-	int takenType = oldPosition.getPiecePlacement().at(move.toSquareId);
-	int activeType = newPosition.getPiecePlacement().at(move.toSquareId);
-	int takenColor{ getColorFromType(takenType) };
-	int activeColor{ getColorFromType(activeType) };
+	if (validateBishopMove(move) || validateRookMove(move)) {
+		return true;
+	}
+	return false;
+}
 
-	if (takenColor != 0 && takenColor == activeColor) {
+bool PositionController::validateKingMove(Move const &move)
+{
+	if ((colsMoved(move) > 1) || (rowsMoved(move) > 1)) {
 		return false;
 	}
 	return true;
 }
 
-int getColorFromType(int pieceType)
+
+
+bool PositionController::validatePawnMove(Position &oldPosition, Move const &move, Position &newPosition, int const piecetype)
 {
-	auto colorSearch{ colorFromType.find(pieceType) };
-	if (colorSearch != colorFromType.end()) {
-		return colorSearch->second;
+	int sign;
+	int startRow;
+	if (piecetype == whitePawn) {
+		sign = 1;
+		startRow = whiteStartRow;
 	}
-	return{};
+	else {
+		sign = -1;
+		startRow = blackStartRow;
+	}
+
+	int const numberOfColsMoved{ colsMoved(move) };
+	int const numberOfRowsMoved{ sign * rowsMovedWithSign(move) };
+
+	bool movedFromStartRow{ false };
+	if (move.fromSquareId / squaresInARow == startRow) {
+		movedFromStartRow = true;
+	}
+	if (movedFromStartRow) {
+		if ((numberOfRowsMoved < 1) || (numberOfRowsMoved > 2)) {
+			return false;
+		}
+	}
+	else if (numberOfRowsMoved !=  1) {
+		return false;
+	}
+
+	if (numberOfColsMoved > 1) {
+		return false;
+	}
+	else if (numberOfColsMoved == 1) {
+		if (checkIfMovingToOppositeColorPiece(oldPosition, move, newPosition) == false) {
+			return false;
+		}
+	}
+	else if (numberOfColsMoved == 0) {
+		if (checkIfMovingToPiece(oldPosition, move) == true) {
+			return false;
+		}
+	}
+	
+	return true;
+}
+
+
+
+bool PositionController::checkIfMovingToOwnColorPiece(Position &oldPosition, Move const &move, Position &newPosition)
+{
+	// Check if trying to move to a square with piece of own color
+	int const colorNotFound{ -1 };
+	int const takenColor{  getColorFromType(oldPosition.getPiecePlacement().at(move.toSquareId),colorNotFound) };
+	int const activeColor{ getColorFromType(newPosition.getPiecePlacement().at(move.toSquareId),colorNotFound) };
+	if (takenColor != colorNotFound && takenColor == activeColor) {
+		return true;
+	}
+	return false;
+}bool PositionController::checkIfMovingToOppositeColorPiece(Position &oldPosition, Move const &move, Position &newPosition)
+{
+	int const colorNotFound{ -1 };
+	// Check if trying to move to a square with piece of own color
+	int const takenColor{  getColorFromType(oldPosition.getPiecePlacement().at(move.toSquareId),colorNotFound) };
+	int const activeColor{ getColorFromType(newPosition.getPiecePlacement().at(move.toSquareId),colorNotFound) };
+	if (takenColor != colorNotFound && takenColor != activeColor) {
+		return true;
+	}
+	return false;
+}
+
+bool PositionController::checkIfMovingToPiece(Position & oldPosition, Move const & move)
+{
+	// Check if trying to move to a square with a piece
+	int const colorNotFound{ -1 };
+	int const takenColor{ getColorFromType(oldPosition.getPiecePlacement().at(move.toSquareId),colorNotFound) };
+	if (takenColor != colorNotFound) {
+		return true;
+	}
+	return false;
 }
 
 int PositionController::rowsMoved(Move move)
@@ -145,12 +250,27 @@ int PositionController::rowsMoved(Move move)
 	int const toRow = move.toSquareId / 8;
 	return std::abs(fromRow - toRow);
 }
+int PositionController::rowsMovedWithSign(Move move)
+{
+	int const fromRow = move.fromSquareId / 8;
+	int const toRow = move.toSquareId / 8;
+	return fromRow - toRow;
+}
 
 int PositionController::colsMoved(Move move)
 {
 	int const fromCol = move.fromSquareId % 8;
 	int const toCol = move.toSquareId % 8;
 	return std::abs(fromCol - toCol);
+}
+
+int PositionController::getColorFromType(int pieceType, int const returnValueIfNotFound)
+{
+	auto colorSearch{ colorFromType.find(pieceType) };
+	if (colorSearch != colorFromType.end()) {
+		return colorSearch->second;
+	}
+	return returnValueIfNotFound;
 }
 
 
