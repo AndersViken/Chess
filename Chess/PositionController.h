@@ -6,6 +6,7 @@ struct specialMove
 {
 	int square;
 	int pieceOnSquareAfterMove;
+	QString moveString;
 };
 
 class PositionController
@@ -26,7 +27,7 @@ public:
 	bool validateKnightMove(Move const &move);
 	bool validateQueenMove(Move const &move);
 	bool validateKingMove(Move const & move, Position &oldPosition, Position &newPosition, int pieceType, std::vector<specialMove> &specialMoves);
-	void moveRookWhenCastling(Position & newPosition, std::vector<specialMove>& specialMoves, int const rookOrigSquare, int const rookNewSquare, int const rookType);
+	void moveRookWhenCastling(Position & newPosition, std::vector<specialMove>& specialMoves, int const rookOrigSquare, int const rookNewSquare, int const rookType, QString castleString);
 	bool validatePawnMove(Position &oldPosition, Move const &move, Position &newPosition, int const piecetype);
 	bool checkIfMovingToOwnColorPiece(Position &oldPosition, Move const &move, Position &newPosition);
 	bool checkIfMovingToOppositeColorPiece(Position & oldPosition, Move const &move, Position &newPosition);

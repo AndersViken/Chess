@@ -29,6 +29,9 @@ std::map<int, int> colorFromType{
 	{ blackKing,  black }
 };
 
+QString kingsideCastleString = "0-0";
+QString queensideCastleString = "0-0-0";
+
 Position PositionController::generateNewPosition(Move & mov, Position & oldPosition)
 {
 	Position newPosition{ oldPosition.getFenString() };
@@ -163,14 +166,14 @@ bool PositionController::validateKingMove(Move const &move, Position &oldPositio
 			if (checkIfPiecesInSquares(oldPosition, { 5,6 })) {
 				return false;
 			}
-			moveRookWhenCastling(newPosition, specialMoves, 7, 5, blackRook);
+			moveRookWhenCastling(newPosition, specialMoves, 7, 5, blackRook, kingsideCastleString);
 			return true;
 		}
 		if (oldPosition.canBlackCastleQueenside() && colsMovedWithSign(move) == 2) {
 			if (checkIfPiecesInSquares(oldPosition, { 1,2,3 })) {
 				return false;
 			}
-			moveRookWhenCastling(newPosition, specialMoves, 0, 3, blackRook);
+			moveRookWhenCastling(newPosition, specialMoves, 0, 3, blackRook, queensideCastleString);
 			return true;
 		}
 	}
@@ -179,14 +182,14 @@ bool PositionController::validateKingMove(Move const &move, Position &oldPositio
 			if (checkIfPiecesInSquares(oldPosition, { 61,62 })) {
 				return false;
 			}
-			moveRookWhenCastling(newPosition, specialMoves, 63, 61, whiteRook);
+			moveRookWhenCastling(newPosition, specialMoves, 63, 61, whiteRook, kingsideCastleString);
 			return true;
 		}
 		if (oldPosition.canWhiteCastleQueenside() && colsMovedWithSign(move) == 2) {
 			if (checkIfPiecesInSquares(oldPosition, { 57,58,59 })) {
 				return false;
 			}
-			moveRookWhenCastling(newPosition, specialMoves, 56, 59, whiteRook);
+			moveRookWhenCastling(newPosition, specialMoves, 56, 59, whiteRook, queensideCastleString);
 			return true;
 		}
 	}
@@ -198,11 +201,11 @@ bool PositionController::validateKingMove(Move const &move, Position &oldPositio
 }
 
 void PositionController::moveRookWhenCastling(Position &newPosition, std::vector<specialMove> &specialMoves,
-	int const rookOrigSquare, int const rookNewSquare, int const rookType)
+	int const rookOrigSquare, int const rookNewSquare, int const rookType, QString castleString)
 {
 	newPosition.insertNewMove({ rookOrigSquare,rookNewSquare,"" });
-	specialMoves.push_back({ rookOrigSquare,empty });
-	specialMoves.push_back({ rookNewSquare,rookType });
+	specialMoves.push_back({ rookOrigSquare,empty,castleString });
+	specialMoves.push_back({ rookNewSquare,rookType,castleString });
 	updateFenString(newPosition);
 }
 
