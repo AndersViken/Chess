@@ -29,6 +29,9 @@ std::map<int, int> colorFromType{
 	{ blackKing,  black }
 };
 
+QString kingsideCastleString = "0-0";
+QString queensideCastleString = "0-0-0";
+
 Position PositionController::generateNewPosition(Move & mov, Position & oldPosition)
 {
 	Position newPosition{ oldPosition.getFenString() };
@@ -46,35 +49,38 @@ Position PositionController::generateNewPosition(Move & mov, Position & oldPosit
 
 	qDebug() << " new position. fullmove=" << newPosition.getFullMove();
 
-	QChar space = ' ';
-	QString fenString = newPosition.createPiecePlacementFenString();
-	fenString.append(space);
-	fenString.append(newPosition.getActiveColor());
-	fenString.append(space);
-	fenString.append(newPosition.createCastleFenString());
-	fenString.append(space);
-	fenString.append(newPosition.getEnPassantSquare());
-	fenString.append(space);
-	fenString.append(newPosition.createHalfMoveFenString());
-	fenString.append(space);
-	fenString.append(newPosition.createFullMoveFenString());
-
-	newPosition.setFenString(fenString);
-
+	updateFenString(newPosition);
 
 	return newPosition;
+}
+
+void PositionController::updateFenString(Position &position)
+{
+	QChar space = ' ';
+	QString fenString = position.createPiecePlacementFenString();
+	fenString.append(space);
+	fenString.append(position.getActiveColor());
+	fenString.append(space);
+	fenString.append(position.createCastleFenString());
+	fenString.append(space);
+	fenString.append(position.getEnPassantSquare());
+	fenString.append(space);
+	fenString.append(position.createHalfMoveFenString());
+	fenString.append(space);
+	fenString.append(position.createFullMoveFenString());
+
+	position.setFenString(fenString);
 }
 
 void PositionController::updateFenStringForNewPosition(Position &position)
 {
 }
 
-bool PositionController::validateMove(Position newPosition, Position oldPosition, Move move, int pieceType)
+bool PositionController::validateMove(Position &newPosition, Position &oldPosition, Move move, int pieceType, std::vector<specialMove> &specialMoves)
 {
 	if (move.fromSquareId == move.toSquareId) {
 		return false;
 	}
-	// TODO: obviously needs more logic
 	if (pieceType == blackRook || pieceType == whiteRook) {
 		if (validateRookMove(move) == false) {
 			return false;
@@ -96,7 +102,7 @@ bool PositionController::validateMove(Position newPosition, Position oldPosition
 		}
 	}
 	if (pieceType == blackKing || pieceType == whiteKing) {
-		if (validateKingMove(move) == false) {
+		if (validateKingMove(move, oldPosition, newPosition, pieceType, specialMoves) == false) {
 			return false;
 		}
 	}
@@ -153,12 +159,54 @@ bool PositionController::validateQueenMove(Move const &move)
 	return false;
 }
 
-bool PositionController::validateKingMove(Move const &move)
+bool PositionController::validateKingMove(Move const &move, Position &oldPosition, Position &newPosition, int pieceType, std::vector<specialMove> &specialMoves)
 {
+	if (pieceType == blackKing) {
+		if (oldPosition.canBlackCastleKingside() && colsMovedWithSign(move) == -2) {
+			if (checkIfPiecesInSquares(oldPosition, { 5,6 })) {
+				return false;
+			}
+			moveRookWhenCastling(newPosition, specialMoves, 7, 5, blackRook, kingsideCastleString);
+			return true;
+		}
+		if (oldPosition.canBlackCastleQueenside() && colsMovedWithSign(move) == 2) {
+			if (checkIfPiecesInSquares(oldPosition, { 1,2,3 })) {
+				return false;
+			}
+			moveRookWhenCastling(newPosition, specialMoves, 0, 3, blackRook, queensideCastleString);
+			return true;
+		}
+	}
+	if (pieceType == whiteKing) {
+		if (oldPosition.canWhiteCastleKingside() && colsMovedWithSign(move) == -2) {
+			if (checkIfPiecesInSquares(oldPosition, { 61,62 })) {
+				return false;
+			}
+			moveRookWhenCastling(newPosition, specialMoves, 63, 61, whiteRook, kingsideCastleString);
+			return true;
+		}
+		if (oldPosition.canWhiteCastleQueenside() && colsMovedWithSign(move) == 2) {
+			if (checkIfPiecesInSquares(oldPosition, { 57,58,59 })) {
+				return false;
+			}
+			moveRookWhenCastling(newPosition, specialMoves, 56, 59, whiteRook, queensideCastleString);
+			return true;
+		}
+	}
+
 	if ((colsMoved(move) > 1) || (rowsMoved(move) > 1)) {
 		return false;
 	}
 	return true;
+}
+
+void PositionController::moveRookWhenCastling(Position &newPosition, std::vector<specialMove> &specialMoves,
+	int const rookOrigSquare, int const rookNewSquare, int const rookType, QString castleString)
+{
+	newPosition.insertNewMove({ rookOrigSquare,rookNewSquare,"" });
+	specialMoves.push_back({ rookOrigSquare,empty,castleString });
+	specialMoves.push_back({ rookNewSquare,rookType,castleString });
+	updateFenString(newPosition);
 }
 
 
@@ -244,6 +292,20 @@ bool PositionController::checkIfMovingToPiece(Position & oldPosition, Move const
 	return false;
 }
 
+bool PositionController::checkIfPiecesInSquares(Position position, std::vector<int> const squares)
+{
+	int retVal = false;
+	std::for_each(squares.begin(), squares.end(), [position, &retVal](int square) mutable {
+		//int piece = position.getPiecePlacement().at(square);
+		if (position.getPiecePlacement().at(square) != empty) {
+			retVal = true;
+		}
+	});
+	return retVal;
+}
+
+
+
 int PositionController::rowsMoved(Move move)
 {
 	int const fromRow = move.fromSquareId / 8;
@@ -262,6 +324,13 @@ int PositionController::colsMoved(Move move)
 	int const fromCol = move.fromSquareId % 8;
 	int const toCol = move.toSquareId % 8;
 	return std::abs(fromCol - toCol);
+}
+
+int PositionController::colsMovedWithSign(Move move)
+{
+	int const fromCol = move.fromSquareId % 8;
+	int const toCol = move.toSquareId % 8;
+	return fromCol - toCol;
 }
 
 int PositionController::getColorFromType(int pieceType, int const returnValueIfNotFound)
