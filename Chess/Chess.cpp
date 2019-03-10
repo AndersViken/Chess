@@ -530,15 +530,13 @@ void Chess::dropEvent(QDropEvent *event)
 		Move move{ origSquareID, newSquareID, "MoveStringNA" };
 		Position origPosition = position;
 	
-		qDebug() << position.getFullMove();
 		position = positioncontroller.generateNewPosition(move, position);
-		qDebug() << position.getFullMove();
 		
 		Piece *piece;
 		bool legalMove = positioncontroller.validateMove(position, origPosition, move, pieceType);
 		if (legalMove)
 		{
-			handleLegalMove(piece, pieceType, newPoint, newSquareID, origSquareID, origPosition);
+			handleLegalMove(piece, pieceType, newPoint, move, origPosition, position);
 		}
 		else
 		{
@@ -583,30 +581,34 @@ void Chess::dropEvent(QDropEvent *event)
 	}
 }
 
-void Chess::handleLegalMove(Piece * &piece, int const pieceType, QPoint const &newPoint, int const newSquareID, int const origSquareID, Position &origPosition)
+void Chess::handleLegalMove(Piece * &piece, int const pieceType, QPoint const &newPoint, Move const &move, Position &origPosition, Position &newPosition)
 {
-	piece = generatePiece(pieceType, newPoint, newSquareID);
-	removePiece(pieces, newSquareID);
-	removePiece(pieces, origSquareID);
+	piece = generatePiece(pieceType, newPoint, move.toSquareId);
+	removePiece(pieces, move.toSquareId);
+	removePiece(pieces, move.fromSquareId);
 	pieces.push_back(piece);
 	QString moveString{};
-	getMoveString(moveString, origSquareID, newSquareID, pieceType);
+	getMoveString(origPosition, newPosition, moveString, move, pieceType);
 	insertMoveInMoveTable(moveTableModel, origPosition.getFullMove(), moveString, origPosition.getActiveColorInt());
 	updateBoard();
 }
 
-void Chess::getMoveString(QString &moveString, int const &origSquareID, int const &newSquareID, int const pieceType)
+void Chess::getMoveString(Position &origPosition, Position &newPosition, QString &moveString, Move const &move, int const pieceType)
 {
 	QString origSquareString{};
 	QString newSquareString{};
-	getSquareString(origSquareID, origSquareString);
-	getSquareString(newSquareID, newSquareString);
-
-
-
+	getSquareString(move.fromSquareId, origSquareString);
+	getSquareString(move.toSquareId, newSquareString);
+	
 	moveString.append(getPieceChar(pieceType));
-	//moveString.append(origSquareString);
-	//moveString.append(" - ");
+
+	if (positioncontroller.checkIfMovingToOppositeColorPiece(origPosition, move, newPosition)) {
+		if (pieceType == blackPawn || pieceType == whitePawn) {
+			moveString.append(origSquareString.at(0));
+		}
+		moveString.append('x');
+	}
+	
 	moveString.append(newSquareString);
 }
 
