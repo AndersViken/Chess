@@ -1,6 +1,7 @@
 #pragma once
 #include "Move.h"
 #include "Position.h"
+#include "Piece.h"
 
 struct specialMove
 {
@@ -19,7 +20,6 @@ public:
 
 	Position generateNewPosition(Move &mov, Position &oldPos);
 	void updateFenString(Position &position);
-	void updateFenStringForNewPosition(Position &position);
 	bool validateMove(Position & newPosition, Position & oldPosition, Move move, int pieceType, std::vector<specialMove> &specialMoves);
 	//QChar getFenCharFromSquareID(QString fenString, int const squareID);
 	bool validateBishopMove(Move const &move);
@@ -38,6 +38,15 @@ public:
 	int colsMoved(Move move);
 	int colsMovedWithSign(Move move);
 	int getColorFromType(int pieceType, int const returnValueIfNotFound);
+
+	std::vector<Move> getValidMoves(Position & position, std::vector<Piece*>& pieces);
+	void getValidMovesForPiece(Position & position, Piece *& piece, std::vector<Move> &moves);
+	void getValidMovesForPawn(Position & position, Piece *& piece, std::vector<Move> &moves);
+	void getValidMovesForRook(Position & position, Piece *& piece, std::vector<Move> &moves);
+	void getValidMovesForBishop(Position & position, Piece *& piece, std::vector<Move> &moves);
+	void getValidMovesForKnight(Position & position, Piece *& piece, std::vector<Move> &moves);
+	void getValidMovesForQueen(Position & position, Piece *& piece, std::vector<Move> &moves);
+	void getValidMovesForKing(Position & position, Piece *& piece, std::vector<Move> &moves);
 
 };
 

@@ -57,6 +57,9 @@
     <ClCompile Include="PieceInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PositionAnalyzer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Chess.h">
@@ -96,6 +99,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PieceInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PositionAnalyzer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
