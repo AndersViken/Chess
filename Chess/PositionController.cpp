@@ -72,10 +72,6 @@ void PositionController::updateFenString(Position &position)
 	position.setFenString(fenString);
 }
 
-void PositionController::updateFenStringForNewPosition(Position &position)
-{
-}
-
 bool PositionController::validateMove(Position &newPosition, Position &oldPosition, Move move, int pieceType, std::vector<specialMove> &specialMoves)
 {
 	if (move.fromSquareId == move.toSquareId) {
@@ -342,13 +338,75 @@ int PositionController::getColorFromType(int pieceType, int const returnValueIfN
 	return returnValueIfNotFound;
 }
 
+std::vector<Move> PositionController::getValidMoves(Position &position, std::vector<Piece*> &pieces)
+{
+	std::vector<Move> validMoves{};
 
+	int activeColor{ position.getActiveColorInt() };
 
-//QChar PositionController::getFenCharFromSquareID(QString fenString, int const squareID)
-//{
-//	QChar ch{};
-//
-//
-//	return ch;
-//}
+	std::for_each(pieces.begin(), pieces.end(), [this, activeColor, &position, &validMoves](Piece* piece) mutable {
+		if (piece->getColor() == activeColor) {
+			getValidMovesForPiece(position, piece, validMoves);
+		}
+	});
+
+	return validMoves;
+}
+
+void PositionController::getValidMovesForPiece(Position & position, Piece *& piece, std::vector<Move> &moves)
+{
+	switch (piece->getPieceType()) {
+
+	case blackPawn:
+	case whitePawn:		getValidMovesForPawn(position, piece, moves);	break;
+
+	case blackRook:
+	case whiteRook:		getValidMovesForRook(position, piece, moves);	break;
+
+	case blackBishop:
+	case whiteBishop:	getValidMovesForBishop(position, piece, moves); break;
+
+	case blackKnight:
+	case whiteKnight:	getValidMovesForKnight(position, piece, moves); break;
+
+	case blackQueen:
+	case whiteQueen:	getValidMovesForQueen(position, piece, moves);	break;
+
+	case blackKing:
+	case whiteKing:		getValidMovesForKing(position, piece, moves);	break;
+		
+	}
+	return;
+}
+
+void PositionController::getValidMovesForPawn(Position & position, Piece *& piece, std::vector<Move>& moves)
+{
+	// TODO: add logic similar to validatemove for all functions here. remember to consider checks on king before and after move.
+	moves.push_back(Move{ piece->getSquareID(),piece->getSquareID(),"Pawn" });
+}
+
+void PositionController::getValidMovesForRook(Position & position, Piece *& piece, std::vector<Move>& moves)
+{
+	moves.push_back(Move{ piece->getSquareID(),piece->getSquareID(),"Rook" });
+}
+
+void PositionController::getValidMovesForBishop(Position & position, Piece *& piece, std::vector<Move>& moves)
+{
+	moves.push_back(Move{ piece->getSquareID(),piece->getSquareID(),"Bishop" });
+}
+
+void PositionController::getValidMovesForKnight(Position & position, Piece *& piece, std::vector<Move>& moves)
+{
+	moves.push_back(Move{ piece->getSquareID(),piece->getSquareID(),"Knight" });
+}
+
+void PositionController::getValidMovesForQueen(Position & position, Piece *& piece, std::vector<Move>& moves)
+{
+	moves.push_back(Move{ piece->getSquareID(),piece->getSquareID(),"Queen" });
+}
+
+void PositionController::getValidMovesForKing(Position & position, Piece *& piece, std::vector<Move>& moves)
+{
+	moves.push_back(Move{ piece->getSquareID(),piece->getSquareID(),"King" });
+}
 

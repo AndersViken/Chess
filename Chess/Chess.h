@@ -7,6 +7,7 @@
 #include "Square.h"
 #include "Position.h"
 #include "PositionController.h"
+#include "PositionAnalyzer.h"
 #include <vector>
 #include <QLabel>
 
@@ -36,7 +37,8 @@ private:
 	std::vector<int> legalCoordinatesY{};
 	std::vector<Piece*> pieces = {};
 	Position position = {};
-	PositionController positioncontroller = {};
+	PositionController positionController = {};
+	PositionAnalyzer positionAnalyzer = {};
 	QLabel *boarder;
 	QLabel* fenStringLabel;
 	QTableView* moveTableView;
@@ -58,6 +60,8 @@ private:
 	void generateMoveTable();
 	void generateAnalysisTable();
 	void insertMoveInMoveTable(QStandardItemModel *& model, int halfMove, QString move, int activeColor);
+	void updateAnalysisTable(QStandardItemModel *& model);
+	void addAnalysisTableRow(QStandardItemModel *& model, QString title, int value);
 	Square* generateSquare(int const color, int const rowNumber, int const colNumber);
 	std::vector<QPoint> Chess::generateInitialCoordinates();
 	std::vector<QLabel*> generateLabelCoordinates();
