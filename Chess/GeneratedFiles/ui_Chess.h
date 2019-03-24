@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'Chess.ui'
 **
-** Created by: Qt User Interface Compiler version 5.12.1
+** Created by: Qt User Interface Compiler version 5.13.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -31,13 +31,13 @@ public:
     {
         if (ChessClass->objectName().isEmpty())
             ChessClass->setObjectName(QString::fromUtf8("ChessClass"));
-        ChessClass->resize(840, 840);
+        ChessClass->resize(840, 690);
         centralWidget = new QWidget(ChessClass);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         ChessClass->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(ChessClass);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 840, 26));
+        menuBar->setGeometry(QRect(0, 0, 840, 21));
         ChessClass->setMenuBar(menuBar);
         mainToolBar = new QToolBar(ChessClass);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
@@ -53,7 +53,7 @@ public:
 
     void retranslateUi(QMainWindow *ChessClass)
     {
-        ChessClass->setWindowTitle(QApplication::translate("ChessClass", "Chess", nullptr));
+        ChessClass->setWindowTitle(QCoreApplication::translate("ChessClass", "Chess", nullptr));
     } // retranslateUi
 
 };
