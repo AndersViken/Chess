@@ -11,7 +11,7 @@ int const darkColor			{ 1 };
 int const boardWidth		{ squaresInARow *squarePixelSize };
 int const boardHeigth		{ boardWidth };
 int const boardStartX		{ 100 };
-int const boardStartY		{ 115 };
+int const boardStartY		{ 25 };
 int const whiteStartRow		{ 6 };
 int const blackStartRow		{ 1 };
 
