@@ -631,8 +631,7 @@ void Chess::handleLegalMove(Piece * &piece, int const pieceType, QPoint const &n
 	}
 	insertMoveInMoveTable(moveTableModel, origPosition.getFullMove(), moveString, origPosition.getActiveColorInt());
 	updateBoard();
-	std::vector<Move> validMoves = positionController.getValidMoves(newPosition, pieces);
-	positionAnalyzer.analysePosition(newPosition, validMoves, pieces, maxDepthWhenAnalysing);
+	positionAnalyzer.analysePosition(newPosition, pieces, maxDepthWhenAnalysing);
 	updateAnalysisTable(analysisTableModel);
 }
 

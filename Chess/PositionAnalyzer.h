@@ -9,7 +9,7 @@ public:
 	PositionAnalyzer();
 	~PositionAnalyzer();
 
-	void analysePosition(Position & position, std::vector<Move> validMoves, std::vector<Piece*>& pieces, int depthRemaining);
+	void analysePosition(Position & position, std::vector<Piece*>& pieces, int depthRemaining);
 	int getPieceValueSum();
 
 private:
