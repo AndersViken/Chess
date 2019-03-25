@@ -8,6 +8,7 @@
 #include "Position.h"
 #include "PositionController.h"
 #include "PositionAnalyzer.h"
+#include "PieceAnimation.h"
 #include <vector>
 #include <QLabel>
 
@@ -30,6 +31,8 @@ protected:
 private:
 	Ui::ChessClass ui;
 
+	int const maxDepthWhenAnalysing = 5;
+
 	std::vector< std::vector <Square*> > board = {};
 	std::vector<QLabel*> labelCoordinates = {};
 	std::vector<QPoint> pieceCoordinates = {};
@@ -39,6 +42,7 @@ private:
 	Position position = {};
 	PositionController positionController = {};
 	PositionAnalyzer positionAnalyzer = {};
+	PieceAnimation pieceAnimation = {};
 	QLabel *boarder;
 	QLabel* fenStringLabel;
 	QTableView* moveTableView;

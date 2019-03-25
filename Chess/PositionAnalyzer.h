@@ -1,5 +1,7 @@
 #pragma once
 #include "Piece.h"
+#include "Move.h"
+#include "Position.h"
 
 class PositionAnalyzer
 {
@@ -7,7 +9,7 @@ public:
 	PositionAnalyzer();
 	~PositionAnalyzer();
 
-	void analysePosition(std::vector<Piece*>& pieces);
+	void analysePosition(Position & position, std::vector<Move> validMoves, std::vector<Piece*>& pieces, int depthRemaining);
 	int getPieceValueSum();
 
 private:
