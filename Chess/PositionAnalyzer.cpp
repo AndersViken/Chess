@@ -28,18 +28,17 @@ PositionAnalyzer::~PositionAnalyzer()
 {
 }
 
-void PositionAnalyzer::analysePosition(Position &position, std::vector<Move> validMoves, std::vector<Piece*>& pieces, int depthRemaining)
+void PositionAnalyzer::analysePosition(Position &position, std::vector<Piece*>& pieces, int depthRemaining)
 {
 	// Add some recursive function here. This is where the fun code will be.
 	// (for every legal move, analysePosition)
-	// should of course jump of after a "depth", to avoid infinite recursion
+	// should of course jump out after a "depth", to avoid infinite recursion
 	// should maybe use the tree/leaf structure here, to store all the paths, along with a position "score".
 	// should in future probably keep this tree between each move, to avoid thinking on same position twice.
 
 	PositionController positionController{};
 	
-	
-	positionController.getValidMoves(position, pieces);
+	std::vector<Move> validMoves{ positionController.getValidMoves(position, pieces) };
 	pieceValueSum = findPieceValueSum(pieces);
 }
 

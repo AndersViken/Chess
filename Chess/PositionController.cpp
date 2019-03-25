@@ -270,6 +270,21 @@ bool PositionController::checkIfMovingToOwnColorPiece(Position &oldPosition, int
 	return false;
 }
 
+bool PositionController::checkIfMovingToOwnColorPiece(Position &position, Location const activeLocation, Location const newLocation)
+{
+	int const newSquareID = getSquareIDFromLocation(newLocation);
+	int const activeSquareID = getSquareIDFromLocation(activeLocation);
+
+	// Check if trying to move to a square with piece of own color
+	int const colorNotFound{ -1 };
+	int const takenColor{ getColorFromType(position.getPiecePlacement().at(newSquareID),colorNotFound) };
+	int const activeColor{ getColorFromType(position.getPiecePlacement().at(activeSquareID),colorNotFound) };
+	if (takenColor != colorNotFound && takenColor == activeColor) {
+		return true;
+	}
+	return false;
+}
+
 bool PositionController::checkIfMovingToOppositeColorPiece(Position &oldPosition, int const newSquareID, Position &newPosition)
 {
 	int const colorNotFound{ -1 };
@@ -281,10 +296,19 @@ bool PositionController::checkIfMovingToOppositeColorPiece(Position &oldPosition
 	}
 	return false;
 }
-bool PositionController::checkIfMovingToOppositeColorPiece(Position &position, Location newLocation)
+bool PositionController::checkIfMovingToOppositeColorPiece(Position &position, Location const activeLocation, Location const newLocation)
 {
-	int const squareID = getSquareIDFromLocation(newLocation);
-	return checkIfMovingToOppositeColorPiece(position, squareID, position);
+	int const newSquareID = getSquareIDFromLocation(newLocation);
+	int const activeSquareID = getSquareIDFromLocation(activeLocation);
+
+	int const colorNotFound{ -1 };
+	// Check if trying to move to a square with piece of opposite color
+	int const takenColor{ getColorFromType(position.getPiecePlacement().at(newSquareID),colorNotFound) };
+	int const activeColor{ getColorFromType(position.getPiecePlacement().at(activeSquareID),colorNotFound) };
+	if (takenColor != colorNotFound && takenColor != activeColor) {
+		return true;
+	}
+	return false;
 }
 
 bool PositionController::checkIfMovingToPiece(Position & oldPosition, int const newSquareID)
@@ -420,83 +444,99 @@ void PositionController::getValidMovesForPawn(Position& position, Piece*& piece,
 	Location origLocation = location;
 
 	moveLocation(location, forward);
-	checkIfValidMovePawnForward(location, position, moves, piece);
+	checkIfValidMovePawnForward(location, origLocation, position, moves);
 	location = origLocation;
 
 	if (location.row == startRow) {
 		moveLocation(location, forward);
 		moveLocation(location, forward);
-		checkIfValidMovePawnForward(location, position, moves, piece);
+		checkIfValidMovePawnForward(location, origLocation, position, moves);
 		location = origLocation;
 	}
 
 	moveLocation(location, diagonalForwardLeft);
-	checkIfValidMovePawnDiagonal(location, position, moves, piece);
+	checkIfValidMovePawnDiagonal(location, origLocation, position, moves);
 	location = origLocation;
 
 	moveLocation(location, diagonalForwardRight);
-	checkIfValidMovePawnDiagonal(location, position, moves, piece);
+	checkIfValidMovePawnDiagonal(location, origLocation, position, moves);
 	location = origLocation;
-
-	/*int const numberOfColsMoved{ colsMoved(move) };
-	int const numberOfRowsMoved{ sign * rowsMovedWithSign(move) };
-
-	bool movedFromStartRow{ false };
-	if (move.fromSquareId / squaresInARow == startRow) {
-		movedFromStartRow = true;
-	}
-	if (movedFromStartRow) {
-		if ((numberOfRowsMoved < 1) || (numberOfRowsMoved > 2)) {
-			return false;
-		}
-	}
-	else if (numberOfRowsMoved != 1) {
-		return false;
-	}
-
-	if (numberOfColsMoved > 1) {
-		return false;
-	}
-	else if (numberOfColsMoved == 1) {
-		if (checkIfMovingToOppositeColorPiece(oldPosition, move, newPosition) == false) {
-			return false;
-		}
-	}
-	else if (numberOfColsMoved == 0) {
-		if (checkIfMovingToPiece(oldPosition, move) == true) {
-			return false;
-		}
-	}
-
-	return true;*/
 
 }
 
-void PositionController::checkIfValidMovePawnForward(Location const & location, Position & position, std::vector<Move> & moves, Piece *& piece)
+void PositionController::checkIfValidMovePawnForward(Location const & location, Location const & origLocation, Position & position, std::vector<Move> & moves)
 {
 	if (checkIfSquare(location)) {
 		if (checkIfMovingToPiece(position, location) == false) {
-			addValidMove(moves, piece->getSquareID(), getSquareIDFromLocation(location));
+			addValidMove(moves, origLocation, location);
 		}
 	}
 }
-void PositionController::checkIfValidMovePawnDiagonal(Location const & location, Position & position, std::vector<Move> & moves, Piece *& piece)
+void PositionController::checkIfValidMovePawnDiagonal(Location const & location, Location const & origLocation, Position & position, std::vector<Move> & moves)
 {
 	if (checkIfSquare(location)) {
-		if (checkIfMovingToOppositeColorPiece(position, location)) {
-			addValidMove(moves, piece->getSquareID(), getSquareIDFromLocation(location));
+		if (checkIfMovingToOppositeColorPiece(position, origLocation, location)) {
+			addValidMove(moves, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(location));
 		}
+	}
+}
+void PositionController::getValidKingMovesInDirections(Location const origLocation, Position & position, std::vector<Move> & moves, std::vector<Direction> directions)
+{
+	std::for_each(directions.begin(), directions.end(), [origLocation, &position, &moves, this](Direction direction) {
+		bool continueSearch{ false };
+		Location location = origLocation;
+		moveLocation(location, direction);
+		checkIfValidMove(location, origLocation, position, moves, continueSearch);
+	});
+}
+void PositionController::getValidMovesInDirections(Location const origLocation, Position & position, std::vector<Move> & moves, std::vector<Direction> directions)
+{
+	std::for_each(directions.begin(), directions.end(), [origLocation,&position, &moves, this](Direction direction) {
+		getValidMovesInDirection(origLocation, position, moves, direction);
+	});
+}
+void PositionController::getValidMovesInDirection(Location const origLocation, Position & position, std::vector<Move> & moves, Direction direction)
+{
+	bool continueSearch{ true };
+	Location location = origLocation;
+	while (continueSearch) {
+		moveLocation(location, direction);
+		checkIfValidMove(location, origLocation, position, moves, continueSearch);
+	}
+}
+void PositionController::checkIfValidMove(Location const & newLocation, Location const & origLocation, Position & position, std::vector<Move> & moves, bool & continueSearch)
+{
+	if (checkIfSquare(newLocation)) {
+		if (checkIfMovingToOwnColorPiece(position, origLocation, newLocation)) {
+			continueSearch = false;
+		}
+		else {
+			addValidMove(moves, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(newLocation));
+		}
+		if (checkIfMovingToOppositeColorPiece(position, origLocation, newLocation)) {
+			continueSearch = false;
+		}
+	}
+	else {
+		continueSearch = false;
 	}
 }
 
 void PositionController::getValidMovesForRook(Position & position, Piece *& piece, std::vector<Move>& moves)
 {
-	//moves.push_back(Move{ piece->getSquareID(),piece->getSquareID(),"Rook" });
+	qDebug() << "enter function getValidMovesForRook()\n";
+	Location origLocation = getLocationFromSquareID(piece->getSquareID());
+	getValidMovesInDirections(origLocation, position, moves,
+		{ Direction::left, Direction::right, Direction::up, Direction::down});
 }
 
 void PositionController::getValidMovesForBishop(Position & position, Piece *& piece, std::vector<Move>& moves)
 {
-	//moves.push_back(Move{ piece->getSquareID(),piece->getSquareID(),"Bishop" });
+	qDebug() << "enter function getValidMovesForBishop()\n";
+	Location origLocation = getLocationFromSquareID(piece->getSquareID());
+	getValidMovesInDirections(origLocation, position, moves,
+		{	Direction::diagonalLeftUp,	Direction::diagonalLeftDown,
+			Direction::diagonalRightUp, Direction::diagonalRightDown });
 }
 
 void PositionController::getValidMovesForKnight(Position & position, Piece *& piece, std::vector<Move>& moves)
@@ -506,12 +546,25 @@ void PositionController::getValidMovesForKnight(Position & position, Piece *& pi
 
 void PositionController::getValidMovesForQueen(Position & position, Piece *& piece, std::vector<Move>& moves)
 {
-	//moves.push_back(Move{ piece->getSquareID(),piece->getSquareID(),"Queen" });
+	qDebug() << "enter function getValidMovesForQueen()\n";
+	Location origLocation = getLocationFromSquareID(piece->getSquareID());
+	getValidMovesInDirections(origLocation, position, moves,
+		{	Direction::left,			Direction::right,
+			Direction::up,				Direction::down,
+			Direction::diagonalLeftUp,	Direction::diagonalLeftDown,
+			Direction::diagonalRightUp, Direction::diagonalRightDown });
 }
 
 void PositionController::getValidMovesForKing(Position & position, Piece *& piece, std::vector<Move>& moves)
 {
 	//moves.push_back(Move{ piece->getSquareID(),piece->getSquareID(),"King" });
+	qDebug() << "enter function getValidMovesForKing()\n";
+	Location origLocation = getLocationFromSquareID(piece->getSquareID());
+	getValidKingMovesInDirections(origLocation, position, moves,
+		{	Direction::left,			Direction::right,
+			Direction::up,				Direction::down,
+			Direction::diagonalLeftUp,	Direction::diagonalLeftDown,
+			Direction::diagonalRightUp, Direction::diagonalRightDown });
 }
 
 bool PositionController::checkIfSquare(Location location)
@@ -580,7 +633,10 @@ void PositionController::addValidMove(std::vector<Move>& moves, int const fromSq
 	moves.push_back({ fromSquareID,toSquareID,"" });
 }
 
-
+void PositionController::addValidMove(std::vector<Move>& moves, Location const & location, Location const & origLocation)
+{
+	moves.push_back({ getSquareIDFromLocation(origLocation),getSquareIDFromLocation(location),"" });
+}
 
 //void PositionController::moveLocation(Location location, Direction direction)
 //{
