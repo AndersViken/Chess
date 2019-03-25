@@ -43,8 +43,8 @@ Chess::Chess(QWidget *parent)
 	generateAnalysisTable();
 	generateMoveTable();
 
-	
-
+	std::vector<Move> validMoves =
+	positionController.getValidMoves(position, pieces);
 	//Leaf leaf{ m,initialPosition };
 
 
@@ -559,6 +559,7 @@ void Chess::dropEvent(QDropEvent *event)
 		if (legalMove)
 		{
 			handleLegalMove(piece, pieceType, newPoint, move, origPosition, position, specialMoves);
+			qDebug() << "\n\n\n";
 		}
 		else
 		{
@@ -629,10 +630,10 @@ void Chess::handleLegalMove(Piece * &piece, int const pieceType, QPoint const &n
 		getMoveString(origPosition, newPosition, moveString, move, pieceType);
 	}
 	insertMoveInMoveTable(moveTableModel, origPosition.getFullMove(), moveString, origPosition.getActiveColorInt());
-	positionController.getValidMoves(newPosition, pieces);
-	positionAnalyzer.analysePosition(pieces);
-	updateAnalysisTable(analysisTableModel);
 	updateBoard();
+	std::vector<Move> validMoves = positionController.getValidMoves(newPosition, pieces);
+	positionAnalyzer.analysePosition(newPosition, validMoves, pieces, maxDepthWhenAnalysing);
+	updateAnalysisTable(analysisTableModel);
 }
 
 void Chess::getMoveString(Position &origPosition, Position &newPosition, QString &moveString, Move const &move, int const pieceType)
@@ -644,7 +645,7 @@ void Chess::getMoveString(Position &origPosition, Position &newPosition, QString
 	
 	moveString.append(getPieceChar(pieceType));
 
-	if (positionController.checkIfMovingToOppositeColorPiece(origPosition, move, newPosition)) {
+	if (positionController.checkIfMovingToOppositeColorPiece(origPosition, move.toSquareId, newPosition)) {
 		if (pieceType == blackPawn || pieceType == whitePawn) {
 			moveString.append(origSquareString.at(0));
 		}

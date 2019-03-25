@@ -127,6 +127,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Move.cpp" />
     <ClCompile Include="Piece.cpp" />
+    <ClCompile Include="PieceAnimation.cpp" />
     <ClCompile Include="Position.cpp" />
     <ClCompile Include="PositionAnalyzer.cpp" />
     <ClCompile Include="PositionController.cpp" />
@@ -144,6 +145,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GuiSetup.h" />
+    <ClInclude Include="PieceAnimation.h" />
     <ClInclude Include="PieceInfo.h" />
     <ClInclude Include="Leaf.h" />
     <ClInclude Include="Move.h" />
