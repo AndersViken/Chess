@@ -39,7 +39,31 @@ void PositionAnalyzer::analysePosition(Position &position, std::vector<Piece*>& 
 	PositionController positionController{};
 	
 	std::vector<Move> validMoves{ positionController.getValidMoves(position, pieces) };
+
+	constexpr bool DEBUG_MODE{ true };
+	if constexpr (DEBUG_MODE)
+	{
+		std::for_each(validMoves.begin(), validMoves.end(), [&positionController, &pieces, &position, this](Move &move) {
+			int const pieceType{ getPieceTypeFromSquareID(pieces, move.fromSquareId) };
+			positionController.getMoveString(position, move, pieceType);
+		});
+	}
+
 	pieceValueSum = findPieceValueSum(pieces);
+	numOfValidMoves = validMoves.size();
+}
+
+int PositionAnalyzer::getPieceTypeFromSquareID(std::vector<Piece*>& pieces, int const squareID)
+{
+	auto it = std::find_if(pieces.begin(), pieces.end(),
+		[&squareID](Piece *piece) { return (piece->getSquareID()); });
+	if (it != pieces.end() && *it) {
+		Piece* foundPiece = static_cast<Piece*>(*it);
+		return foundPiece->getPieceType();
+	}
+	else {
+		return 0;
+	}
 }
 
 int PositionAnalyzer::findPieceValueSum(std::vector<Piece*>& pieces)
@@ -72,5 +96,10 @@ int PositionAnalyzer::findPieceValue(Piece*& piece)
 int PositionAnalyzer::getPieceValueSum()
 {
 	return pieceValueSum;
+}
+
+int PositionAnalyzer::getNumberOfValidMoves()
+{
+	return numOfValidMoves;
 }
 

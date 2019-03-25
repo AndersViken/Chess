@@ -382,7 +382,15 @@ void Chess::insertMoveInMoveTable(QStandardItemModel *& model, int fullMove, QSt
 void Chess::updateAnalysisTable(QStandardItemModel *& model)
 {
 	model->clear();
+	if (position.getActiveColorInt() == white) {
+		addAnalysisTableRow(model, "White to move", 0);
+	}
+	if (position.getActiveColorInt() == black) {
+		addAnalysisTableRow(model, "Black to move", 0);
+	}
 	addAnalysisTableRow(model, "Piece Values:", positionAnalyzer.getPieceValueSum());
+	addAnalysisTableRow(model, "Possible Moves:", positionAnalyzer.getNumberOfValidMoves());
+
 }
 
 void Chess::addAnalysisTableRow(QStandardItemModel *& model, QString title, int value)

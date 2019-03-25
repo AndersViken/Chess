@@ -29,6 +29,19 @@ std::map<int, int> colorFromType{
 	{ blackKing,  black }
 };
 
+std::map<int, QChar> pieceChars2 = {
+	{ whiteRook,    'R' },
+	{ whiteKnight,  'N' },
+	{ whiteBishop,  'B'	},
+	{ whiteQueen,   'Q' },
+	{ whiteKing,    'K' },
+	{ blackRook,    'R' },
+	{ blackKnight,  'N' },
+	{ blackBishop,  'B' },
+	{ blackQueen,   'Q' },
+	{ blackKing,    'K' }
+};
+
 int const lowestSquareID = 0;
 int const highestSquareID = 63;
 
@@ -296,11 +309,8 @@ bool PositionController::checkIfMovingToOppositeColorPiece(Position &oldPosition
 	}
 	return false;
 }
-bool PositionController::checkIfMovingToOppositeColorPiece(Position &position, Location const activeLocation, Location const newLocation)
+bool PositionController::checkIfMovingToOppositeColorPiece(Position &position, int const activeSquareID, int const newSquareID)
 {
-	int const newSquareID = getSquareIDFromLocation(newLocation);
-	int const activeSquareID = getSquareIDFromLocation(activeLocation);
-
 	int const colorNotFound{ -1 };
 	// Check if trying to move to a square with piece of opposite color
 	int const takenColor{ getColorFromType(position.getPiecePlacement().at(newSquareID),colorNotFound) };
@@ -384,7 +394,7 @@ std::vector<Move> PositionController::getValidMoves(Position &position, std::vec
 	int activeColor{ position.getActiveColorInt() };
 
 	std::for_each(pieces.begin(), pieces.end(), [this, activeColor, &position, &validMoves](Piece* piece) mutable {
-		if (piece->getColor() != activeColor) {
+		if (piece->getColor() == activeColor) {
 			getValidMovesForPiece(position, piece, validMoves);
 		}
 	});
@@ -475,7 +485,7 @@ void PositionController::checkIfValidMovePawnForward(Location const & location, 
 void PositionController::checkIfValidMovePawnDiagonal(Location const & location, Location const & origLocation, Position & position, std::vector<Move> & moves)
 {
 	if (checkIfSquare(location)) {
-		if (checkIfMovingToOppositeColorPiece(position, origLocation, location)) {
+		if (checkIfMovingToOppositeColorPiece(position, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(location))) {
 			addValidMove(moves, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(location));
 		}
 	}
@@ -513,7 +523,7 @@ void PositionController::checkIfValidMove(Location const & newLocation, Location
 		else {
 			addValidMove(moves, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(newLocation));
 		}
-		if (checkIfMovingToOppositeColorPiece(position, origLocation, newLocation)) {
+		if (checkIfMovingToOppositeColorPiece(position, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(newLocation))) {
 			continueSearch = false;
 		}
 	}
@@ -565,6 +575,44 @@ void PositionController::getValidMovesForKing(Position & position, Piece *& piec
 			Direction::up,				Direction::down,
 			Direction::diagonalLeftUp,	Direction::diagonalLeftDown,
 			Direction::diagonalRightUp, Direction::diagonalRightDown });
+}
+
+void PositionController::getMoveString(Position &origPosition, Move &move, int const pieceType)
+{
+	QString origSquareString{};
+	QString newSquareString{};
+	getSquareString(move.fromSquareId, origSquareString);
+	getSquareString(move.toSquareId, newSquareString);
+
+	move.moveString.append(getPieceChar(pieceType));
+
+	if (checkIfMovingToOppositeColorPiece(origPosition, move.fromSquareId, move.toSquareId)) {
+		if (pieceType == blackPawn || pieceType == whitePawn) {
+			move.moveString.append(origSquareString.at(0));
+		}
+		move.moveString.append('x');
+	}
+
+	move.moveString.append(newSquareString);
+}
+
+void PositionController::getSquareString(int const &squareID, QString &squareString)
+{
+	std::vector<QChar> boardLetters{ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' };
+	int const origRow = squaresInARow - (squareID / squaresInARow);
+	QChar const origCol = boardLetters.at(squareID % squaresInARow);
+	squareString.append(origCol);
+	squareString.append(QString::number(origRow));
+}
+
+QChar PositionController::getPieceChar(int const pieceType)
+{
+	QChar pieceChar{};
+	auto pieceCharSearch{ pieceChars2.find(pieceType) };
+	if (pieceCharSearch != pieceChars2.end()) {
+		pieceChar = pieceCharSearch->second;
+	}
+	return pieceChar;
 }
 
 bool PositionController::checkIfSquare(Location location)
