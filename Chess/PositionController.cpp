@@ -110,7 +110,7 @@ bool PositionController::validateMove(Position &newPosition, Position &oldPositi
 			return false;
 		}
 	}
-	if (checkIfMovingToOwnColorPiece(oldPosition, move, newPosition)) {
+	if (checkIfMovingToOwnColorPiece(oldPosition, move.toSquareId, newPosition)) {
 		return false;
 	}
 	return true;
@@ -243,7 +243,7 @@ bool PositionController::validatePawnMove(Position &oldPosition, Move const &mov
 		return false;
 	}
 	else if (numberOfColsMoved == 1) {
-		if (checkIfMovingToOppositeColorPiece(oldPosition, move.toSquareId) == false) {
+		if (checkIfMovingToOppositeColorPiece(oldPosition, move.toSquareId, newPosition) == false) {
 			return false;
 		}
 	}
@@ -258,24 +258,24 @@ bool PositionController::validatePawnMove(Position &oldPosition, Move const &mov
 
 
 
-bool PositionController::checkIfMovingToOwnColorPiece(Position &oldPosition, Move const &move, Position &newPosition)
+bool PositionController::checkIfMovingToOwnColorPiece(Position &oldPosition, int const newSquareID, Position &newPosition)
 {
 	// Check if trying to move to a square with piece of own color
 	int const colorNotFound{ -1 };
-	int const takenColor{  getColorFromType(oldPosition.getPiecePlacement().at(move.toSquareId),colorNotFound) };
-	int const activeColor{ getColorFromType(newPosition.getPiecePlacement().at(move.toSquareId),colorNotFound) };
+	int const takenColor{  getColorFromType(oldPosition.getPiecePlacement().at(newSquareID),colorNotFound) };
+	int const activeColor{ getColorFromType(newPosition.getPiecePlacement().at(newSquareID),colorNotFound) };
 	if (takenColor != colorNotFound && takenColor == activeColor) {
 		return true;
 	}
 	return false;
 }
 
-bool PositionController::checkIfMovingToOppositeColorPiece(Position &position, int const newSquareID)
+bool PositionController::checkIfMovingToOppositeColorPiece(Position &oldPosition, int const newSquareID, Position &newPosition)
 {
 	int const colorNotFound{ -1 };
 	// Check if trying to move to a square with piece of opposite color
-	int const takenColor{  getColorFromType(position.getPiecePlacement().at(newSquareID),colorNotFound) };
-	int const activeColor{ getColorFromType(position.getPiecePlacement().at(newSquareID),colorNotFound) };
+	int const takenColor{ getColorFromType(oldPosition.getPiecePlacement().at(newSquareID),colorNotFound) };
+	int const activeColor{ getColorFromType(newPosition.getPiecePlacement().at(newSquareID),colorNotFound) };
 	if (takenColor != colorNotFound && takenColor != activeColor) {
 		return true;
 	}
@@ -284,7 +284,7 @@ bool PositionController::checkIfMovingToOppositeColorPiece(Position &position, i
 bool PositionController::checkIfMovingToOppositeColorPiece(Position &position, Location newLocation)
 {
 	int const squareID = getSquareIDFromLocation(newLocation);
-	return checkIfMovingToOppositeColorPiece(position, squareID);
+	return checkIfMovingToOppositeColorPiece(position, squareID, position);
 }
 
 bool PositionController::checkIfMovingToPiece(Position & oldPosition, int const newSquareID)

@@ -35,8 +35,8 @@ public:
 	bool validateKingMove(Move const & move, Position &oldPosition, Position &newPosition, int pieceType, std::vector<specialMove> &specialMoves);
 	void moveRookWhenCastling(Position & newPosition, std::vector<specialMove>& specialMoves, int const rookOrigSquare, int const rookNewSquare, int const rookType, QString castleString);
 	bool validatePawnMove(Position &oldPosition, Move const &move, Position &newPosition, int const piecetype);
-	bool checkIfMovingToOwnColorPiece(Position &oldPosition, Move const &move, Position &newPosition);
-	bool checkIfMovingToOppositeColorPiece(Position & position, int const newSquareID);
+	bool checkIfMovingToOwnColorPiece(Position &oldPosition, int const newSquareID, Position &newPosition);
+	bool checkIfMovingToOppositeColorPiece(Position &oldPosition, int const newSquareID, Position &newPosition);
 	bool checkIfMovingToOppositeColorPiece(Position & position, Location newLocation);
 	bool checkIfMovingToPiece(Position & oldPosition, int const newSquareID);
 	bool checkIfMovingToPiece(Position & oldPosition, Location newLocation);

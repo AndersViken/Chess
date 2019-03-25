@@ -645,7 +645,7 @@ void Chess::getMoveString(Position &origPosition, Position &newPosition, QString
 	
 	moveString.append(getPieceChar(pieceType));
 
-	if (positionController.checkIfMovingToOppositeColorPiece(origPosition, move.toSquareId)) {
+	if (positionController.checkIfMovingToOppositeColorPiece(origPosition, move.toSquareId, newPosition)) {
 		if (pieceType == blackPawn || pieceType == whitePawn) {
 			moveString.append(origSquareString.at(0));
 		}
