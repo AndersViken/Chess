@@ -36,6 +36,7 @@ public:
 	void moveRookWhenCastling(Position & newPosition, std::vector<specialMove>& specialMoves, int const rookOrigSquare, int const rookNewSquare, int const rookType, QString castleString);
 	bool validatePawnMove(Position &oldPosition, Move const &move, Position &newPosition, int const piecetype);
 	bool checkIfMovingToOwnColorPiece(Position &oldPosition, int const newSquareID, Position &newPosition);
+	bool checkIfMovingToOwnColorPiece(Position & oldPosition, int const newSquareID, int const oldSquareID);
 	bool checkIfMovingToOppositeColorPiece(Position &oldPosition, int const newSquareID, Position &newPosition);
 	bool checkIfMovingToOppositeColorPiece(Position & position, Location newLocation);
 	bool checkIfMovingToPiece(Position & oldPosition, int const newSquareID);
@@ -52,6 +53,7 @@ public:
 	void getValidMovesForPawn(Position & position, Piece *& piece, std::vector<Move> &moves);
 	void checkIfValidMovePawnForward(const Location &location, Position & position, std::vector<Move> & moves, Piece *& piece);
 	void checkIfValidMovePawnDiagonal(Location const & location, Position & position, std::vector<Move>& moves, Piece *& piece);
+	void checkIfValidMove(Location const & location, Position & position, std::vector<Move>& moves, Piece *& piece, bool & continueSearch, int const origSquareID);
 	void getValidMovesForRook(Position & position, Piece *& piece, std::vector<Move> &moves);
 	void getValidMovesForBishop(Position & position, Piece *& piece, std::vector<Move> &moves);
 	void getValidMovesForKnight(Position & position, Piece *& piece, std::vector<Move> &moves);

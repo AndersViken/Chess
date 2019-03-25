@@ -270,6 +270,18 @@ bool PositionController::checkIfMovingToOwnColorPiece(Position &oldPosition, int
 	return false;
 }
 
+bool PositionController::checkIfMovingToOwnColorPiece(Position &position, int const newSquareID, int const oldSquareID)
+{
+	// Check if trying to move to a square with piece of own color
+	int const colorNotFound{ -1 };
+	int const takenColor{ getColorFromType(position.getPiecePlacement().at(newSquareID),colorNotFound) };
+	int const activeColor{ getColorFromType(position.getPiecePlacement().at(newSquareID),colorNotFound) };
+	if (takenColor != colorNotFound && takenColor == activeColor) {
+		return true;
+	}
+	return false;
+}
+
 bool PositionController::checkIfMovingToOppositeColorPiece(Position &oldPosition, int const newSquareID, Position &newPosition)
 {
 	int const colorNotFound{ -1 };
@@ -438,38 +450,6 @@ void PositionController::getValidMovesForPawn(Position& position, Piece*& piece,
 	checkIfValidMovePawnDiagonal(location, position, moves, piece);
 	location = origLocation;
 
-	/*int const numberOfColsMoved{ colsMoved(move) };
-	int const numberOfRowsMoved{ sign * rowsMovedWithSign(move) };
-
-	bool movedFromStartRow{ false };
-	if (move.fromSquareId / squaresInARow == startRow) {
-		movedFromStartRow = true;
-	}
-	if (movedFromStartRow) {
-		if ((numberOfRowsMoved < 1) || (numberOfRowsMoved > 2)) {
-			return false;
-		}
-	}
-	else if (numberOfRowsMoved != 1) {
-		return false;
-	}
-
-	if (numberOfColsMoved > 1) {
-		return false;
-	}
-	else if (numberOfColsMoved == 1) {
-		if (checkIfMovingToOppositeColorPiece(oldPosition, move, newPosition) == false) {
-			return false;
-		}
-	}
-	else if (numberOfColsMoved == 0) {
-		if (checkIfMovingToPiece(oldPosition, move) == true) {
-			return false;
-		}
-	}
-
-	return true;*/
-
 }
 
 void PositionController::checkIfValidMovePawnForward(Location const & location, Position & position, std::vector<Move> & moves, Piece *& piece)
@@ -489,9 +469,38 @@ void PositionController::checkIfValidMovePawnDiagonal(Location const & location,
 	}
 }
 
+void PositionController::checkIfValidMove(Location const & location, Position & position, std::vector<Move> & moves, Piece *& piece, bool & continueSearch, int const origSquareID)
+{
+	if (checkIfSquare(location)) {
+		if (checkIfMovingToOppositeColorPiece(position, location)) {
+			addValidMove(moves, piece->getSquareID(), getSquareIDFromLocation(location));
+			continueSearch = false;
+		}
+		else if (checkIfMovingToOwnColorPiece(position, getSquareIDFromLocation(location), position));
+	}
+	else {
+		continueSearch = false;
+	}
+}
+
 void PositionController::getValidMovesForRook(Position & position, Piece *& piece, std::vector<Move>& moves)
 {
-	//moves.push_back(Move{ piece->getSquareID(),piece->getSquareID(),"Rook" });
+	int const origSquareID = piece->getSquareID();
+	Location location = getLocationFromSquareID(origSquareID);
+	Location origLocation = location;
+
+	// needs to have "recursive" lookup in 4 directions, until hitting piece (of both colors, opposite piece can be captured)
+	// or outside of board.
+
+
+	bool continueSearch = true;
+	while (continueSearch) {
+		moveLocation(location, Direction::left);
+		checkIfValidMove(location, position, moves, piece, continueSearch, origSquareID);
+	}
+	location = origLocation;
+	
+
 }
 
 void PositionController::getValidMovesForBishop(Position & position, Piece *& piece, std::vector<Move>& moves)
