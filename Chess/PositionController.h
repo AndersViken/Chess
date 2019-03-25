@@ -38,7 +38,7 @@ public:
 	bool checkIfMovingToOwnColorPiece(Position &oldPosition, int const newSquareID, Position &newPosition);
 	bool checkIfMovingToOwnColorPiece(Position & position, Location const activeLocation, Location const newLocation);
 	bool checkIfMovingToOppositeColorPiece(Position &oldPosition, int const newSquareID, Position &newPosition);
-	bool checkIfMovingToOppositeColorPiece(Position & position, Location newLocation, Location origLocation);
+	bool checkIfMovingToOppositeColorPiece(Position & position, int const activeSquareID, int const newSquareID);
 	bool checkIfMovingToPiece(Position & oldPosition, int const newSquareID);
 	bool checkIfMovingToPiece(Position & oldPosition, Location newLocation);
 	bool checkIfPiecesInSquares(Position const position, std::vector<int> const squares);
@@ -62,6 +62,12 @@ public:
 	void getValidMovesForKnight(Position & position, Piece *& piece, std::vector<Move> &moves);
 	void getValidMovesForQueen(Position & position, Piece *& piece, std::vector<Move> &moves);
 	void getValidMovesForKing(Position & position, Piece *& piece, std::vector<Move> &moves);
+
+	void getMoveString(Position & origPosition, Move & move, int const pieceType);
+
+	void getSquareString(int const & squareID, QString & squareString);
+
+	QChar getPieceChar(int const pieceType);
 
 	bool checkIfSquare(Location location);
 	Location getLocationFromSquareID(int const squareID);
