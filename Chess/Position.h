@@ -80,6 +80,8 @@ public:
 	QString createEnPassantFenString();
 	QString createHalfMoveFenString();
 	QString createFullMoveFenString();
+	bool getActiveKingAttacked() { return activeKingAttacked; };
+	void setActiveKingAttacked(bool t_activeKingAttacked) { activeKingAttacked = t_activeKingAttacked; };
 
 private:
 	void processFenString(QString const text);
@@ -106,5 +108,6 @@ private:
 	QString enPassantSquare;
 	int		halfMoveClock;
 	int		fullMove;
+	bool	activeKingAttacked;
 };
 

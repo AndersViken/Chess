@@ -42,6 +42,7 @@ public:
 	bool checkIfMovingToOppositeColorPiece(Position & position, int const activeSquareID, int const newSquareID);
 	bool checkIfMovingToPiece(Position & oldPosition, int const newSquareID);
 	bool checkIfMovingToPiece(Position & oldPosition, Location newLocation);
+	bool checkIfKingAttacked(Position & position, std::vector<Piece*> pieces, int const pieceTypeToFind, int const activeColor);
 	bool checkIfPiecesInSquares(Position const position, std::vector<int> const squares);
 	int rowsMoved(Move move);
 	int rowsMovedWithSign(Move move);
@@ -49,7 +50,8 @@ public:
 	int colsMovedWithSign(Move move);
 	int getColorFromType(int pieceType, int const returnValueIfNotFound);
 
-	std::vector<Move> getValidMoves(Position & position, std::vector<Piece*>& pieces);
+	std::vector<Move> getValidMoves(Position & position, std::vector<Piece*>& pieces, int const activeColor);
+
 	void getValidMovesForPiece(Position & position, Piece *& piece, std::vector<Move> &moves);
 	void getValidMovesForPawn(Position & position, Piece *& piece, std::vector<Move> &moves);
 	void checkIfValidMovePawnForward(Location const & location, Location const & origLocation, Position & position, std::vector<Move>& moves);

@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <map>
+#include <qdebug.h>
 #include "PieceInfo.h"
 #include "PositionAnalyzer.h"
 #include "PositionController.h"
@@ -38,13 +39,19 @@ void PositionAnalyzer::analysePosition(Position &position, std::vector<Piece*>& 
 
 	PositionController positionController{};
 	
-	std::vector<Move> validMoves{ positionController.getValidMoves(position, pieces) };
+	std::vector<Move> validMoves{ positionController.getValidMoves(position, pieces, position.getActiveColorInt()) };
 	int error{};
 	std::for_each(validMoves.begin(), validMoves.end(), [&](Move &move) {
 		if (move.fromSquareId < 0 || move.fromSquareId>63 || move.toSquareId < 0 || move.toSquareId>63) {
 			error++;
 		}
 	});
+
+	bool whiteKingAttacked{ positionController.checkIfKingAttacked(position, pieces, whiteKing, black) };
+	bool blackKingAttacked{ positionController.checkIfKingAttacked(position, pieces, blackKing, white) };
+	qDebug() << "fullmove: " << position.getFullMove();
+	qDebug() << "whiteKingAttacked: " << whiteKingAttacked;
+	qDebug() << "blackKingAttacked: " << blackKingAttacked;
 
 	constexpr bool DEBUG_MODE{ true };
 	if constexpr (DEBUG_MODE)
