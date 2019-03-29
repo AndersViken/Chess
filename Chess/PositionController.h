@@ -26,7 +26,8 @@ public:
 
 	Position generateNewPosition(Move &mov, Position &oldPos);
 	void updateFenString(Position &position);
-	bool validateMove(Position & newPosition, Position & oldPosition, Move move, int pieceType, std::vector<specialMove> &specialMoves);
+	bool validateMove(Position & position, std::vector<Piece*> pieces, Move move, MoveType & moveType);
+	bool validateMove(Position & newPosition, Position & oldPosition, Move move, int pieceType, std::vector<specialMove>& specialMoves);
 	//QChar getFenCharFromSquareID(QString fenString, int const squareID);
 	bool validateBishopMove(Move const &move);
 	bool validateRookMove(Move const &move);
@@ -53,7 +54,9 @@ public:
 	void getValidMovesForPawn(Position & position, Piece *& piece, std::vector<Move> &moves);
 	void checkIfValidMovePawnForward(Location const & location, Location const & origLocation, Position & position, std::vector<Move>& moves);
 	void checkIfValidMovePawnDiagonal(Location const & location, Location const & origLocation, Position & position, std::vector<Move>& moves);
+	void getValidKnightMovesInDirections(Location const origLocation, Position & position, std::vector<Move> & moves, std::vector< std::vector<Direction>> directionsVector);
 	void getValidKingMovesInDirections(Location const origLocation, Position & position, std::vector<Move>& moves, std::vector<Direction> directions);
+	void getValidKingMovesCastling(Location const origLocation, std::vector<Move>& moves, int const pieceColor, bool canCastleKingSide, bool canCastleQueenSide);
 	void getValidMovesInDirections(Location const origLocation, Position & position, std::vector<Move>& moves, std::vector<Direction> directions);
 	void getValidMovesInDirection(Location const origLocation, Position & position, std::vector<Move>& moves, Direction direction);
 	void checkIfValidMove(Location const & newLocation, Location const & origLocation, Position & position, std::vector<Move>& moves, bool & continueSearch);
@@ -75,7 +78,11 @@ public:
 	void moveLocation(Location& location, Direction const direction);
 	void addValidMove(std::vector<Move>& moves, int const fromSquareID, int const toSquareID);
 
+	void addValidMove(std::vector<Move>& moves, int const fromSquareID, int const toSquareID, MoveType moveType);
+
 	void addValidMove(std::vector<Move>& moves, Location const & location, Location const & origLocation);
+
+	void addValidMove(std::vector<Move>& moves, Location const & origLocation, Location const & location, MoveType moveType);
 
 };
 

@@ -556,17 +556,20 @@ void Chess::dropEvent(QDropEvent *event)
 		QPoint newPoint = giveCoordinateToDroppedPiece(droppedPoint, origPoint);
 		int newSquareID = getSquareIdFromPoint(newPoint);
 
-		Move move{ origSquareID, newSquareID, "MoveStringNA" };
+		Move move{ origSquareID, newSquareID };
 		Position origPosition = position;
 	
+		std::vector<specialMove> specialMoves{}; // probably not needed
+		MoveType moveType{};
+		bool legalMove = positionController.validateMove(position, pieces, move, moveType);
+
 		position = positionController.generateNewPosition(move, position);
 		
 		Piece *piece;
-		std::vector<specialMove> specialMoves{};
-		bool legalMove = positionController.validateMove(position, origPosition, move, pieceType, specialMoves);
+		//bool legalMove = positionController.validateMove(position, origPosition, move, pieceType, specialMoves);
 		if (legalMove)
 		{
-			handleLegalMove(piece, pieceType, newPoint, move, origPosition, position, specialMoves);
+			handleLegalMove(piece, pieceType, newPoint, move, origPosition, position, specialMoves, moveType);
 			qDebug() << "\n\n\n";
 		}
 		else
@@ -609,23 +612,29 @@ void Chess::dropEvent(QDropEvent *event)
 }
 
 void Chess::handleLegalMove(Piece * &piece, int const pieceType, QPoint const &newPoint, Move const &move,
-	Position &origPosition, Position &newPosition, std::vector<specialMove> &specialMoves)
+	Position &origPosition, Position &newPosition, std::vector<specialMove> &specialMoves, MoveType moveType)
 {
 	QString moveString{};
 	bool moveStringAlreadyFilled = false;
 	std::for_each(specialMoves.begin(), specialMoves.end(), [this,&moveString,&moveStringAlreadyFilled](specialMove move) {
-		removePiece(pieces, move.square);
-		if (move.pieceOnSquareAfterMove != empty) {
-			Piece *newRook = generatePiece(move.pieceOnSquareAfterMove, getPointFromSquareID(move.square), move.square);
-			pieces.push_back(newRook);
-			newRook->show();
-			newRook->setAttribute(Qt::WA_DeleteOnClose);
-			if (!moveStringAlreadyFilled) {
-				moveString.append(move.moveString);
-				moveStringAlreadyFilled = true;
-			}
-		}
+		
 	});
+
+	switch (moveType) {
+		case MoveType::castleKingsideWhite:
+			performCastling({ 63,61 }, pieces, whiteRook);
+			break;
+		case MoveType::castleQueensideWhite:
+			performCastling({ 56,59 }, pieces, whiteRook);
+			break;
+		case MoveType::castleKingsideBlack:
+			performCastling({ 7,5 }, pieces, blackRook);
+			break;
+		case MoveType::castleQueensideBlack:
+			performCastling({ 0,3 }, pieces, blackRook);
+			break;
+		default: break;
+	}
 
 	specialMoves.clear();
 
@@ -641,6 +650,15 @@ void Chess::handleLegalMove(Piece * &piece, int const pieceType, QPoint const &n
 	updateBoard();
 	positionAnalyzer.analysePosition(newPosition, pieces, maxDepthWhenAnalysing);
 	updateAnalysisTable(analysisTableModel);
+}
+
+void Chess::performCastling(Move move,std::vector<Piece*>& t_pieces, int const pieceType)
+{
+	removePiece(pieces, move.fromSquareId);
+	Piece *newRook = generatePiece(pieceType, getPointFromSquareID(move.toSquareId),move.toSquareId);
+	pieces.push_back(newRook);
+	newRook->show();
+	newRook->setAttribute(Qt::WA_DeleteOnClose);
 }
 
 void Chess::getMoveString(Position &origPosition, Position &newPosition, QString &moveString, Move const &move, int const pieceType)

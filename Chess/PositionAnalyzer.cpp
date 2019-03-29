@@ -39,6 +39,12 @@ void PositionAnalyzer::analysePosition(Position &position, std::vector<Piece*>& 
 	PositionController positionController{};
 	
 	std::vector<Move> validMoves{ positionController.getValidMoves(position, pieces) };
+	int error{};
+	std::for_each(validMoves.begin(), validMoves.end(), [&](Move &move) {
+		if (move.fromSquareId < 0 || move.fromSquareId>63 || move.toSquareId < 0 || move.toSquareId>63) {
+			error++;
+		}
+	});
 
 	constexpr bool DEBUG_MODE{ true };
 	if constexpr (DEBUG_MODE)
