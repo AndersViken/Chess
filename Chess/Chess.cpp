@@ -43,13 +43,12 @@ Chess::Chess(QWidget *parent)
 	generateAnalysisTable();
 	generateMoveTable();
 
-	std::vector<Move> validMoves =
-	positionController.getValidMoves(position, pieces);
+
+	positionAnalyzer.analysePosition(position, pieces, maxDepthWhenAnalysing);
+	updateAnalysisTable(analysisTableModel);
+
 	//Leaf leaf{ m,initialPosition };
-
-
 }
-
 
 std::map<int, int> const pieceColors = {
 	{ whitePawn,    white },
@@ -370,8 +369,6 @@ void Chess::insertMoveInMoveTable(QStandardItemModel *& model, int fullMove, QSt
 	}
 	int const row{ (fullMove -1) }; // -1 because fullmove starts at one, but model starts at 0
 	int const col{ activeColor };
-	qDebug() << "fullMove=" << fullMove << " row=" << row << " col=" << col;
-
 
 	QModelIndex index = model->index(row, col, QModelIndex());
 	// 0 for all data
@@ -487,7 +484,6 @@ void Chess::handleMove(Move & move, Position & t_position, std::vector<Piece*>& 
 
 		t_position = positionController.generateNewPosition(move, t_position);
 		handleLegalMove(piece, pieceType, newPoint, move, origPosition, t_position);
-		qDebug() << "\n\n\n";
 	}
 	else
 	{
