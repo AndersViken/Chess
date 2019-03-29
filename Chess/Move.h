@@ -8,7 +8,9 @@ enum class MoveType {
 	castleKingsideBlack,
 	castleQueensideBlack,
 	enPassant,
-	promotion
+	promotion,
+	pawnMove,
+	capture
 };
 
 class Move

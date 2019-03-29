@@ -207,16 +207,16 @@ QString Position::createCastleFenString()
 	QChar blackCastleQueenSide = 'q';
 	QChar noCastling = '-';
 	QString castleFenString{};
-	if (canWhiteCastleKingside()) {
+	if (getCastleLegalWhiteKingside()) {
 		castleFenString.append(whiteCastleKingSide);
 	}
-	if (canWhiteCastleQueenside()) {
+	if (getCastleLegalWhiteQueenside()) {
 		castleFenString.append(whiteCastleQueenSide);
 	}
-	if (canBlackCastleKingside()) {
+	if (getCastleLegalBlackKingside()) {
 		castleFenString.append(blackCastleKingSide);
 	}
-	if (canBlackCastleQueenside()) {
+	if (getCastleLegalBlackQueenside()) {
 		castleFenString.append(blackCastleQueenSide);
 	}
 	if (std::size(castleFenString) == 0) {
@@ -251,8 +251,8 @@ void Position::insertNewMove(Move const &move)
 
 void Position::setCastleValues(std::vector<QChar> &castleVector)
 {
-	whiteCanCastleKingside = (std::find(castleVector.begin(), castleVector.end(), 'K') == castleVector.end()) ? false : true;
-	whiteCanCastleQueenside = (std::find(castleVector.begin(), castleVector.end(), 'Q') == castleVector.end()) ? false : true;
-	blackCanCastleKingside = (std::find(castleVector.begin(), castleVector.end(), 'k') == castleVector.end()) ? false : true;
-	blackCanCastleQueenside = (std::find(castleVector.begin(), castleVector.end(), 'q') == castleVector.end()) ? false : true;
+	castleLegalWhiteKingside = (std::find(castleVector.begin(), castleVector.end(), 'K') == castleVector.end()) ? false : true;
+	castleLegalWhiteQueenside = (std::find(castleVector.begin(), castleVector.end(), 'Q') == castleVector.end()) ? false : true;
+	castleLegalBlackKingside = (std::find(castleVector.begin(), castleVector.end(), 'k') == castleVector.end()) ? false : true;
+	castleLegalBlackQueenside = (std::find(castleVector.begin(), castleVector.end(), 'q') == castleVector.end()) ? false : true;
 }

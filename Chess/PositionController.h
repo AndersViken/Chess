@@ -26,7 +26,7 @@ public:
 
 	Position generateNewPosition(Move &mov, Position &oldPos);
 	void updateFenString(Position &position);
-	bool validateMove(Position & position, std::vector<Piece*> pieces, Move move, MoveType & moveType);
+	bool validateMove(Position & position, std::vector<Piece*> pieces, Move & move);
 	bool validateMove(Position & newPosition, Position & oldPosition, Move move, int pieceType, std::vector<specialMove>& specialMoves);
 	//QChar getFenCharFromSquareID(QString fenString, int const squareID);
 	bool validateBishopMove(Move const &move);
