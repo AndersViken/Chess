@@ -49,10 +49,22 @@ public:
 	void updateActiveColor();
 	int getActiveColorInt();
 	void setActiveColor(QChar t_activeColor) { activeColor = t_activeColor; };
-	bool canWhiteCastleKingside() { return whiteCanCastleKingside; };
-	bool canWhiteCastleQueenside() { return whiteCanCastleQueenside; };
-	bool canBlackCastleKingside() { return blackCanCastleKingside; };
-	bool canBlackCastleQueenside() { return blackCanCastleQueenside; };
+	bool getCastleLegalWhiteKingside() { return castleLegalWhiteKingside; };
+	bool getCastleLegalWhiteQueenside() { return castleLegalWhiteQueenside; };
+	bool getCastleLegalBlackKingside() { return castleLegalBlackKingside; };
+	bool getCastleLegalBlackQueenside() { return castleLegalBlackQueenside; };
+	void setCastleLegalWhiteKingside(bool t_castleLegalWhiteKingside) {
+		castleLegalWhiteKingside = t_castleLegalWhiteKingside;
+	};
+	void setCastleLegalWhiteQueenside(bool t_castleLegalWhiteQueenside) {
+		castleLegalWhiteQueenside = t_castleLegalWhiteQueenside;
+	};
+	void setCastleLegalBlackKingside(bool t_castleLegalBlackKingside) {
+		castleLegalBlackKingside = t_castleLegalBlackKingside;
+	};
+	void setCastleLegalBlackQueenside(bool t_castleLegalBlackQueenside) {
+		castleLegalBlackQueenside = t_castleLegalBlackQueenside;
+	};
 	QString getEnPassantSquare() { return enPassantSquare; };
 	int getHalfMoveClock() { return halfMoveClock; };
 	int getFullMove() { return fullMove; };
@@ -84,10 +96,10 @@ private:
 	QString fenString;
 	std::vector<int> piecePlacement;
 	QChar activeColor;
-	bool	whiteCanCastleKingside;
-	bool	whiteCanCastleQueenside;
-	bool	blackCanCastleKingside;
-	bool	blackCanCastleQueenside;
+	bool	castleLegalWhiteKingside;
+	bool	castleLegalWhiteQueenside;
+	bool	castleLegalBlackKingside;
+	bool	castleLegalBlackQueenside;
 	QString enPassantSquare;
 	int		halfMoveClock;
 	int		fullMove;

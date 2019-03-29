@@ -560,8 +560,10 @@ void Chess::dropEvent(QDropEvent *event)
 		Position origPosition = position;
 	
 		std::vector<specialMove> specialMoves{}; // probably not needed
-		MoveType moveType{};
-		bool legalMove = positionController.validateMove(position, pieces, move, moveType);
+		bool legalMove = positionController.validateMove(position, pieces, move);
+
+		// should here also detect a rook move, to loose castling rights with that rook
+		checkIfCastling(move, position);
 
 		position = positionController.generateNewPosition(move, position);
 		
@@ -569,7 +571,7 @@ void Chess::dropEvent(QDropEvent *event)
 		//bool legalMove = positionController.validateMove(position, origPosition, move, pieceType, specialMoves);
 		if (legalMove)
 		{
-			handleLegalMove(piece, pieceType, newPoint, move, origPosition, position, specialMoves, moveType);
+			handleLegalMove(piece, pieceType, newPoint, move, origPosition, position, specialMoves);
 			qDebug() << "\n\n\n";
 		}
 		else
@@ -612,31 +614,10 @@ void Chess::dropEvent(QDropEvent *event)
 }
 
 void Chess::handleLegalMove(Piece * &piece, int const pieceType, QPoint const &newPoint, Move const &move,
-	Position &origPosition, Position &newPosition, std::vector<specialMove> &specialMoves, MoveType moveType)
+	Position &origPosition, Position &newPosition, std::vector<specialMove> &specialMoves)
 {
 	QString moveString{};
 	bool moveStringAlreadyFilled = false;
-	std::for_each(specialMoves.begin(), specialMoves.end(), [this,&moveString,&moveStringAlreadyFilled](specialMove move) {
-		
-	});
-
-	switch (moveType) {
-		case MoveType::castleKingsideWhite:
-			performCastling({ 63,61 }, pieces, whiteRook);
-			break;
-		case MoveType::castleQueensideWhite:
-			performCastling({ 56,59 }, pieces, whiteRook);
-			break;
-		case MoveType::castleKingsideBlack:
-			performCastling({ 7,5 }, pieces, blackRook);
-			break;
-		case MoveType::castleQueensideBlack:
-			performCastling({ 0,3 }, pieces, blackRook);
-			break;
-		default: break;
-	}
-
-	specialMoves.clear();
 
 	piece = generatePiece(pieceType, newPoint, move.toSquareId);
 	removePiece(pieces, move.toSquareId);
@@ -650,6 +631,34 @@ void Chess::handleLegalMove(Piece * &piece, int const pieceType, QPoint const &n
 	updateBoard();
 	positionAnalyzer.analysePosition(newPosition, pieces, maxDepthWhenAnalysing);
 	updateAnalysisTable(analysisTableModel);
+}
+
+void Chess::checkIfCastling(Move& move, Position& newPosition)
+{
+
+	switch (move.moveType) {
+	case MoveType::castleKingsideWhite:
+		performCastling({ 63,61 }, pieces, whiteRook);
+		newPosition.setCastleLegalWhiteKingside(false);
+		newPosition.setCastleLegalWhiteQueenside(false);
+		break;
+	case MoveType::castleQueensideWhite:
+		performCastling({ 56,59 }, pieces, whiteRook);
+		newPosition.setCastleLegalWhiteKingside(false);
+		newPosition.setCastleLegalWhiteQueenside(false);
+		break;
+	case MoveType::castleKingsideBlack:
+		performCastling({ 7,5 }, pieces, blackRook);
+		newPosition.setCastleLegalBlackKingside(false);
+		newPosition.setCastleLegalBlackQueenside(false);
+		break;
+	case MoveType::castleQueensideBlack:
+		performCastling({ 0,3 }, pieces, blackRook);
+		newPosition.setCastleLegalBlackKingside(false);
+		newPosition.setCastleLegalBlackQueenside(false);
+		break;
+	default: break;
+	}
 }
 
 void Chess::performCastling(Move move,std::vector<Piece*>& t_pieces, int const pieceType)
