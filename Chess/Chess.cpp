@@ -474,6 +474,31 @@ QString Chess::getPositionFromDialog(QInputDialog & dialog)
 	return dialog.textValue();
 }
 
+void Chess::handleMove(Move & move, Position & t_position, std::vector<Piece*>& t_pieces, int const pieceType, QPoint const &newPoint, QPoint const &origPoint)
+{
+	Position origPosition = t_position;
+	bool legalMove = positionController.validateMove(t_position, t_pieces, move);
+
+	Piece *piece;
+	if (legalMove)
+	{
+		// TODO: should here also detect a rook move, to loose castling rights with that rook
+		checkIfCastling(move, t_position);
+
+		t_position = positionController.generateNewPosition(move, t_position);
+		handleLegalMove(piece, pieceType, newPoint, move, origPosition, t_position);
+		qDebug() << "\n\n\n";
+	}
+	else
+	{
+		piece = generatePiece(pieceType, origPoint, move.fromSquareId);
+		t_position = origPosition;
+	}
+
+	piece->show();
+	piece->setAttribute(Qt::WA_DeleteOnClose);
+}
+
 
 void Chess::updateFenString()
 {
@@ -548,8 +573,8 @@ void Chess::dropEvent(QDropEvent *event)
 
 		int pieceType{};
 		int origSquareID{};
-		QPoint offset{};
 		QPoint origPoint{};
+		QPoint offset{};
 		dataStream >> pieceType >> origSquareID >> origPoint.rx() >> origPoint.ry() >> offset;
 
 		QPoint droppedPoint{ event->pos() - offset };
@@ -557,32 +582,8 @@ void Chess::dropEvent(QDropEvent *event)
 		int newSquareID = getSquareIdFromPoint(newPoint);
 
 		Move move{ origSquareID, newSquareID };
-		Position origPosition = position;
-	
-		std::vector<specialMove> specialMoves{}; // probably not needed
-		bool legalMove = positionController.validateMove(position, pieces, move);
-
-		// should here also detect a rook move, to loose castling rights with that rook
-		checkIfCastling(move, position);
-
-		position = positionController.generateNewPosition(move, position);
+		handleMove(move, position, pieces, pieceType, newPoint, origPoint);
 		
-		Piece *piece;
-		//bool legalMove = positionController.validateMove(position, origPosition, move, pieceType, specialMoves);
-		if (legalMove)
-		{
-			handleLegalMove(piece, pieceType, newPoint, move, origPosition, position, specialMoves);
-			qDebug() << "\n\n\n";
-		}
-		else
-		{
-			piece = generatePiece(pieceType, origPoint, origSquareID);
-			position = origPosition;
-		}
-			
-		piece->show();
-		piece->setAttribute(Qt::WA_DeleteOnClose);
-	
 		if (event->source() == this) {
 			event->setDropAction(Qt::MoveAction);
 			event->accept();
@@ -614,17 +615,16 @@ void Chess::dropEvent(QDropEvent *event)
 }
 
 void Chess::handleLegalMove(Piece * &piece, int const pieceType, QPoint const &newPoint, Move const &move,
-	Position &origPosition, Position &newPosition, std::vector<specialMove> &specialMoves)
+	Position &origPosition, Position &newPosition)
 {
-	QString moveString{};
-	bool moveStringAlreadyFilled = false;
+	QString moveString = move.moveString;
 
 	piece = generatePiece(pieceType, newPoint, move.toSquareId);
 	removePiece(pieces, move.toSquareId);
 	removePiece(pieces, move.fromSquareId);
 	pieces.push_back(piece);
 	
-	if (!moveStringAlreadyFilled) {
+	if (!moveString.compare("")){ // move string not filled yet
 		getMoveString(origPosition, newPosition, moveString, move, pieceType);
 	}
 	insertMoveInMoveTable(moveTableModel, origPosition.getFullMove(), moveString, origPosition.getActiveColorInt());
@@ -663,9 +663,9 @@ void Chess::checkIfCastling(Move& move, Position& newPosition)
 
 void Chess::performCastling(Move move,std::vector<Piece*>& t_pieces, int const pieceType)
 {
-	removePiece(pieces, move.fromSquareId);
+	removePiece(t_pieces, move.fromSquareId);
 	Piece *newRook = generatePiece(pieceType, getPointFromSquareID(move.toSquareId),move.toSquareId);
-	pieces.push_back(newRook);
+	t_pieces.push_back(newRook);
 	newRook->show();
 	newRook->setAttribute(Qt::WA_DeleteOnClose);
 }

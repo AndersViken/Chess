@@ -69,6 +69,9 @@ public:
 	int getHalfMoveClock() { return halfMoveClock; };
 	int getFullMove() { return fullMove; };
 	void setFullMove(int t_fullMove) { fullMove = t_fullMove; };
+	void incrementFullMove() { fullMove++; };
+	void resetHalfMoveClock() { halfMoveClock = 0; };
+	void incrementHalfMoveClock() { halfMoveClock++; };
 	std::vector<int> getPiecePlacement() { return piecePlacement; };
 	void insertNewMove(Move const &move);
 	//rnbqkbnr / pppppppp / 8 / 8 / 8 / 8 / PPPPPPPP / RNBQKBNR w KQkq - 0 1

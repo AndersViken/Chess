@@ -54,14 +54,22 @@ Position PositionController::generateNewPosition(Move & move, Position & oldPosi
 	newPosition.insertNewMove(move);
 
 	if (oldPosition.getActiveColorInt() == black) {
-		newPosition.setFullMove(oldPosition.getFullMove() + 1);
+		newPosition.incrementFullMove();
 	}
 	newPosition.updateActiveColor();
 
+	if (move.moveType == MoveType::capture ||
+		move.moveType == MoveType::pawnMove ||
+		move.moveType == MoveType::promotion) {
+		newPosition.resetHalfMoveClock();
+	}
+	else {
+		newPosition.incrementHalfMoveClock();
+	}
+	
+
 	// need to update all position parameters here.
-	// - waiting with castle
 	// - waiting with en passant
-	// - waiting with half move
 
 	qDebug() << " new position. fullmove=" << newPosition.getFullMove();
 
@@ -497,7 +505,7 @@ void PositionController::checkIfValidMovePawnForward(Location const & location, 
 {
 	if (checkIfSquare(location)) {
 		if (checkIfMovingToPiece(position, location) == false) {
-			addValidMove(moves, origLocation, location);
+			addValidMove(moves, origLocation, location, MoveType::pawnMove);
 		}
 	}
 }
@@ -505,7 +513,7 @@ void PositionController::checkIfValidMovePawnDiagonal(Location const & location,
 {
 	if (checkIfSquare(location)) {
 		if (checkIfMovingToOppositeColorPiece(position, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(location))) {
-			addValidMove(moves, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(location));
+			addValidMove(moves, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(location), MoveType::capture);
 		}
 	}
 }
@@ -587,6 +595,7 @@ void PositionController::getValidMovesInDirection(Location const origLocation, P
 }
 void PositionController::checkIfValidMove(Location const & newLocation, Location const & origLocation, Position & position, std::vector<Move> & moves, bool & continueSearch)
 {
+	/* backup before changing if else order
 	if (checkIfSquare(newLocation)) {
 		if (checkIfMovingToOwnColorPiece(position, origLocation, newLocation)) {
 			continueSearch = false;
@@ -596,6 +605,22 @@ void PositionController::checkIfValidMove(Location const & newLocation, Location
 		}
 		if (checkIfMovingToOppositeColorPiece(position, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(newLocation))) {
 			continueSearch = false;
+		}
+	}
+	else {
+		continueSearch = false;
+	}
+	*/
+	if (checkIfSquare(newLocation)) {
+		if (checkIfMovingToOwnColorPiece(position, origLocation, newLocation)) {
+			continueSearch = false;
+		}
+		else if (checkIfMovingToOppositeColorPiece(position, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(newLocation))) {
+			continueSearch = false;
+			addValidMove(moves, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(newLocation), MoveType::capture);
+		}
+		else {
+			addValidMove(moves, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(newLocation));
 		}
 	}
 	else {
