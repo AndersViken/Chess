@@ -2,7 +2,8 @@
 #include "Move.h"
 #include "Position.h"
 #include "Piece.h"
-
+#include "PieceView.h"
+#include "PositionAnalyzer.h"
 struct specialMove
 {
 	int square;
@@ -42,7 +43,8 @@ public:
 	bool checkIfMovingToOppositeColorPiece(Position & position, int const activeSquareID, int const newSquareID);
 	bool checkIfMovingToPiece(Position & oldPosition, int const newSquareID);
 	bool checkIfMovingToPiece(Position & oldPosition, Location newLocation);
-	bool checkIfKingAttacked(Position & position, std::vector<Piece*> pieces, int const pieceTypeToFind, int const activeColor);
+	bool checkIfKingAttacked(Position & position, std::vector<Piece*> pieces, int const activeColor);
+	bool checkIfSquareAttacked(Position & position, std::vector<Piece*> pieces, int const activeColor, int const squareID);
 	bool checkIfPiecesInSquares(Position const position, std::vector<int> const squares);
 	int rowsMoved(Move move);
 	int rowsMovedWithSign(Move move);
@@ -50,24 +52,42 @@ public:
 	int colsMovedWithSign(Move move);
 	int getColorFromType(int pieceType, int const returnValueIfNotFound);
 
-	std::vector<Move> getValidMoves(Position & position, std::vector<Piece*>& pieces, int const activeColor);
+	std::vector<Move> getValidMoves(Position & position, std::vector<Piece*>& pieces, int const activeColor, bool isActualMove);
 
-	void getValidMovesForPiece(Position & position, Piece *& piece, std::vector<Move> &moves);
-	void getValidMovesForPawn(Position & position, Piece *& piece, std::vector<Move> &moves);
-	void checkIfValidMovePawnForward(Location const & location, Location const & origLocation, Position & position, std::vector<Move>& moves);
-	void checkIfValidMovePawnDiagonal(Location const & location, Location const & origLocation, Position & position, std::vector<Move>& moves);
-	void getValidKnightMovesInDirections(Location const origLocation, Position & position, std::vector<Move> & moves, std::vector< std::vector<Direction>> directionsVector);
-	void getValidKingMovesInDirections(Location const origLocation, Position & position, std::vector<Move>& moves, std::vector<Direction> directions);
-	void getValidKingMovesCastling(Location const origLocation, std::vector<Move>& moves, int const pieceColor, bool canCastleKingSide, bool canCastleQueenSide);
-	void getValidMovesInDirections(Location const origLocation, Position & position, std::vector<Move>& moves, std::vector<Direction> directions);
-	void getValidMovesInDirection(Location const origLocation, Position & position, std::vector<Move>& moves, Direction direction);
-	void checkIfValidMove(Location const & newLocation, Location const & origLocation, Position & position, std::vector<Move>& moves, bool & continueSearch);
-	void getValidMovesForRook(Position & position, Piece *& piece, std::vector<Move> &moves);
-	void getValidMovesForBishop(Position & position, Piece *& piece, std::vector<Move> &moves);
-	void getValidMovesForKnight(Position & position, Piece *& piece, std::vector<Move> &moves);
-	void getValidMovesForQueen(Position & position, Piece *& piece, std::vector<Move> &moves);
-	void getValidMovesForKing(Position & position, Piece *& piece, std::vector<Move> &moves);
+	void getValidMovesForPiece(Position & position, std::vector<Piece*>& pieces, Piece *& piece, std::vector<Move>& moves, bool isActualMove);
 
+	void getValidMovesForPawn(Position & position, std::vector<Piece*>& pieces, Piece *& piece, std::vector<Move>& moves, bool isActualMove);
+
+	void checkIfValidMovePawnForward(Location const & location, Location const & origLocation, Position & position, std::vector<Piece*>& pieces, std::vector<Move>& moves, bool isActualMove);
+
+	void checkIfValidMovePawnDiagonal(Location const & location, Location const & origLocation, Position & position, std::vector<Piece*>& pieces, std::vector<Move>& moves, bool isActualMove);
+
+	void getValidKnightMovesInDirections(Location const origLocation, Position & position, std::vector<Piece*>& pieces, std::vector<Move>& moves, std::vector<std::vector<Direction>> directionsVector, bool isActualMove);
+
+	void getValidKingMovesInDirections(Location const origLocation, Position & position, std::vector<Piece*>& pieces, std::vector<Move>& moves, std::vector<Direction> directions, bool isActualMove);
+
+	void getValidKingMovesCastling(Location const origLocation, Position & position, std::vector<Piece*>& pieces, std::vector<Move>& moves, int const pieceColor, bool canCastleKingSide, bool canCastleQueenSide, bool isActualMove);
+
+	void getValidMovesInDirections(Location const origLocation, Position & position, std::vector<Piece*>& pieces, std::vector<Move>& moves, std::vector<Direction> directions, bool isActualMove);
+
+	void getValidMovesInDirection(Location const origLocation, Position & position, std::vector<Piece*>& pieces, std::vector<Move>& moves, Direction direction, bool isActualMove);
+
+	void checkIfValidMove(Location const & newLocation, Location const & origLocation, Position & position, std::vector<Piece*> pieces, std::vector<Move>& moves, bool & continueSearch, bool isActualMove);
+
+	bool checkIfKingAttackedAfterMove(Position & position, std::vector<Piece*>& pieces, int const inactiveColor, Move move);
+
+	
+	void checkIfListOfSquaresAttackedAfterMove(Position & position, Move move, std::vector<int> squares);
+	void getValidMovesForRook(Position & position, std::vector<Piece*>& pieces, Piece *& piece, std::vector<Move>& moves, bool isActualMove);
+
+	void getValidMovesForBishop(Position & position, std::vector<Piece*>& pieces, Piece *& piece, std::vector<Move>& moves, bool isActualMove);
+
+	void getValidMovesForKnight(Position & position, std::vector<Piece*>& pieces, Piece *& piece, std::vector<Move>& moves, bool isActualMove);
+
+	void getValidMovesForQueen(Position & position, std::vector<Piece*>& pieces, Piece *& piece, std::vector<Move>& moves, bool isActualMove);
+
+	void getValidMovesForKing(Position & position, std::vector<Piece*>& pieces, Piece *& piece, std::vector<Move>& moves, bool isActualMove);
+	
 	void getMoveString(Position & origPosition, Move & move, int const pieceType);
 
 	void getSquareString(int const & squareID, QString & squareString);
@@ -78,13 +98,13 @@ public:
 	Location getLocationFromSquareID(int const squareID);
 	int getSquareIDFromLocation(Location location);
 	void moveLocation(Location& location, Direction const direction);
-	void addValidMove(std::vector<Move>& moves, int const fromSquareID, int const toSquareID);
+	void addValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, int const fromSquareID, int const toSquareID, MoveType moveType, bool isActualMove);
+	void addValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, int const fromSquareID, int const toSquareID, bool isActualMove);
+	void addValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, Location const & origLocation, Location const & location, bool isActualMove);
+	void addValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, Location const & origLocation, Location const & location, MoveType moveType, bool isActualMove);
 
-	void addValidMove(std::vector<Move>& moves, int const fromSquareID, int const toSquareID, MoveType moveType);
-
-	void addValidMove(std::vector<Move>& moves, Location const & location, Location const & origLocation);
-
-	void addValidMove(std::vector<Move>& moves, Location const & origLocation, Location const & location, MoveType moveType);
-
+	void removePiece(std::vector<Piece*>& pieceVec, int squareID);
+	
+	
 };
 

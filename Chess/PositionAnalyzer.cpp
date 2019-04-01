@@ -39,7 +39,7 @@ void PositionAnalyzer::analysePosition(Position &position, std::vector<Piece*>& 
 
 	PositionController positionController{};
 	
-	std::vector<Move> validMoves{ positionController.getValidMoves(position, pieces, position.getActiveColorInt()) };
+	std::vector<Move> validMoves{ positionController.getValidMoves(position, pieces, position.getActiveColorInt(), true) };
 	int error{};
 	std::for_each(validMoves.begin(), validMoves.end(), [&](Move &move) {
 		if (move.fromSquareId < 0 || move.fromSquareId>63 || move.toSquareId < 0 || move.toSquareId>63) {
@@ -47,8 +47,8 @@ void PositionAnalyzer::analysePosition(Position &position, std::vector<Piece*>& 
 		}
 	});
 
-	bool whiteKingAttacked{ positionController.checkIfKingAttacked(position, pieces, whiteKing, black) };
-	bool blackKingAttacked{ positionController.checkIfKingAttacked(position, pieces, blackKing, white) };
+	bool whiteKingAttacked{ positionController.checkIfKingAttacked(position, pieces, black) };
+	bool blackKingAttacked{ positionController.checkIfKingAttacked(position, pieces, white) };
 	qDebug() << "fullmove: " << position.getFullMove();
 	qDebug() << "whiteKingAttacked: " << whiteKingAttacked;
 	qDebug() << "blackKingAttacked: " << blackKingAttacked;

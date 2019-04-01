@@ -50,36 +50,7 @@ Chess::Chess(QWidget *parent)
 	//Leaf leaf{ m,initialPosition };
 }
 
-std::map<int, int> const pieceColors = {
-	{ whitePawn,    white },
-	{ whiteRook,    white },
-	{ whiteKnight,  white },
-	{ whiteBishop,  white },
-	{ whiteQueen,   white },
-	{ whiteKing,    white },
-	{ blackPawn,    black },
-	{ blackRook,    black },
-	{ blackKnight,  black },
-	{ blackBishop,  black },
-	{ blackQueen,   black },
-	{ blackKing,    black }
-};
 
-QString imageDir = ":/Images/";
-std::map<int, QString> imagePaths = {
-	{ whitePawn,    imageDir + "whitePawn"     },
-	{ whiteRook,    imageDir + "whiteRook"     },
-	{ whiteKnight,  imageDir + "whiteKnight"   },
-	{ whiteBishop,  imageDir + "whiteBishop"	},
-	{ whiteQueen,   imageDir + "whiteQueen"    },
-	{ whiteKing,    imageDir + "whiteKing"     },
-	{ blackPawn,    imageDir + "blackPawn"     },
-	{ blackRook,    imageDir + "blackRook"     },
-	{ blackKnight,  imageDir + "blackKnight"   },
-	{ blackBishop,  imageDir + "blackBishop"   },
-	{ blackQueen,   imageDir + "blackQueen"    },
-	{ blackKing,    imageDir + "blackKing"     }
-};
 
 std::map<int, QChar> pieceChars = {
 	{ whiteRook,    'R' },
@@ -257,51 +228,14 @@ std::vector<Piece*> Chess::generatePieces(Position &t_position)
 		if (pieceType != empty)
 		{
 			QPoint coordinate = getPointFromSquareID(squareID);
-			piecesVec.push_back(generatePiece(pieceType, coordinate, squareID));
+			piecesVec.push_back(pieceView.generatePiece(pieceType, coordinate, squareID, this));
 		}
 		squareID++;
 	}
 	return piecesVec;
 }
 
-Piece* Chess::generatePiece(int const pieceType, QPoint coordinate, int squareID)
-{
 
-	auto colorSearch = pieceColors.find(pieceType);
-	int color{};
-	if (colorSearch != pieceColors.end()) {
-		color = colorSearch->second;
-	}
-	else {
-		qDebug() << "generatePiece(): no color found.";
-		return{};
-	}
-
-	auto imageSearch{ imagePaths.find(pieceType) };
-	if (imageSearch != imagePaths.end()) {
-		QString imagePath = imageSearch->second;
-		int tempImageSize = imageSize;
-		Piece *piece{ new Piece(coordinate, squareID, pieceType, color, imagePath , tempImageSize, this) };
-		//piece->setAttribute(Qt::WA_DeleteOnClose);
-		return piece;
-	}
-	return {};
-}
-
-void Chess::removePiece(std::vector<Piece*>& pieceVec, int squareID)
-{
-	auto it = std::find_if(pieceVec.begin(), pieceVec.end(),
-		[&squareID](Piece *piece) {return (piece->getSquareID() == squareID); });
-	if (it != pieceVec.end())
-	{
-		if (*it)
-		{
-			Piece* pieceToErase = static_cast<Piece*>(*it);
-			pieceToErase->hide();
-			pieceVec.erase(it);
-		}
-	}
-}
 
 void Chess::showAllPieces(std::vector<Piece*>& pieceVec)
 {
@@ -487,7 +421,7 @@ void Chess::handleMove(Move & move, Position & t_position, std::vector<Piece*>& 
 	}
 	else
 	{
-		piece = generatePiece(pieceType, origPoint, move.fromSquareId);
+		piece = pieceView.generatePiece(pieceType, origPoint, move.fromSquareId, this);
 		t_position = origPosition;
 	}
 
@@ -615,9 +549,9 @@ void Chess::handleLegalMove(Piece * &piece, int const pieceType, QPoint const &n
 {
 	QString moveString = move.moveString;
 
-	piece = generatePiece(pieceType, newPoint, move.toSquareId);
-	removePiece(pieces, move.toSquareId);
-	removePiece(pieces, move.fromSquareId);
+	piece = pieceView.generatePiece(pieceType, newPoint, move.toSquareId, this);
+	positionController.removePiece(pieces, move.toSquareId);
+	positionController.removePiece(pieces, move.fromSquareId);
 	pieces.push_back(piece);
 	
 	if (!moveString.compare("")){ // move string not filled yet
@@ -659,8 +593,8 @@ void Chess::checkIfCastling(Move& move, Position& newPosition)
 
 void Chess::performCastling(Move move,std::vector<Piece*>& t_pieces, int const pieceType)
 {
-	removePiece(t_pieces, move.fromSquareId);
-	Piece *newRook = generatePiece(pieceType, getPointFromSquareID(move.toSquareId),move.toSquareId);
+	positionController.removePiece(t_pieces, move.fromSquareId);
+	Piece *newRook = pieceView.generatePiece(pieceType, getPointFromSquareID(move.toSquareId),move.toSquareId, this);
 	t_pieces.push_back(newRook);
 	newRook->show();
 	newRook->setAttribute(Qt::WA_DeleteOnClose);

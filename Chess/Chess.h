@@ -9,6 +9,7 @@
 #include "PositionController.h"
 #include "PositionAnalyzer.h"
 #include "PieceAnimation.h"
+#include "PieceView.h"
 #include <vector>
 #include <QLabel>
 
@@ -43,6 +44,7 @@ private:
 	PositionController positionController = {};
 	PositionAnalyzer positionAnalyzer = {};
 	PieceAnimation pieceAnimation = {};
+	PieceView pieceView = {};
 	QLabel *boarder;
 	QLabel* fenStringLabel;
 	QTableView* moveTableView;
@@ -54,9 +56,7 @@ private:
 	void updateFenString();
 	void updateBoard();
 	void updateColorRules();
-	Piece* generatePiece(int const pieceType, QPoint coordinate, int squareID);
 	std::vector<Piece*> generatePieces(Position &position);
-	void removePiece(std::vector<Piece*> &pieceVec, int squareID);
 	void showAllPieces(std::vector<Piece*>& pieceVec);
 	void generateBoard(Position &position);
 	void generateBoarder();
