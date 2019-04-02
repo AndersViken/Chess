@@ -484,7 +484,7 @@ void Chess::updateColorRules()
 void Chess::dragEnterEvent(QDragEnterEvent *event)
 {
 
-	setCursor(Qt::ClosedHandCursor);
+	//setCursor(Qt::ClosedHandCursor);
 	if (event->mimeData()->hasFormat(chessMimeType())) {
 		if (children().contains(event->source())) {
 			event->setDropAction(Qt::MoveAction);
@@ -505,7 +505,7 @@ void Chess::dragEnterEvent(QDragEnterEvent *event)
 void Chess::dragMoveEvent(QDragMoveEvent *event)
 {
 
-	setCursor(Qt::ClosedHandCursor);
+	//setCursor(Qt::ClosedHandCursor);
 	if (event->mimeData()->hasFormat(chessMimeType())) {
 		if (children().contains(event->source())) {
 			event->setDropAction(Qt::MoveAction);
@@ -697,7 +697,7 @@ QChar Chess::getPieceChar(int const pieceType)
 void Chess::mousePressEvent(QMouseEvent *event)
 {
 
-	setCursor(Qt::ClosedHandCursor);
+	//setCursor(Qt::ClosedHandCursor);
 	Piece *piece{ static_cast<Piece*>(childAt(event->pos())) };
 	
 	if (!piece || !piece->hasTabletTracking()) // TabletTracking used only for Chess Pieces, not board
@@ -726,7 +726,7 @@ void Chess::mousePressEvent(QMouseEvent *event)
 	if (drag->exec(Qt::MoveAction | Qt::CopyAction, Qt::CopyAction) == Qt::MoveAction)
 		//piece->close();
 	{
-		setCursor(Qt::ClosedHandCursor);
+		//setCursor(Qt::ClosedHandCursor);
 	}
 	else {
 		piece->show();
