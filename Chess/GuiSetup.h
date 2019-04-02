@@ -24,7 +24,7 @@ int const coordinateOffsetBoarder{ squarePixelSize / 40 };
 int const analysisTableOffsetFromBoardX{ 10 };
 int const analysisTableOffsetFromBoardY{ -coordinateOffsetBoarder };
 int const analysisTableWidth{ 300 };
-int const analysisTableHeight{ 100 };
+int const analysisTableHeight{ 150 };
 
 int const moveTableOffsetFromBoardX	{ analysisTableOffsetFromBoardX };
 int const moveTableOffsetFromAnalysisBoard{ -5 };

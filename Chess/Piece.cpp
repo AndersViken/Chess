@@ -1,5 +1,6 @@
 #include "Piece.h"
 
+
 Piece::Piece()
 {
 }
@@ -22,6 +23,8 @@ Piece::Piece(QPoint coordinate, int squareID, int pieceType, int color, QString 
 Piece::~Piece()
 {
 }
+
+
 
 QPoint Piece::getCoordinate()
 {

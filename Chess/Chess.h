@@ -9,6 +9,7 @@
 #include "PositionController.h"
 #include "PositionAnalyzer.h"
 #include "PieceAnimation.h"
+#include "PieceView.h"
 #include <vector>
 #include <QLabel>
 
@@ -43,6 +44,7 @@ private:
 	PositionController positionController = {};
 	PositionAnalyzer positionAnalyzer = {};
 	PieceAnimation pieceAnimation = {};
+	PieceView pieceView = {};
 	QLabel *boarder;
 	QLabel* fenStringLabel;
 	QTableView* moveTableView;
@@ -54,9 +56,7 @@ private:
 	void updateFenString();
 	void updateBoard();
 	void updateColorRules();
-	Piece* generatePiece(int const pieceType, QPoint coordinate, int squareID);
 	std::vector<Piece*> generatePieces(Position &position);
-	void removePiece(std::vector<Piece*> &pieceVec, int squareID);
 	void showAllPieces(std::vector<Piece*>& pieceVec);
 	void generateBoard(Position &position);
 	void generateBoarder();
@@ -79,10 +79,10 @@ private:
 	void setLabelColor(const int &color, QLabel * label);
 	QString Chess::getPositionFromDialog(QInputDialog & dialog);
 	void handleMove(Move & move, Position & t_position, std::vector<Piece*>& t_pieces, int const pieceType, QPoint const & newPoint, QPoint const & origPoint);
-	void handleLegalMove(Piece *& piece, int const pieceType, QPoint const & newPoint, Move const & move, Position & origPosition, Position & newPosition);
+	void handleLegalMove(Piece *& piece, int const pieceType, QPoint const & newPoint, Move const & move, Position & origPosition, Position & newPosition, std::vector<Piece*>& t_pieces);
 	void checkIfCastling(Move & move, Position & newPosition);
 	void performCastling(Move move, std::vector<Piece*>& t_pieces, int const pieceType);
-	void getMoveString(Position &origPosition, Position &newPosition, QString & moveString, Move const &move, int const pieceType);
+	void getMoveString(Position & origPosition, Position & newPosition, std::vector<Piece*>& t_pieces, QString & moveString, Move const & move, int const pieceType);
 	void getSquareString(const int & origSquareID, QString &origSquareString);
 	QChar getPieceChar(int const pieceType);
 

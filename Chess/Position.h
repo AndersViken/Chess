@@ -36,6 +36,8 @@ std::map<int, QChar> const pieceLettersReverse = {
 	{ whiteKing, 'K'  }
 };
 
+enum class GameStatus { notStarted, inProgress, stalemate, draw, whiteWon, blackWon };
+
 class Position
 {
 public:
@@ -82,6 +84,10 @@ public:
 	QString createFullMoveFenString();
 	bool getActiveKingAttacked() { return activeKingAttacked; };
 	void setActiveKingAttacked(bool t_activeKingAttacked) { activeKingAttacked = t_activeKingAttacked; };
+	bool getGameFinished() { return gameFinished; };
+	void setGameFinished(bool t_gameFinished) { gameFinished = t_gameFinished; };
+	GameStatus getGameStatus() { return gameStatus; };
+	void setGameStatus(GameStatus t_gameStatus) { gameStatus = t_gameStatus; };
 
 private:
 	void processFenString(QString const text);
@@ -109,5 +115,7 @@ private:
 	int		halfMoveClock;
 	int		fullMove;
 	bool	activeKingAttacked;
+	bool	gameFinished;
+	GameStatus gameStatus;
 };
 

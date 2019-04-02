@@ -39,7 +39,7 @@ void PositionAnalyzer::analysePosition(Position &position, std::vector<Piece*>& 
 
 	PositionController positionController{};
 	
-	std::vector<Move> validMoves{ positionController.getValidMoves(position, pieces, position.getActiveColorInt()) };
+	std::vector<Move> validMoves{ positionController.getValidMoves(position, pieces, position.getActiveColorInt(), true) };
 	int error{};
 	std::for_each(validMoves.begin(), validMoves.end(), [&](Move &move) {
 		if (move.fromSquareId < 0 || move.fromSquareId>63 || move.toSquareId < 0 || move.toSquareId>63) {
@@ -47,11 +47,11 @@ void PositionAnalyzer::analysePosition(Position &position, std::vector<Piece*>& 
 		}
 	});
 
-	bool whiteKingAttacked{ positionController.checkIfKingAttacked(position, pieces, whiteKing, black) };
-	bool blackKingAttacked{ positionController.checkIfKingAttacked(position, pieces, blackKing, white) };
+	//bool whiteKingAttacked{ positionController.checkIfKingAttacked(position, pieces, black) };
+	//bool blackKingAttacked{ positionController.checkIfKingAttacked(position, pieces, white) };
 	qDebug() << "fullmove: " << position.getFullMove();
-	qDebug() << "whiteKingAttacked: " << whiteKingAttacked;
-	qDebug() << "blackKingAttacked: " << blackKingAttacked;
+	//qDebug() << "whiteKingAttacked: " << whiteKingAttacked;
+	//qDebug() << "blackKingAttacked: " << blackKingAttacked;
 
 	constexpr bool DEBUG_MODE{ true };
 	if constexpr (DEBUG_MODE)
@@ -69,7 +69,7 @@ void PositionAnalyzer::analysePosition(Position &position, std::vector<Piece*>& 
 int PositionAnalyzer::getPieceTypeFromSquareID(std::vector<Piece*>& pieces, int const squareID)
 {
 	auto it = std::find_if(pieces.begin(), pieces.end(),
-		[&squareID](Piece *piece) { return (piece->getSquareID()); });
+		[&squareID](Piece *piece) { return (piece->getSquareID()==squareID); });
 	if (it != pieces.end() && *it) {
 		Piece* foundPiece = static_cast<Piece*>(*it);
 		return foundPiece->getPieceType();
@@ -114,5 +114,12 @@ int PositionAnalyzer::getPieceValueSum()
 int PositionAnalyzer::getNumberOfValidMoves()
 {
 	return numOfValidMoves;
+}
+
+int PositionAnalyzer::getUpdatedNumberOfValidMoves(Position &t_position, std::vector<Piece*>& t_pieces)
+{
+	PositionController positionController;
+	std::vector<Move> validMoves{ positionController.getValidMoves(t_position, t_pieces, t_position.getActiveColorInt(), true) };
+	return validMoves.size();
 }
 

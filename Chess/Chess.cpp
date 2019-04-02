@@ -18,7 +18,7 @@ Chess::Chess(QWidget *parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
-
+	setCursor(Qt::PointingHandCursor);
 	setMinimumSize(minWinSizeX, minWinSizeY);
 	setWindowTitle(tr("Chess"));
 	setAcceptDrops(true);
@@ -50,36 +50,7 @@ Chess::Chess(QWidget *parent)
 	//Leaf leaf{ m,initialPosition };
 }
 
-std::map<int, int> const pieceColors = {
-	{ whitePawn,    white },
-	{ whiteRook,    white },
-	{ whiteKnight,  white },
-	{ whiteBishop,  white },
-	{ whiteQueen,   white },
-	{ whiteKing,    white },
-	{ blackPawn,    black },
-	{ blackRook,    black },
-	{ blackKnight,  black },
-	{ blackBishop,  black },
-	{ blackQueen,   black },
-	{ blackKing,    black }
-};
 
-QString imageDir = ":/Images/";
-std::map<int, QString> imagePaths = {
-	{ whitePawn,    imageDir + "whitePawn"     },
-	{ whiteRook,    imageDir + "whiteRook"     },
-	{ whiteKnight,  imageDir + "whiteKnight"   },
-	{ whiteBishop,  imageDir + "whiteBishop"	},
-	{ whiteQueen,   imageDir + "whiteQueen"    },
-	{ whiteKing,    imageDir + "whiteKing"     },
-	{ blackPawn,    imageDir + "blackPawn"     },
-	{ blackRook,    imageDir + "blackRook"     },
-	{ blackKnight,  imageDir + "blackKnight"   },
-	{ blackBishop,  imageDir + "blackBishop"   },
-	{ blackQueen,   imageDir + "blackQueen"    },
-	{ blackKing,    imageDir + "blackKing"     }
-};
 
 std::map<int, QChar> pieceChars = {
 	{ whiteRook,    'R' },
@@ -257,51 +228,14 @@ std::vector<Piece*> Chess::generatePieces(Position &t_position)
 		if (pieceType != empty)
 		{
 			QPoint coordinate = getPointFromSquareID(squareID);
-			piecesVec.push_back(generatePiece(pieceType, coordinate, squareID));
+			piecesVec.push_back(pieceView.generatePiece(pieceType, coordinate, squareID, this));
 		}
 		squareID++;
 	}
 	return piecesVec;
 }
 
-Piece* Chess::generatePiece(int const pieceType, QPoint coordinate, int squareID)
-{
 
-	auto colorSearch = pieceColors.find(pieceType);
-	int color{};
-	if (colorSearch != pieceColors.end()) {
-		color = colorSearch->second;
-	}
-	else {
-		qDebug() << "generatePiece(): no color found.";
-		return{};
-	}
-
-	auto imageSearch{ imagePaths.find(pieceType) };
-	if (imageSearch != imagePaths.end()) {
-		QString imagePath = imageSearch->second;
-		int tempImageSize = imageSize;
-		Piece *piece{ new Piece(coordinate, squareID, pieceType, color, imagePath , tempImageSize, this) };
-		//piece->setAttribute(Qt::WA_DeleteOnClose);
-		return piece;
-	}
-	return {};
-}
-
-void Chess::removePiece(std::vector<Piece*>& pieceVec, int squareID)
-{
-	auto it = std::find_if(pieceVec.begin(), pieceVec.end(),
-		[&squareID](Piece *piece) {return (piece->getSquareID() == squareID); });
-	if (it != pieceVec.end())
-	{
-		if (*it)
-		{
-			Piece* pieceToErase = static_cast<Piece*>(*it);
-			pieceToErase->hide();
-			pieceVec.erase(it);
-		}
-	}
-}
 
 void Chess::showAllPieces(std::vector<Piece*>& pieceVec)
 {
@@ -386,7 +320,32 @@ void Chess::updateAnalysisTable(QStandardItemModel *& model)
 		addAnalysisTableRow(model, "Black to move", 0);
 	}
 	addAnalysisTableRow(model, "Piece Values:", positionAnalyzer.getPieceValueSum());
-	addAnalysisTableRow(model, "Possible Moves:", positionAnalyzer.getNumberOfValidMoves());
+	addAnalysisTableRow(model, "Possible Moves:", positionAnalyzer.getUpdatedNumberOfValidMoves(position, pieces));
+
+	QString gameStatus{};
+	switch(position.getGameStatus()) {
+		case GameStatus::notStarted:
+		gameStatus.append("Not Started.");
+		break;
+		case GameStatus::inProgress:
+		gameStatus.append("In progress.");
+		break;
+		case GameStatus::draw:
+		gameStatus.append("draw.");
+		break;
+		case GameStatus::stalemate:
+		gameStatus.append("stalemate.");
+		break;
+		case GameStatus::whiteWon:
+		gameStatus.append("White won.");
+		break;
+		case GameStatus::blackWon:
+		gameStatus.append("Black won.");
+		break;
+		default: break;
+	}
+	
+	addAnalysisTableRow(model, gameStatus, 0);
 
 }
 
@@ -483,11 +442,11 @@ void Chess::handleMove(Move & move, Position & t_position, std::vector<Piece*>& 
 		checkIfCastling(move, t_position);
 
 		t_position = positionController.generateNewPosition(move, t_position);
-		handleLegalMove(piece, pieceType, newPoint, move, origPosition, t_position);
+		handleLegalMove(piece, pieceType, newPoint, move, origPosition, t_position, t_pieces);
 	}
 	else
 	{
-		piece = generatePiece(pieceType, origPoint, move.fromSquareId);
+		piece = pieceView.generatePiece(pieceType, origPoint, move.fromSquareId, this);
 		t_position = origPosition;
 	}
 
@@ -524,6 +483,8 @@ void Chess::updateColorRules()
 
 void Chess::dragEnterEvent(QDragEnterEvent *event)
 {
+
+	//setCursor(Qt::ClosedHandCursor);
 	if (event->mimeData()->hasFormat(chessMimeType())) {
 		if (children().contains(event->source())) {
 			event->setDropAction(Qt::MoveAction);
@@ -543,6 +504,8 @@ void Chess::dragEnterEvent(QDragEnterEvent *event)
 
 void Chess::dragMoveEvent(QDragMoveEvent *event)
 {
+
+	//setCursor(Qt::ClosedHandCursor);
 	if (event->mimeData()->hasFormat(chessMimeType())) {
 		if (children().contains(event->source())) {
 			event->setDropAction(Qt::MoveAction);
@@ -562,6 +525,9 @@ void Chess::dragMoveEvent(QDragMoveEvent *event)
 
 void Chess::dropEvent(QDropEvent *event)
 {
+	//unsetCursor();
+	setCursor(Qt::PointingHandCursor);
+
 	if (event->mimeData()->hasFormat(chessMimeType())) {
 		const QMimeData *mime = event->mimeData();
 		QByteArray itemData = mime->data(chessMimeType());
@@ -611,17 +577,17 @@ void Chess::dropEvent(QDropEvent *event)
 }
 
 void Chess::handleLegalMove(Piece * &piece, int const pieceType, QPoint const &newPoint, Move const &move,
-	Position &origPosition, Position &newPosition)
+	Position &origPosition, Position &newPosition, std::vector<Piece*>& t_pieces)
 {
 	QString moveString = move.moveString;
 
-	piece = generatePiece(pieceType, newPoint, move.toSquareId);
-	removePiece(pieces, move.toSquareId);
-	removePiece(pieces, move.fromSquareId);
+	piece = pieceView.generatePiece(pieceType, newPoint, move.toSquareId, this);
+	positionController.removePiece(pieces, move.toSquareId);
+	positionController.removePiece(pieces, move.fromSquareId);
 	pieces.push_back(piece);
 	
 	if (!moveString.compare("")){ // move string not filled yet
-		getMoveString(origPosition, newPosition, moveString, move, pieceType);
+		getMoveString(origPosition, newPosition, t_pieces, moveString, move, pieceType);
 	}
 	insertMoveInMoveTable(moveTableModel, origPosition.getFullMove(), moveString, origPosition.getActiveColorInt());
 	updateBoard();
@@ -659,14 +625,14 @@ void Chess::checkIfCastling(Move& move, Position& newPosition)
 
 void Chess::performCastling(Move move,std::vector<Piece*>& t_pieces, int const pieceType)
 {
-	removePiece(t_pieces, move.fromSquareId);
-	Piece *newRook = generatePiece(pieceType, getPointFromSquareID(move.toSquareId),move.toSquareId);
+	positionController.removePiece(t_pieces, move.fromSquareId);
+	Piece *newRook = pieceView.generatePiece(pieceType, getPointFromSquareID(move.toSquareId),move.toSquareId, this);
 	t_pieces.push_back(newRook);
 	newRook->show();
 	newRook->setAttribute(Qt::WA_DeleteOnClose);
 }
 
-void Chess::getMoveString(Position &origPosition, Position &newPosition, QString &moveString, Move const &move, int const pieceType)
+void Chess::getMoveString(Position &origPosition, Position &newPosition, std::vector<Piece*>& t_pieces, QString &moveString, Move const &move, int const pieceType)
 {
 	QString origSquareString{};
 	QString newSquareString{};
@@ -683,6 +649,30 @@ void Chess::getMoveString(Position &origPosition, Position &newPosition, QString
 	}
 	
 	moveString.append(newSquareString);
+	int const activeColor{ origPosition.getActiveColorInt() };
+	bool const kingAttacked{ positionController.checkIfKingAttacked(newPosition, t_pieces, activeColor) };
+	newPosition.setActiveKingAttacked(kingAttacked);
+	int const numberOfPossibleMoves{ positionAnalyzer.getUpdatedNumberOfValidMoves(newPosition, t_pieces) };
+	if (kingAttacked) {
+		if (numberOfPossibleMoves == 0) {
+			moveString.append('#');
+			newPosition.setGameFinished(true);
+			GameStatus gameStatus{ activeColor == white ? GameStatus::whiteWon : GameStatus::blackWon };
+			newPosition.setGameStatus(gameStatus);
+		}
+		else {
+			moveString.append('+');
+			newPosition.setGameStatus(GameStatus::inProgress);
+		}
+	}
+	else if (numberOfPossibleMoves == 0) {
+		moveString.append('=');
+		newPosition.setGameFinished(true);
+		newPosition.setGameStatus(GameStatus::stalemate);
+	}
+	else {
+		newPosition.setGameStatus(GameStatus::inProgress);
+	}
 }
 
 void Chess::getSquareString(int const &squareID, QString &squareString)
@@ -706,6 +696,8 @@ QChar Chess::getPieceChar(int const pieceType)
 
 void Chess::mousePressEvent(QMouseEvent *event)
 {
+
+	//setCursor(Qt::ClosedHandCursor);
 	Piece *piece{ static_cast<Piece*>(childAt(event->pos())) };
 	
 	if (!piece || !piece->hasTabletTracking()) // TabletTracking used only for Chess Pieces, not board
@@ -734,8 +726,10 @@ void Chess::mousePressEvent(QMouseEvent *event)
 	if (drag->exec(Qt::MoveAction | Qt::CopyAction, Qt::CopyAction) == Qt::MoveAction)
 		//piece->close();
 	{
+		//setCursor(Qt::ClosedHandCursor);
 	}
-	else
+	else {
 		piece->show();
-	
+	}
+	setCursor(Qt::PointingHandCursor);
 }
