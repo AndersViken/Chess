@@ -47,11 +47,11 @@ void PositionAnalyzer::analysePosition(Position &position, std::vector<Piece*>& 
 		}
 	});
 
-	bool whiteKingAttacked{ positionController.checkIfKingAttacked(position, pieces, black) };
-	bool blackKingAttacked{ positionController.checkIfKingAttacked(position, pieces, white) };
+	//bool whiteKingAttacked{ positionController.checkIfKingAttacked(position, pieces, black) };
+	//bool blackKingAttacked{ positionController.checkIfKingAttacked(position, pieces, white) };
 	qDebug() << "fullmove: " << position.getFullMove();
-	qDebug() << "whiteKingAttacked: " << whiteKingAttacked;
-	qDebug() << "blackKingAttacked: " << blackKingAttacked;
+	//qDebug() << "whiteKingAttacked: " << whiteKingAttacked;
+	//qDebug() << "blackKingAttacked: " << blackKingAttacked;
 
 	constexpr bool DEBUG_MODE{ true };
 	if constexpr (DEBUG_MODE)
@@ -69,7 +69,7 @@ void PositionAnalyzer::analysePosition(Position &position, std::vector<Piece*>& 
 int PositionAnalyzer::getPieceTypeFromSquareID(std::vector<Piece*>& pieces, int const squareID)
 {
 	auto it = std::find_if(pieces.begin(), pieces.end(),
-		[&squareID](Piece *piece) { return (piece->getSquareID()); });
+		[&squareID](Piece *piece) { return (piece->getSquareID()==squareID); });
 	if (it != pieces.end() && *it) {
 		Piece* foundPiece = static_cast<Piece*>(*it);
 		return foundPiece->getPieceType();

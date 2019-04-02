@@ -373,7 +373,7 @@ bool PositionController::checkIfKingAttacked(Position & position, std::vector<Pi
 		Piece* piece = static_cast<Piece*>(*it);
 		kingSquareID = piece->getSquareID();
 	}
-	
+	//qDebug() << "checkIfKingAttacked: " << kingSquareID << " activeColor: " << activeColor;
 	return checkIfSquareAttacked(position, pieces, activeColor, kingSquareID);
 }
 
@@ -385,6 +385,7 @@ bool PositionController::checkIfSquareAttacked(Position & position, std::vector<
 	std::for_each(validMoves.begin(), validMoves.end(), [&squareAttacked, squareID](Move &move) {
 		if (move.toSquareId == squareID) {
 			squareAttacked = true;
+			qDebug() << "square " << squareID << " is attacked by square " << move.fromSquareId;
 		}
 	});
 
@@ -654,6 +655,7 @@ bool PositionController::checkIfKingAttackedAfterMove(Position &position, std::v
 	removePiece(piecesAfterMove, move.toSquareId);
 	removePiece(piecesAfterMove, move.fromSquareId);
 	piecesAfterMove.push_back(piece);
+	//qDebug() << "CKAAM: from: " << move.fromSquareId << " to: " << move.toSquareId << " type: " << pieceType;
 	bool retVal{ checkIfKingAttacked(positionAfterMove, piecesAfterMove, inactiveColor) };
 
 	//delete piece;
