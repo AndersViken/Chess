@@ -9,6 +9,7 @@ Position::Position()
 {
 	gameFinished = false;
 	gameStatus = GameStatus::notStarted;
+	activeKingAttacked = false;
 }
 
 Position::Position(QString fenString) : fenString(fenString)
@@ -16,6 +17,7 @@ Position::Position(QString fenString) : fenString(fenString)
 	processFenString(fenString);
 	gameFinished = false;
 	gameStatus = GameStatus::notStarted;
+	activeKingAttacked = false;
 }
 
 Position::~Position()

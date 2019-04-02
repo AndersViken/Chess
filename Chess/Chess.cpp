@@ -644,9 +644,9 @@ void Chess::getMoveString(Position &origPosition, Position &newPosition, std::ve
 	moveString.append(newSquareString);
 	int const activeColor{ origPosition.getActiveColorInt() };
 	bool const kingAttacked{ positionController.checkIfKingAttacked(newPosition, t_pieces, activeColor) };
+	newPosition.setActiveKingAttacked(kingAttacked);
 	int const numberOfPossibleMoves{ positionAnalyzer.getUpdatedNumberOfValidMoves(newPosition, t_pieces) };
 	if (kingAttacked) {
-		origPosition.setActiveKingAttacked(true);
 		if (numberOfPossibleMoves == 0) {
 			moveString.append('#');
 			newPosition.setGameFinished(true);
