@@ -18,7 +18,7 @@ Chess::Chess(QWidget *parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
-
+	setCursor(Qt::PointingHandCursor);
 	setMinimumSize(minWinSizeX, minWinSizeY);
 	setWindowTitle(tr("Chess"));
 	setAcceptDrops(true);
@@ -483,6 +483,8 @@ void Chess::updateColorRules()
 
 void Chess::dragEnterEvent(QDragEnterEvent *event)
 {
+
+	setCursor(Qt::ClosedHandCursor);
 	if (event->mimeData()->hasFormat(chessMimeType())) {
 		if (children().contains(event->source())) {
 			event->setDropAction(Qt::MoveAction);
@@ -502,6 +504,8 @@ void Chess::dragEnterEvent(QDragEnterEvent *event)
 
 void Chess::dragMoveEvent(QDragMoveEvent *event)
 {
+
+	setCursor(Qt::ClosedHandCursor);
 	if (event->mimeData()->hasFormat(chessMimeType())) {
 		if (children().contains(event->source())) {
 			event->setDropAction(Qt::MoveAction);
@@ -521,6 +525,9 @@ void Chess::dragMoveEvent(QDragMoveEvent *event)
 
 void Chess::dropEvent(QDropEvent *event)
 {
+	//unsetCursor();
+	setCursor(Qt::PointingHandCursor);
+
 	if (event->mimeData()->hasFormat(chessMimeType())) {
 		const QMimeData *mime = event->mimeData();
 		QByteArray itemData = mime->data(chessMimeType());
@@ -689,6 +696,8 @@ QChar Chess::getPieceChar(int const pieceType)
 
 void Chess::mousePressEvent(QMouseEvent *event)
 {
+
+	setCursor(Qt::ClosedHandCursor);
 	Piece *piece{ static_cast<Piece*>(childAt(event->pos())) };
 	
 	if (!piece || !piece->hasTabletTracking()) // TabletTracking used only for Chess Pieces, not board
@@ -717,8 +726,10 @@ void Chess::mousePressEvent(QMouseEvent *event)
 	if (drag->exec(Qt::MoveAction | Qt::CopyAction, Qt::CopyAction) == Qt::MoveAction)
 		//piece->close();
 	{
+		setCursor(Qt::ClosedHandCursor);
 	}
-	else
+	else {
 		piece->show();
-	
+	}
+	setCursor(Qt::PointingHandCursor);
 }
