@@ -320,7 +320,32 @@ void Chess::updateAnalysisTable(QStandardItemModel *& model)
 		addAnalysisTableRow(model, "Black to move", 0);
 	}
 	addAnalysisTableRow(model, "Piece Values:", positionAnalyzer.getPieceValueSum());
-	addAnalysisTableRow(model, "Possible Moves:", positionAnalyzer.getNumberOfValidMoves());
+	addAnalysisTableRow(model, "Possible Moves:", positionAnalyzer.getUpdatedNumberOfValidMoves(position, pieces));
+
+	QString gameStatus{};
+	switch(position.getGameStatus()) {
+		case GameStatus::notStarted:
+		gameStatus.append("Not Started.");
+		break;
+		case GameStatus::inProgress:
+		gameStatus.append("In progress.");
+		break;
+		case GameStatus::draw:
+		gameStatus.append("draw.");
+		break;
+		case GameStatus::stalemate:
+		gameStatus.append("stalemate.");
+		break;
+		case GameStatus::whiteWon:
+		gameStatus.append("White won.");
+		break;
+		case GameStatus::blackWon:
+		gameStatus.append("Black won.");
+		break;
+		default: break;
+	}
+	
+	addAnalysisTableRow(model, gameStatus, 0);
 
 }
 
@@ -417,7 +442,7 @@ void Chess::handleMove(Move & move, Position & t_position, std::vector<Piece*>& 
 		checkIfCastling(move, t_position);
 
 		t_position = positionController.generateNewPosition(move, t_position);
-		handleLegalMove(piece, pieceType, newPoint, move, origPosition, t_position);
+		handleLegalMove(piece, pieceType, newPoint, move, origPosition, t_position, t_pieces);
 	}
 	else
 	{
@@ -545,7 +570,7 @@ void Chess::dropEvent(QDropEvent *event)
 }
 
 void Chess::handleLegalMove(Piece * &piece, int const pieceType, QPoint const &newPoint, Move const &move,
-	Position &origPosition, Position &newPosition)
+	Position &origPosition, Position &newPosition, std::vector<Piece*>& t_pieces)
 {
 	QString moveString = move.moveString;
 
@@ -555,7 +580,7 @@ void Chess::handleLegalMove(Piece * &piece, int const pieceType, QPoint const &n
 	pieces.push_back(piece);
 	
 	if (!moveString.compare("")){ // move string not filled yet
-		getMoveString(origPosition, newPosition, moveString, move, pieceType);
+		getMoveString(origPosition, newPosition, t_pieces, moveString, move, pieceType);
 	}
 	insertMoveInMoveTable(moveTableModel, origPosition.getFullMove(), moveString, origPosition.getActiveColorInt());
 	updateBoard();
@@ -600,7 +625,7 @@ void Chess::performCastling(Move move,std::vector<Piece*>& t_pieces, int const p
 	newRook->setAttribute(Qt::WA_DeleteOnClose);
 }
 
-void Chess::getMoveString(Position &origPosition, Position &newPosition, QString &moveString, Move const &move, int const pieceType)
+void Chess::getMoveString(Position &origPosition, Position &newPosition, std::vector<Piece*>& t_pieces, QString &moveString, Move const &move, int const pieceType)
 {
 	QString origSquareString{};
 	QString newSquareString{};
@@ -617,6 +642,30 @@ void Chess::getMoveString(Position &origPosition, Position &newPosition, QString
 	}
 	
 	moveString.append(newSquareString);
+	int const activeColor{ origPosition.getActiveColorInt() };
+	bool const kingAttacked{ positionController.checkIfKingAttacked(newPosition, t_pieces, activeColor) };
+	int const numberOfPossibleMoves{ positionAnalyzer.getUpdatedNumberOfValidMoves(newPosition, t_pieces) };
+	if (kingAttacked) {
+		origPosition.setActiveKingAttacked(true);
+		if (numberOfPossibleMoves == 0) {
+			moveString.append('#');
+			newPosition.setGameFinished(true);
+			GameStatus gameStatus{ activeColor == white ? GameStatus::whiteWon : GameStatus::blackWon };
+			newPosition.setGameStatus(gameStatus);
+		}
+		else {
+			moveString.append('+');
+			newPosition.setGameStatus(GameStatus::inProgress);
+		}
+	}
+	else if (numberOfPossibleMoves == 0) {
+		moveString.append('=');
+		newPosition.setGameFinished(true);
+		newPosition.setGameStatus(GameStatus::stalemate);
+	}
+	else {
+		newPosition.setGameStatus(GameStatus::inProgress);
+	}
 }
 
 void Chess::getSquareString(int const &squareID, QString &squareString)

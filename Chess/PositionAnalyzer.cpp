@@ -116,3 +116,10 @@ int PositionAnalyzer::getNumberOfValidMoves()
 	return numOfValidMoves;
 }
 
+int PositionAnalyzer::getUpdatedNumberOfValidMoves(Position &t_position, std::vector<Piece*>& t_pieces)
+{
+	PositionController positionController;
+	std::vector<Move> validMoves{ positionController.getValidMoves(t_position, t_pieces, t_position.getActiveColorInt(), true) };
+	return validMoves.size();
+}
+

@@ -651,14 +651,15 @@ bool PositionController::checkIfKingAttackedAfterMove(Position &position, std::v
 	std::vector<Piece*> piecesAfterMove = pieces;
 	PieceView pieceView;
 	int const pieceType{ positionAnalyzer.getPieceTypeFromSquareID(pieces, move.fromSquareId) };
-	Piece* piece = pieceView.generatePiece(pieceType, { 0,0 }, move.toSquareId, NULL);
+	Piece* piece =  pieceView.generatePiece(pieceType, { 0,0 }, move.toSquareId, NULL);
+	piece->hide();
 	removePiece(piecesAfterMove, move.toSquareId);
 	removePiece(piecesAfterMove, move.fromSquareId);
 	piecesAfterMove.push_back(piece);
 	//qDebug() << "CKAAM: from: " << move.fromSquareId << " to: " << move.toSquareId << " type: " << pieceType;
 	bool retVal{ checkIfKingAttacked(positionAfterMove, piecesAfterMove, inactiveColor) };
 
-	//delete piece;
+	delete piece;
 	//piecesAfterMove.clear();
 	pieces = origPieceVector;
 	for (auto pieceToShow : pieces) {
@@ -744,8 +745,9 @@ void PositionController::getValidMovesForKing(Position & position, std::vector<P
 		default:
 			break;
 	}
-
-	getValidKingMovesCastling(origLocation, position, pieces, moves, pieceColor, castlingPossibleKingSide, castlingPossibleQueenSide, isActualMove);
+	if (!position.getActiveKingAttacked()) {
+		getValidKingMovesCastling(origLocation, position, pieces, moves, pieceColor, castlingPossibleKingSide, castlingPossibleQueenSide, isActualMove);
+	}
 }
 
 void PositionController::getMoveString(Position &origPosition, Move &move, int const pieceType)

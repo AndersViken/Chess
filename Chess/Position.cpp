@@ -7,12 +7,15 @@
 #include "PieceInfo.h"
 Position::Position()
 {
-  
+	gameFinished = false;
+	gameStatus = GameStatus::notStarted;
 }
 
 Position::Position(QString fenString) : fenString(fenString)
 {
 	processFenString(fenString);
+	gameFinished = false;
+	gameStatus = GameStatus::notStarted;
 }
 
 Position::~Position()
