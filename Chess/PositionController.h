@@ -104,6 +104,9 @@ public:
 	void addValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, Location const & origLocation, Location const & location, MoveType moveType, bool isActualMove);
 
 	void removePiece(std::vector<Piece*>& pieceVec, int squareID);
+
+	void erasePieceFromVector(std::vector<Piece*>& t_pieces, int squareID);
+
 	
 	
 };

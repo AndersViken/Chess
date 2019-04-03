@@ -81,7 +81,7 @@ private:
 	void handleMove(Move & move, Position & t_position, std::vector<Piece*>& t_pieces, int const pieceType, QPoint const & newPoint, QPoint const & origPoint);
 	void handleLegalMove(Piece *& piece, int const pieceType, QPoint const & newPoint, Move const & move, Position & origPosition, Position & newPosition, std::vector<Piece*>& t_pieces);
 	void checkIfCastling(Move & move, Position & newPosition);
-	void performCastling(Move move, std::vector<Piece*>& t_pieces, int const pieceType);
+	void performCastling(Position & t_position, Move move, std::vector<Piece*>& t_pieces, int const pieceType);
 	void getMoveString(Position & origPosition, Position & newPosition, std::vector<Piece*>& t_pieces, QString & moveString, Move const & move, int const pieceType);
 	void getSquareString(const int & origSquareID, QString &origSquareString);
 	QChar getPieceChar(int const pieceType);

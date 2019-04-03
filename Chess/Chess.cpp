@@ -6,6 +6,7 @@
 #include "Leaf.h"
 #include "PieceInfo.h"
 #include "PositionController.h"
+#include "PromotionDialog.h"
 #include <qinputdialog.h>
 #include <QDebug>
 #include <map>
@@ -14,6 +15,7 @@
 #include <stdio.h>
 #include <QTableView>
 #include <QHeaderView>
+
 Chess::Chess(QWidget *parent)
 	: QMainWindow(parent)
 {
@@ -46,6 +48,11 @@ Chess::Chess(QWidget *parent)
 
 	positionAnalyzer.analysePosition(position, pieces, maxDepthWhenAnalysing);
 	updateAnalysisTable(analysisTableModel);
+
+	PromotionDialog* dialog{ new PromotionDialog() };
+	dialog->exec();
+
+	qDebug() << "piece selected: " << dialog->getPieceTypeSelected();
 
 	//Leaf leaf{ m,initialPosition };
 }
@@ -443,15 +450,15 @@ void Chess::handleMove(Move & move, Position & t_position, std::vector<Piece*>& 
 
 		t_position = positionController.generateNewPosition(move, t_position);
 		handleLegalMove(piece, pieceType, newPoint, move, origPosition, t_position, t_pieces);
+
 	}
 	else
 	{
-		piece = pieceView.generatePiece(pieceType, origPoint, move.fromSquareId, this);
+		//piece = pieceView.generatePiece(pieceType, origPoint, move.fromSquareId, this);
 		t_position = origPosition;
 	}
 
-	piece->show();
-	piece->setAttribute(Qt::WA_DeleteOnClose);
+	
 }
 
 
@@ -584,6 +591,9 @@ void Chess::handleLegalMove(Piece * &piece, int const pieceType, QPoint const &n
 	piece = pieceView.generatePiece(pieceType, newPoint, move.toSquareId, this);
 	positionController.removePiece(pieces, move.toSquareId);
 	positionController.removePiece(pieces, move.fromSquareId);
+
+	piece->show();
+	piece->setAttribute(Qt::WA_DeleteOnClose);
 	pieces.push_back(piece);
 	
 	if (!moveString.compare("")){ // move string not filled yet
@@ -600,22 +610,22 @@ void Chess::checkIfCastling(Move& move, Position& newPosition)
 
 	switch (move.moveType) {
 	case MoveType::castleKingsideWhite:
-		performCastling({ 63,61 }, pieces, whiteRook);
+		performCastling(newPosition, { 63,61 }, pieces, whiteRook);
 		newPosition.setCastleLegalWhiteKingside(false);
 		newPosition.setCastleLegalWhiteQueenside(false);
 		break;
 	case MoveType::castleQueensideWhite:
-		performCastling({ 56,59 }, pieces, whiteRook);
+		performCastling(newPosition, { 56,59 }, pieces, whiteRook);
 		newPosition.setCastleLegalWhiteKingside(false);
 		newPosition.setCastleLegalWhiteQueenside(false);
 		break;
 	case MoveType::castleKingsideBlack:
-		performCastling({ 7,5 }, pieces, blackRook);
+		performCastling(newPosition, { 7,5 }, pieces, blackRook);
 		newPosition.setCastleLegalBlackKingside(false);
 		newPosition.setCastleLegalBlackQueenside(false);
 		break;
 	case MoveType::castleQueensideBlack:
-		performCastling({ 0,3 }, pieces, blackRook);
+		performCastling(newPosition, { 0,3 }, pieces, blackRook);
 		newPosition.setCastleLegalBlackKingside(false);
 		newPosition.setCastleLegalBlackQueenside(false);
 		break;
@@ -623,11 +633,12 @@ void Chess::checkIfCastling(Move& move, Position& newPosition)
 	}
 }
 
-void Chess::performCastling(Move move,std::vector<Piece*>& t_pieces, int const pieceType)
+void Chess::performCastling(Position &t_position, Move move,std::vector<Piece*>& t_pieces, int const pieceType)
 {
 	positionController.removePiece(t_pieces, move.fromSquareId);
 	Piece *newRook = pieceView.generatePiece(pieceType, getPointFromSquareID(move.toSquareId),move.toSquareId, this);
 	t_pieces.push_back(newRook);
+	t_position.insertNewMove(move);
 	newRook->show();
 	newRook->setAttribute(Qt::WA_DeleteOnClose);
 }

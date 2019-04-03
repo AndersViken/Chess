@@ -133,6 +133,8 @@
     <ClCompile Include="PositionAnalyzer.cpp" />
     <ClCompile Include="PositionController.cpp" />
     <ClCompile Include="PieceInfo.cpp" />
+    <ClCompile Include="PromotionDialog.cpp" />
+    <ClCompile Include="PromotionImage.cpp" />
     <ClCompile Include="Square.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -155,6 +157,8 @@
     <ClInclude Include="Position.h" />
     <ClInclude Include="PositionAnalyzer.h" />
     <ClInclude Include="PositionController.h" />
+    <QtMoc Include="PromotionDialog.h" />
+    <ClInclude Include="PromotionImage.h" />
     <ClInclude Include="Square.h" />
   </ItemGroup>
   <ItemGroup>
