@@ -45,6 +45,11 @@ std::map<int, QChar> pieceChars2 = {
 int const lowestSquareID = 0;
 int const highestSquareID = 63;
 
+std::vector<int> const whiteKingsideCastleSquares{ 61,62 };
+std::vector<int> const whiteQueensideCastleSquares{ 59,58,57 };
+std::vector<int> const blackKingsideCastleSquares{ 5,6 };
+std::vector<int> const blackQueensideCastleSquares{ 1,2,3};
+
 QString kingsideCastleString = "0-0";
 QString queensideCastleString = "0-0-0";
 
@@ -653,6 +658,7 @@ bool PositionController::checkIfKingAttackedAfterMove(Position &position, std::v
 	int const pieceType{ positionAnalyzer.getPieceTypeFromSquareID(pieces, move.fromSquareId) };
 	Piece* piece =  pieceView.generatePiece(pieceType, { 0,0 }, move.toSquareId, NULL);
 	piece->hide();
+
 	removePiece(piecesAfterMove, move.toSquareId);
 	removePiece(piecesAfterMove, move.fromSquareId);
 	piecesAfterMove.push_back(piece);
@@ -734,12 +740,24 @@ void PositionController::getValidMovesForKing(Position & position, std::vector<P
 	{
 		case whiteKing:
 			castlingPossibleKingSide = position.getCastleLegalWhiteKingside();
+			if (checkIfPiecesInSquares(position, whiteKingsideCastleSquares)) {
+				castlingPossibleKingSide = false;
+			}
 			castlingPossibleQueenSide = position.getCastleLegalWhiteQueenside();
+			if (checkIfPiecesInSquares(position, whiteQueensideCastleSquares)) {
+				castlingPossibleQueenSide = false;
+			}
 			pieceColor = white;
 			break;
 		case blackKing:
 			castlingPossibleKingSide = position.getCastleLegalBlackKingside();
+			if (checkIfPiecesInSquares(position, blackKingsideCastleSquares)) {
+				castlingPossibleKingSide = false;
+			}
 			castlingPossibleQueenSide = position.getCastleLegalBlackQueenside();
+			if (checkIfPiecesInSquares(position, blackQueensideCastleSquares)) {
+				castlingPossibleQueenSide = false;
+			}
 			pieceColor = black;
 			break;
 		default:

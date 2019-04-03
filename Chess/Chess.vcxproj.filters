@@ -66,9 +66,18 @@
     <ClCompile Include="PieceView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PromotionDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PromotionImage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Chess.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="PromotionDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -114,6 +123,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PieceView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PromotionImage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

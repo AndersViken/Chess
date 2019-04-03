@@ -11,6 +11,7 @@ public:
 	QPoint	getCoordinate();
 	int		getSquareID();
 	int		getPieceType();
+	void	setPieceType(int t_pieceType) { pieceType = t_pieceType; };
 	int		getColor();
 	QString	getImagePath();
 	int		getImageSize();
