@@ -5,35 +5,35 @@
 #include "PieceInfo.h"
 #include "Move.h"
 
-std::map<QChar, int> const pieceLetters = {
-	{ 'p', blackPawn },
-	{ 'r', blackRook },
-	{ 'n', blackKnight },
-	{ 'b', blackBishop },
-	{ 'q', blackQueen },
-	{ 'k', blackKing },
-	{ 'P', whitePawn },
-	{ 'R', whiteRook },
-	{ 'N', whiteKnight },
-	{ 'B', whiteBishop },
-	{ 'Q', whiteQueen },
-	{ 'K', whiteKing },
-	{ '-', empty } // using '-' when need for empty square
+std::map<QChar, PieceType> const pieceLetters = {
+	{ 'p', PieceType::blackPawn },
+	{ 'r', PieceType::blackRook },
+	{ 'n', PieceType::blackKnight },
+	{ 'b', PieceType::blackBishop },
+	{ 'q', PieceType::blackQueen },
+	{ 'k', PieceType::blackKing },
+	{ 'P', PieceType::whitePawn },
+	{ 'R', PieceType::whiteRook },
+	{ 'N', PieceType::whiteKnight },
+	{ 'B', PieceType::whiteBishop },
+	{ 'Q', PieceType::whiteQueen },
+	{ 'K', PieceType::whiteKing },
+	{ '-', PieceType::empty } // using '-' when need for empty square
 };
 
-std::map<int, QChar> const pieceLettersReverse = {
-	{ blackPawn,'p' },
-	{ blackRook, 'r' },
-	{ blackKnight, 'n'  },
-	{ blackBishop, 'b'  },
-	{ blackQueen, 'q'  },
-	{ blackKing, 'k'  },
-	{ whitePawn, 'P'  },
-	{ whiteRook, 'R'  },
-	{ whiteKnight, 'N'  },
-	{ whiteBishop, 'B'  },
-	{ whiteQueen, 'Q'  },
-	{ whiteKing, 'K'  }
+std::map<PieceType, QChar> const pieceLettersReverse = {
+	{ PieceType::blackPawn,'p' },
+	{ PieceType::blackRook, 'r' },
+	{ PieceType::blackKnight, 'n'  },
+	{ PieceType::blackBishop, 'b'  },
+	{ PieceType::blackQueen, 'q'  },
+	{ PieceType::blackKing, 'k'  },
+	{ PieceType::whitePawn, 'P'  },
+	{ PieceType::whiteRook, 'R'  },
+	{ PieceType::whiteKnight, 'N'  },
+	{ PieceType::whiteBishop, 'B'  },
+	{ PieceType::whiteQueen, 'Q'  },
+	{ PieceType::whiteKing, 'K'  }
 };
 
 enum class GameStatus { notStarted, inProgress, stalemate, draw, whiteWon, blackWon };
@@ -74,7 +74,7 @@ public:
 	void incrementFullMove() { fullMove++; };
 	void resetHalfMoveClock() { halfMoveClock = 0; };
 	void incrementHalfMoveClock() { halfMoveClock++; };
-	std::vector<int> getPiecePlacement() { return piecePlacement; };
+	std::vector<PieceType> getPiecePlacement() { return piecePlacement; };
 	void insertNewMove(Move const &move);
 	//rnbqkbnr / pppppppp / 8 / 8 / 8 / 8 / PPPPPPPP / RNBQKBNR w KQkq - 0 1
 	QString createPiecePlacementFenString();
@@ -101,11 +101,11 @@ private:
 	void findPiecePlacement(QChar * &it, QString &text, const QChar &space);
 	void pushBackEmptySquares(int const n);
 	void pushBackPieceInSquare(QChar const pieceChar);
-	void pushBackLetterInFenString(int pieceNumber, QString &inputString);
+	void pushBackLetterInFenString(PieceType pieceNumber, QString &inputString);
 	void pushBackNumberInFenString(int &number, QString &inputString);
 
 	QString fenString;
-	std::vector<int> piecePlacement;
+	std::vector<PieceType> piecePlacement;
 	QChar activeColor;
 	bool	castleLegalWhiteKingside;
 	bool	castleLegalWhiteQueenside;

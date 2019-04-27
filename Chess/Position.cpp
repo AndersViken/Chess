@@ -145,9 +145,9 @@ void Position::pushBackPieceInSquare(QChar const pieceChar)
 
 }
 
-void Position::pushBackLetterInFenString(int pieceNumber, QString &inputString)
+void Position::pushBackLetterInFenString(PieceType pieceType, QString &inputString)
 {
-	auto search{ pieceLettersReverse.find(pieceNumber) };
+	auto search{ pieceLettersReverse.find(pieceType) };
 	if (search != pieceLettersReverse.end()) {
 		inputString.append(search->second);
 	}
@@ -168,8 +168,8 @@ QString Position::createPiecePlacementFenString()
 	QString pieceFenString{};
 	int emptySquares{ 0 };
 	int index = 1;
-	for(int piece : piecePlacement) {
-		if (piece == 0) {
+	for(PieceType piece : piecePlacement) {
+		if (piece == PieceType::empty) {
 			emptySquares++;
 		}
 		else if (emptySquares > 0) {
@@ -179,7 +179,7 @@ QString Position::createPiecePlacementFenString()
 			pushBackNumberInFenString(emptySquares, pieceFenString);
 		}
 
-		if (piece != empty) {
+		if (piece != PieceType::empty) {
 			pushBackLetterInFenString(piece, pieceFenString);
 		}
 
@@ -250,7 +250,7 @@ QString Position::createFullMoveFenString()
 void Position::insertNewMove(Move const &move)
 {
 	piecePlacement.at(move.toSquareId) = piecePlacement.at(move.fromSquareId);
-	piecePlacement.at(move.fromSquareId) = 0;
+	piecePlacement.at(move.fromSquareId) = PieceType::empty;
 }
 
 

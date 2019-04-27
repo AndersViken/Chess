@@ -2,7 +2,7 @@
 #include <qstring.h>
 #include <qlabel.h>
 
-enum {
+enum class PieceType {
 	empty = 0, whitePawn, whiteRook, whiteKnight, whiteBishop, whiteQueen, whiteKing,
 	blackPawn, blackRook, blackKnight, blackBishop, blackQueen, blackKing
 };

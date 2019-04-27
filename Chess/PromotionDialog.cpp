@@ -16,11 +16,11 @@ PromotionDialog::PromotionDialog()
 	imageDirs.push_back(":/Images/whiteRook");
 	imageDirs.push_back(":/Images/whiteBishop");
 
-	std::vector<int> pieceTypes{};
-	pieceTypes.push_back(whiteQueen);
-	pieceTypes.push_back(whiteKnight);
-	pieceTypes.push_back(whiteRook);
-	pieceTypes.push_back(whiteBishop);
+	std::vector<PieceType> pieceTypes{};
+	pieceTypes.push_back(PieceType::whiteQueen);
+	pieceTypes.push_back(PieceType::whiteKnight);
+	pieceTypes.push_back(PieceType::whiteRook);
+	pieceTypes.push_back(PieceType::whiteBishop);
 
 	int pieceNum{ 0 };
 	std::for_each(imageDirs.begin(), imageDirs.end(), [&mainLayout, &pieceTypes, &pieceNum, this](QString imageDir) {
@@ -43,12 +43,12 @@ void PromotionDialog::mousePressEvent(QMouseEvent * event)
 	PromotionImage *piece{ static_cast<PromotionImage*>(childAt(event->pos())) };
 	if (!piece)
 		return;
-	
+
 	QByteArray itemData;
 	QDataStream dataStream(&itemData, QIODevice::WriteOnly);
-	dataStream << piece->getPieceType();
+	dataStream << static_cast<int>(piece->getPieceType());
 
-	pieceTypeSelected = piece->getPieceType();
+	// not needed ?? pieceTypeSelected = piece->getPieceType();
 
 	delete piece;
 	close();

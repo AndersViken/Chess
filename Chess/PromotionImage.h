@@ -1,5 +1,6 @@
 #pragma once
 #include <qlabel.h>
+#include "PieceInfo.h"
 
 class PromotionImage :
 	public QLabel
@@ -7,10 +8,10 @@ class PromotionImage :
 public:
 	PromotionImage();
 	~PromotionImage();
-	int getPieceType() { return pieceType; };
-	void setPieceType(int t_pieceType) { pieceType = t_pieceType; };
+	PieceType getPieceType() { return pieceType; };
+	void setPieceType(PieceType t_pieceType) { pieceType = t_pieceType; };
 private:
-	int pieceType;
+	PieceType pieceType;
 };
 
 

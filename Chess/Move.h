@@ -10,7 +10,8 @@ enum class MoveType {
 	enPassant,
 	promotion,
 	pawnMove,
-	capture
+	capture,
+	captureAndPromotion
 };
 
 class Move
