@@ -98,14 +98,17 @@ public:
 	Location getLocationFromSquareID(int const squareID);
 	int getSquareIDFromLocation(Location location);
 	void moveLocation(Location& location, Direction const direction);
-	void addValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, int const fromSquareID, int const toSquareID, MoveType moveType, bool isActualMove);
-	void addValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, int const fromSquareID, int const toSquareID, bool isActualMove);
-	void addValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, Location const & origLocation, Location const & location, bool isActualMove);
-	void addValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, Location const & origLocation, Location const & location, MoveType moveType, bool isActualMove);
+	void handleValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, int const fromSquareID, int const toSquareID, MoveType moveType, bool isActualMove);
+	void insertValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, int const fromSquareID, int const toSquareID, MoveType const moveType, bool const isActualMove, QString moveString);
+	void handleValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, int const fromSquareID, int const toSquareID, bool isActualMove);
+	void handleValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, Location const & origLocation, Location const & location, bool isActualMove);
+	void handleValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, Location const & origLocation, Location const & location, MoveType moveType, bool isActualMove);
 
 	void removePiece(std::vector<Piece*>& pieceVec, int squareID);
 
-	MoveType PositionController::checkIfPromotion(Location origLocation, Location newLocation);
+	MoveType checkIfPromotion(Location origLocation, Location newLocation);
+	void handlePromotion(Position &position, std::vector<Move>& moves, std::vector<Piece*> &pieces, int const fromSquareID, int const toSquareID, MoveType moveType, int const pieceColor, bool const isActualMove, QString moveString);
+	std::vector<PieceType> getPromotionOptions(int const pieceColor);
 	
 	void erasePieceFromVector(std::vector<Piece*>& t_pieces, int squareID);
 
