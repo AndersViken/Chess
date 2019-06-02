@@ -77,7 +77,6 @@ public:
 	bool checkIfKingAttackedAfterMove(Position & position, std::vector<Piece*>& pieces, int const inactiveColor, Move move);
 
 	
-	void checkIfListOfSquaresAttackedAfterMove(Position & position, Move move, std::vector<int> squares);
 	void getValidMovesForRook(Position & position, std::vector<Piece*>& pieces, Piece *& piece, std::vector<Move>& moves, bool isActualMove);
 
 	void getValidMovesForBishop(Position & position, std::vector<Piece*>& pieces, Piece *& piece, std::vector<Move>& moves, bool isActualMove);
