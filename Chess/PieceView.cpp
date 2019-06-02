@@ -3,35 +3,35 @@
 #include "GuiSetup.h"
 #include "qdebug.h"
 
-std::map<int, int> const pieceColors = {
-	{ whitePawn,    white },
-	{ whiteRook,    white },
-	{ whiteKnight,  white },
-	{ whiteBishop,  white },
-	{ whiteQueen,   white },
-	{ whiteKing,    white },
-	{ blackPawn,    black },
-	{ blackRook,    black },
-	{ blackKnight,  black },
-	{ blackBishop,  black },
-	{ blackQueen,   black },
-	{ blackKing,    black }
+std::map<PieceType, int> const pieceColors = {
+	{ PieceType::whitePawn,    white },
+	{ PieceType::whiteRook,    white },
+	{ PieceType::whiteKnight,  white },
+	{ PieceType::whiteBishop,  white },
+	{ PieceType::whiteQueen,   white },
+	{ PieceType::whiteKing,    white },
+	{ PieceType::blackPawn,    black },
+	{ PieceType::blackRook,    black },
+	{ PieceType::blackKnight,  black },
+	{ PieceType::blackBishop,  black },
+	{ PieceType::blackQueen,   black },
+	{ PieceType::blackKing,    black }
 };
 
 QString imageDir = ":/Images/";
-std::map<int, QString> imagePaths = {
-	{ whitePawn,    imageDir + "whitePawn"     },
-	{ whiteRook,    imageDir + "whiteRook"     },
-	{ whiteKnight,  imageDir + "whiteKnight"   },
-	{ whiteBishop,  imageDir + "whiteBishop"	},
-	{ whiteQueen,   imageDir + "whiteQueen"    },
-	{ whiteKing,    imageDir + "whiteKing"     },
-	{ blackPawn,    imageDir + "blackPawn"     },
-	{ blackRook,    imageDir + "blackRook"     },
-	{ blackKnight,  imageDir + "blackKnight"   },
-	{ blackBishop,  imageDir + "blackBishop"   },
-	{ blackQueen,   imageDir + "blackQueen"    },
-	{ blackKing,    imageDir + "blackKing"     }
+std::map<PieceType, QString> imagePaths = {
+	{ PieceType::whitePawn,    imageDir + "whitePawn"     },
+	{ PieceType::whiteRook,    imageDir + "whiteRook"     },
+	{ PieceType::whiteKnight,  imageDir + "whiteKnight"   },
+	{ PieceType::whiteBishop,  imageDir + "whiteBishop"	},
+	{ PieceType::whiteQueen,   imageDir + "whiteQueen"    },
+	{ PieceType::whiteKing,    imageDir + "whiteKing"     },
+	{ PieceType::blackPawn,    imageDir + "blackPawn"     },
+	{ PieceType::blackRook,    imageDir + "blackRook"     },
+	{ PieceType::blackKnight,  imageDir + "blackKnight"   },
+	{ PieceType::blackBishop,  imageDir + "blackBishop"   },
+	{ PieceType::blackQueen,   imageDir + "blackQueen"    },
+	{ PieceType::blackKing,    imageDir + "blackKing"     }
 };
 
 
@@ -44,7 +44,7 @@ PieceView::~PieceView()
 {
 }
 
-Piece* PieceView::generatePiece(int const pieceType, QPoint coordinate, int squareID, QWidget *parent)
+Piece* PieceView::generatePiece(PieceType const pieceType, QPoint coordinate, int squareID, QWidget *parent)
 {
 
 	auto colorSearch = pieceColors.find(pieceType);

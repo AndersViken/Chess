@@ -14,32 +14,32 @@ PositionController::~PositionController()
 {
 }
 
-std::map<int, int> colorFromType{
-	{ whitePawn,  white	},
-	{ whiteRook,  white	},
-	{ whiteKnight,white	},
-	{ whiteBishop,white	},
-	{ whiteQueen, white	},
-	{ whiteKing,  white },
-	{ blackPawn,  black },
-	{ blackRook,  black },
-	{ blackKnight,black },
-	{ blackBishop,black },
-	{ blackQueen, black },
-	{ blackKing,  black }
+std::map<PieceType, int> colorFromType{
+	{ PieceType::whitePawn,  white	},
+	{ PieceType::whiteRook,  white	},
+	{ PieceType::whiteKnight,white	},
+	{ PieceType::whiteBishop,white	},
+	{ PieceType::whiteQueen, white	},
+	{ PieceType::whiteKing,  white },
+	{ PieceType::blackPawn,  black },
+	{ PieceType::blackRook,  black },
+	{ PieceType::blackKnight,black },
+	{ PieceType::blackBishop,black },
+	{ PieceType::blackQueen, black },
+	{ PieceType::blackKing,  black }
 };
 
-std::map<int, QChar> pieceChars2 = {
-	{ whiteRook,    'R' },
-	{ whiteKnight,  'N' },
-	{ whiteBishop,  'B'	},
-	{ whiteQueen,   'Q' },
-	{ whiteKing,    'K' },
-	{ blackRook,    'R' },
-	{ blackKnight,  'N' },
-	{ blackBishop,  'B' },
-	{ blackQueen,   'Q' },
-	{ blackKing,    'K' }
+std::map<PieceType, QChar> pieceChars2 = {
+	{ PieceType::whiteRook,    'R' },
+	{ PieceType::whiteKnight,  'N' },
+	{ PieceType::whiteBishop,  'B'	},
+	{ PieceType::whiteQueen,   'Q' },
+	{ PieceType::whiteKing,    'K' },
+	{ PieceType::blackRook,    'R' },
+	{ PieceType::blackKnight,  'N' },
+	{ PieceType::blackBishop,  'B' },
+	{ PieceType::blackQueen,   'Q' },
+	{ PieceType::blackKing,    'K' }
 };
 
 int const lowestSquareID = 0;
@@ -48,7 +48,12 @@ int const highestSquareID = 63;
 std::vector<int> const whiteKingsideCastleSquares{ 61,62 };
 std::vector<int> const whiteQueensideCastleSquares{ 59,58,57 };
 std::vector<int> const blackKingsideCastleSquares{ 5,6 };
-std::vector<int> const blackQueensideCastleSquares{ 1,2,3};
+std::vector<int> const blackQueensideCastleSquares{ 1,2,3 };
+
+std::vector<PieceType> promotionOptionsWhite{ PieceType::whiteBishop, PieceType::whiteKnight,
+												PieceType::whiteQueen, PieceType::whiteRook };
+std::vector<PieceType> promotionOptionsBlack{ PieceType::blackBishop, PieceType::blackKnight,
+												PieceType::blackQueen, PieceType::blackRook };
 
 QString kingsideCastleString = "0-0";
 QString queensideCastleString = "0-0-0";
@@ -71,7 +76,7 @@ Position PositionController::generateNewPosition(Move & move, Position & oldPosi
 	else {
 		newPosition.incrementHalfMoveClock();
 	}
-	
+
 
 	// need to update all position parameters here.
 	// - waiting with en passant
@@ -118,37 +123,37 @@ bool PositionController::validateMove(Position &position, std::vector<Piece*> pi
 
 }
 
-bool PositionController::validateMove(Position &newPosition, Position &oldPosition, Move move, int pieceType, std::vector<specialMove> &specialMoves)
+bool PositionController::validateMove(Position &newPosition, Position &oldPosition, Move move, PieceType pieceType, std::vector<specialMove> &specialMoves)
 {
 	if (move.fromSquareId == move.toSquareId) {
 		return false;
 	}
-	if (pieceType == blackRook || pieceType == whiteRook) {
+	if (pieceType == PieceType::blackRook || pieceType == PieceType::whiteRook) {
 		if (validateRookMove(move) == false) {
 			return false;
 		};
 	}
-	if (pieceType == blackKnight || pieceType == whiteKnight) {
+	if (pieceType == PieceType::blackKnight || pieceType == PieceType::whiteKnight) {
 		if (validateKnightMove(move) == false) {
 			return false;
 		}
 	}
-	if (pieceType == blackBishop || pieceType == whiteBishop) {
+	if (pieceType == PieceType::blackBishop || pieceType == PieceType::whiteBishop) {
 		if (validateBishopMove(move) == false) {
 			return false;
 		}
 	}
-	if (pieceType == blackQueen || pieceType == whiteQueen) {
+	if (pieceType == PieceType::blackQueen || pieceType == PieceType::whiteQueen) {
 		if (validateQueenMove(move) == false) {
 			return false;
 		}
 	}
-	if (pieceType == blackKing || pieceType == whiteKing) {
+	if (pieceType == PieceType::blackKing || pieceType == PieceType::whiteKing) {
 		if (validateKingMove(move, oldPosition, newPosition, pieceType, specialMoves) == false) {
 			return false;
 		}
 	}
-	if (pieceType == blackPawn || pieceType == whitePawn) {
+	if (pieceType == PieceType::blackPawn || pieceType == PieceType::whitePawn) {
 		if (validatePawnMove(oldPosition, move, newPosition, pieceType) == false) {
 			return false;
 		}
@@ -201,37 +206,37 @@ bool PositionController::validateQueenMove(Move const &move)
 	return false;
 }
 
-bool PositionController::validateKingMove(Move const &move, Position &oldPosition, Position &newPosition, int pieceType, std::vector<specialMove> &specialMoves)
+bool PositionController::validateKingMove(Move const &move, Position &oldPosition, Position &newPosition, PieceType pieceType, std::vector<specialMove> &specialMoves)
 {
-	if (pieceType == blackKing) {
+	if (pieceType == PieceType::blackKing) {
 		if (oldPosition.getCastleLegalBlackKingside() && colsMovedWithSign(move) == -2) {
 			if (checkIfPiecesInSquares(oldPosition, { 5,6 })) {
 				return false;
 			}
-			moveRookWhenCastling(newPosition, specialMoves, 7, 5, blackRook, kingsideCastleString);
+			moveRookWhenCastling(newPosition, specialMoves, 7, 5, PieceType::blackRook, kingsideCastleString);
 			return true;
 		}
 		if (oldPosition.getCastleLegalBlackQueenside() && colsMovedWithSign(move) == 2) {
 			if (checkIfPiecesInSquares(oldPosition, { 1,2,3 })) {
 				return false;
 			}
-			moveRookWhenCastling(newPosition, specialMoves, 0, 3, blackRook, queensideCastleString);
+			moveRookWhenCastling(newPosition, specialMoves, 0, 3, PieceType::blackRook, queensideCastleString);
 			return true;
 		}
 	}
-	if (pieceType == whiteKing) {
+	if (pieceType == PieceType::whiteKing) {
 		if (oldPosition.getCastleLegalWhiteKingside() && colsMovedWithSign(move) == -2) {
 			if (checkIfPiecesInSquares(oldPosition, { 61,62 })) {
 				return false;
 			}
-			moveRookWhenCastling(newPosition, specialMoves, 63, 61, whiteRook, kingsideCastleString);
+			moveRookWhenCastling(newPosition, specialMoves, 63, 61, PieceType::whiteRook, kingsideCastleString);
 			return true;
 		}
 		if (oldPosition.getCastleLegalWhiteQueenside() && colsMovedWithSign(move) == 2) {
 			if (checkIfPiecesInSquares(oldPosition, { 57,58,59 })) {
 				return false;
 			}
-			moveRookWhenCastling(newPosition, specialMoves, 56, 59, whiteRook, queensideCastleString);
+			moveRookWhenCastling(newPosition, specialMoves, 56, 59, PieceType::whiteRook, queensideCastleString);
 			return true;
 		}
 	}
@@ -243,21 +248,21 @@ bool PositionController::validateKingMove(Move const &move, Position &oldPositio
 }
 
 void PositionController::moveRookWhenCastling(Position &newPosition, std::vector<specialMove> &specialMoves,
-	int const rookOrigSquare, int const rookNewSquare, int const rookType, QString castleString)
+	int const rookOrigSquare, int const rookNewSquare, PieceType const rookType, QString castleString)
 {
 	newPosition.insertNewMove({ rookOrigSquare,rookNewSquare,"" });
-	specialMoves.push_back({ rookOrigSquare,empty,castleString });
+	specialMoves.push_back({ rookOrigSquare,PieceType::empty,castleString });
 	specialMoves.push_back({ rookNewSquare,rookType,castleString });
 	updateFenString(newPosition);
 }
 
 
 
-bool PositionController::validatePawnMove(Position &oldPosition, Move const &move, Position &newPosition, int const piecetype)
+bool PositionController::validatePawnMove(Position &oldPosition, Move const &move, Position &newPosition, PieceType const piecetype)
 {
 	int sign;
 	int startRow;
-	if (piecetype == whitePawn) {
+	if (piecetype == PieceType::whitePawn) {
 		sign = 1;
 		startRow = whiteStartRow;
 	}
@@ -278,7 +283,7 @@ bool PositionController::validatePawnMove(Position &oldPosition, Move const &mov
 			return false;
 		}
 	}
-	else if (numberOfRowsMoved !=  1) {
+	else if (numberOfRowsMoved != 1) {
 		return false;
 	}
 
@@ -295,7 +300,7 @@ bool PositionController::validatePawnMove(Position &oldPosition, Move const &mov
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 
@@ -305,7 +310,7 @@ bool PositionController::checkIfMovingToOwnColorPiece(Position &oldPosition, int
 {
 	// Check if trying to move to a square with piece of own color
 	int const colorNotFound{ -1 };
-	int const takenColor{  getColorFromType(oldPosition.getPiecePlacement().at(newSquareID),colorNotFound) };
+	int const takenColor{ getColorFromType(oldPosition.getPiecePlacement().at(newSquareID),colorNotFound) };
 	int const activeColor{ getColorFromType(newPosition.getPiecePlacement().at(newSquareID),colorNotFound) };
 	if (takenColor != colorNotFound && takenColor == activeColor) {
 		return true;
@@ -370,7 +375,7 @@ bool PositionController::checkIfMovingToPiece(Position & oldPosition, Location n
 bool PositionController::checkIfKingAttacked(Position & position, std::vector<Piece*> pieces, int const activeColor)
 {
 	int kingSquareID{};
-	int const kingPieceType{ activeColor == white ? blackKing : whiteKing };
+	PieceType const kingPieceType{ activeColor == white ? PieceType::blackKing : PieceType::whiteKing };
 	auto it{ find_if(pieces.begin(), pieces.end(),[kingPieceType](Piece* piece) {
 		return piece->getPieceType() == kingPieceType;
 	}) };
@@ -390,7 +395,6 @@ bool PositionController::checkIfSquareAttacked(Position & position, std::vector<
 	std::for_each(validMoves.begin(), validMoves.end(), [&squareAttacked, squareID](Move &move) {
 		if (move.toSquareId == squareID) {
 			squareAttacked = true;
-			qDebug() << "square " << squareID << " is attacked by square " << move.fromSquareId;
 		}
 	});
 
@@ -403,7 +407,7 @@ bool PositionController::checkIfPiecesInSquares(Position position, std::vector<i
 	int retVal = false;
 	std::for_each(squares.begin(), squares.end(), [position, &retVal](int square) mutable {
 		//int piece = position.getPiecePlacement().at(square);
-		if (position.getPiecePlacement().at(square) != empty) {
+		if (position.getPiecePlacement().at(square) != PieceType::empty) {
 			retVal = true;
 		}
 	});
@@ -437,7 +441,7 @@ int PositionController::colsMovedWithSign(Move move)
 	return fromCol - toCol;
 }
 
-int PositionController::getColorFromType(int pieceType, int const returnValueIfNotFound)
+int PositionController::getColorFromType(PieceType pieceType, int const returnValueIfNotFound)
 {
 	auto colorSearch{ colorFromType.find(pieceType) };
 	if (colorSearch != colorFromType.end()) {
@@ -464,24 +468,24 @@ void PositionController::getValidMovesForPiece(Position & position, std::vector<
 {
 	switch (piece->getPieceType()) {
 
-	case blackPawn:
-	case whitePawn:		getValidMovesForPawn(position, pieces, piece, moves, isActualMove);	break;
+	case PieceType::blackPawn:
+	case PieceType::whitePawn:		getValidMovesForPawn(position, pieces, piece, moves, isActualMove);	break;
 
-	case blackRook:
-	case whiteRook:		getValidMovesForRook(position, pieces, piece, moves, isActualMove);	break;
+	case PieceType::blackRook:
+	case PieceType::whiteRook:		getValidMovesForRook(position, pieces, piece, moves, isActualMove);	break;
 
-	case blackBishop:
-	case whiteBishop:	getValidMovesForBishop(position, pieces, piece, moves, isActualMove); break;
+	case PieceType::blackBishop:
+	case PieceType::whiteBishop:	getValidMovesForBishop(position, pieces, piece, moves, isActualMove); break;
 
-	case blackKnight:
-	case whiteKnight:	getValidMovesForKnight(position, pieces, piece, moves, isActualMove); break;
+	case PieceType::blackKnight:
+	case PieceType::whiteKnight:	getValidMovesForKnight(position, pieces, piece, moves, isActualMove); break;
 
-	case blackQueen:
-	case whiteQueen:	getValidMovesForQueen(position, pieces, piece, moves, isActualMove);	break;
+	case PieceType::blackQueen:
+	case PieceType::whiteQueen:	getValidMovesForQueen(position, pieces, piece, moves, isActualMove);	break;
 
-	case blackKing:
-	case whiteKing:		getValidMovesForKing(position, pieces, piece, moves, isActualMove);	break;
-		
+	case PieceType::blackKing:
+	case PieceType::whiteKing:		getValidMovesForKing(position, pieces, piece, moves, isActualMove);	break;
+
 	}
 	return;
 }
@@ -491,12 +495,12 @@ void PositionController::getValidMovesForPawn(Position& position, std::vector<Pi
 	// TODO: add logic similar to validatemove for all functions here. remember to consider checks on king before and after move.
 	//moves.push_back(Move{ piece->getSquareID(),piece->getSquareID(),"Pawn" });
 
-	int piecetype = piece->getPieceType();
+	PieceType piecetype = piece->getPieceType();
 	Direction forward;
 	Direction diagonalForwardLeft;
 	Direction diagonalForwardRight;
 	int startRow;
-	if (piecetype == whitePawn) {
+	if (piecetype == PieceType::whitePawn) {
 		forward = Direction::up;
 		diagonalForwardLeft = Direction::diagonalLeftUp;
 		diagonalForwardRight = Direction::diagonalRightUp;
@@ -536,7 +540,7 @@ void PositionController::checkIfValidMovePawnForward(Location const & location, 
 {
 	if (checkIfSquare(location)) {
 		if (checkIfMovingToPiece(position, location) == false) {
-			addValidMove(position, moves, pieces, origLocation, location, MoveType::pawnMove, isActualMove);
+			handleValidMove(position, moves, pieces, origLocation, location, checkIfPromotion(origLocation, location), isActualMove);
 		}
 	}
 }
@@ -544,7 +548,7 @@ void PositionController::checkIfValidMovePawnDiagonal(Location const & location,
 {
 	if (checkIfSquare(location)) {
 		if (checkIfMovingToOppositeColorPiece(position, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(location))) {
-			addValidMove(position, moves, pieces, origLocation, location, MoveType::capture, isActualMove);
+			handleValidMove(position, moves, pieces, origLocation, location, checkIfPromotion(origLocation, location), isActualMove);
 		}
 	}
 }
@@ -562,7 +566,7 @@ void PositionController::getValidKnightMovesInDirections(Location const origLoca
 		checkIfValidMove(location, origLocation, position, pieces, moves, continueSearch, isActualMove);
 	});
 }
-		
+
 void PositionController::getValidKingMovesInDirections(Location const origLocation, Position & position, std::vector<Piece*> &pieces, std::vector<Move> & moves, std::vector<Direction> directions, bool isActualMove)
 {
 	std::for_each(directions.begin(), directions.end(),
@@ -578,7 +582,7 @@ void PositionController::getValidKingMovesInDirections(Location const origLocati
 	Location queenRookLocation{};
 	MoveType moveType{};
 	if (pieceColor == white) {
-		kingRookLocation =	{ 0, squaresInARow-1 };
+		kingRookLocation = { 0, squaresInARow - 1 };
 		queenRookLocation = { 0, 0 };
 	}
 	else {
@@ -596,7 +600,7 @@ void PositionController::getValidKingMovesInDirections(Location const origLocati
 		Location location = origLocation;
 		moveLocation(location, Direction::right);
 		moveLocation(location, Direction::right);
-		addValidMove(position, moves, pieces, origLocation, location, moveType, isActualMove);
+		handleValidMove(position, moves, pieces, origLocation, location, moveType, isActualMove);
 	}
 	if (canCastleQueenSide) {
 		if (pieceColor == white) {
@@ -608,13 +612,13 @@ void PositionController::getValidKingMovesInDirections(Location const origLocati
 		Location location = origLocation;
 		moveLocation(location, Direction::left);
 		moveLocation(location, Direction::left);
-		addValidMove(position, moves, pieces, origLocation, location, moveType, isActualMove);
+		handleValidMove(position, moves, pieces, origLocation, location, moveType, isActualMove);
 	}
 }
 void PositionController::getValidMovesInDirections(Location const origLocation, Position & position, std::vector<Piece*> &pieces, std::vector<Move> & moves, std::vector<Direction> directions, bool isActualMove)
 {
 	std::for_each(directions.begin(), directions.end(),
-		[origLocation,&position, &pieces, &moves, isActualMove, this](Direction direction) {
+		[origLocation, &position, &pieces, &moves, isActualMove, this](Direction direction) {
 		getValidMovesInDirection(origLocation, position, pieces, moves, direction, isActualMove);
 	});
 }
@@ -635,10 +639,10 @@ void PositionController::checkIfValidMove(Location const & newLocation, Location
 		}
 		else if (checkIfMovingToOppositeColorPiece(position, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(newLocation))) {
 			continueSearch = false;
-			addValidMove(position, moves, pieces, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(newLocation), MoveType::capture, isActualMove);
+			handleValidMove(position, moves, pieces, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(newLocation), MoveType::capture, isActualMove);
 		}
 		else {
-			addValidMove(position, moves, pieces, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(newLocation), isActualMove);
+			handleValidMove(position, moves, pieces, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(newLocation), isActualMove);
 		}
 	}
 	else {
@@ -655,8 +659,8 @@ bool PositionController::checkIfKingAttackedAfterMove(Position &position, std::v
 	std::vector<Piece*> origPieceVector = pieces;
 	std::vector<Piece*> piecesAfterMove = pieces;
 	PieceView pieceView;
-	int const pieceType{ positionAnalyzer.getPieceTypeFromSquareID(pieces, move.fromSquareId) };
-	Piece* piece =  pieceView.generatePiece(pieceType, { 0,0 }, move.toSquareId, NULL);
+	PieceType const pieceType{ positionAnalyzer.getPieceTypeFromSquareID(pieces, move.fromSquareId) };
+	Piece* piece = pieceView.generatePiece(pieceType, { 0,0 }, move.toSquareId, NULL);
 	piece->hide();
 
 	removePiece(piecesAfterMove, move.toSquareId);
@@ -685,14 +689,14 @@ void PositionController::getValidMovesForRook(Position & position, std::vector<P
 {
 	Location origLocation = getLocationFromSquareID(piece->getSquareID());
 	getValidMovesInDirections(origLocation, position, pieces, moves,
-		{ Direction::left, Direction::right, Direction::up, Direction::down}, isActualMove);
+		{ Direction::left, Direction::right, Direction::up, Direction::down }, isActualMove);
 }
 
 void PositionController::getValidMovesForBishop(Position & position, std::vector<Piece*> &pieces, Piece *& piece, std::vector<Move>& moves, bool isActualMove)
 {
 	Location origLocation = getLocationFromSquareID(piece->getSquareID());
 	getValidMovesInDirections(origLocation, position, pieces, moves,
-		{	Direction::diagonalLeftUp,	Direction::diagonalLeftDown,
+		{ Direction::diagonalLeftUp,	Direction::diagonalLeftDown,
 			Direction::diagonalRightUp, Direction::diagonalRightDown }, isActualMove);
 }
 
@@ -716,7 +720,7 @@ void PositionController::getValidMovesForQueen(Position & position, std::vector<
 {
 	Location origLocation = getLocationFromSquareID(piece->getSquareID());
 	getValidMovesInDirections(origLocation, position, pieces, moves,
-		{	Direction::left,			Direction::right,
+		{ Direction::left,			Direction::right,
 			Direction::up,				Direction::down,
 			Direction::diagonalLeftUp,	Direction::diagonalLeftDown,
 			Direction::diagonalRightUp, Direction::diagonalRightDown }, isActualMove);
@@ -726,49 +730,49 @@ void PositionController::getValidMovesForKing(Position & position, std::vector<P
 {
 	Location origLocation = getLocationFromSquareID(piece->getSquareID());
 	getValidKingMovesInDirections(origLocation, position, pieces, moves,
-		{	Direction::left,			Direction::right,
+		{ Direction::left,			Direction::right,
 			Direction::up,				Direction::down,
 			Direction::diagonalLeftUp,	Direction::diagonalLeftDown,
 			Direction::diagonalRightUp, Direction::diagonalRightDown }, isActualMove);
 
 	// check if possible to castle
-	int const pieceType = piece->getPieceType();
+	PieceType const pieceType = piece->getPieceType();
 	bool castlingPossibleKingSide{};
 	bool castlingPossibleQueenSide{};
 	int pieceColor{};
 	switch (pieceType)
 	{
-		case whiteKing:
-			castlingPossibleKingSide = position.getCastleLegalWhiteKingside();
-			if (checkIfPiecesInSquares(position, whiteKingsideCastleSquares)) {
-				castlingPossibleKingSide = false;
-			}
-			castlingPossibleQueenSide = position.getCastleLegalWhiteQueenside();
-			if (checkIfPiecesInSquares(position, whiteQueensideCastleSquares)) {
-				castlingPossibleQueenSide = false;
-			}
-			pieceColor = white;
-			break;
-		case blackKing:
-			castlingPossibleKingSide = position.getCastleLegalBlackKingside();
-			if (checkIfPiecesInSquares(position, blackKingsideCastleSquares)) {
-				castlingPossibleKingSide = false;
-			}
-			castlingPossibleQueenSide = position.getCastleLegalBlackQueenside();
-			if (checkIfPiecesInSquares(position, blackQueensideCastleSquares)) {
-				castlingPossibleQueenSide = false;
-			}
-			pieceColor = black;
-			break;
-		default:
-			break;
+	case PieceType::whiteKing:
+		castlingPossibleKingSide = position.getCastleLegalWhiteKingside();
+		if (checkIfPiecesInSquares(position, whiteKingsideCastleSquares)) {
+			castlingPossibleKingSide = false;
+		}
+		castlingPossibleQueenSide = position.getCastleLegalWhiteQueenside();
+		if (checkIfPiecesInSquares(position, whiteQueensideCastleSquares)) {
+			castlingPossibleQueenSide = false;
+		}
+		pieceColor = white;
+		break;
+	case PieceType::blackKing:
+		castlingPossibleKingSide = position.getCastleLegalBlackKingside();
+		if (checkIfPiecesInSquares(position, blackKingsideCastleSquares)) {
+			castlingPossibleKingSide = false;
+		}
+		castlingPossibleQueenSide = position.getCastleLegalBlackQueenside();
+		if (checkIfPiecesInSquares(position, blackQueensideCastleSquares)) {
+			castlingPossibleQueenSide = false;
+		}
+		pieceColor = black;
+		break;
+	default:
+		break;
 	}
 	if (!position.getActiveKingAttacked()) {
 		getValidKingMovesCastling(origLocation, position, pieces, moves, pieceColor, castlingPossibleKingSide, castlingPossibleQueenSide, isActualMove);
 	}
 }
 
-void PositionController::getMoveString(Position &origPosition, Move &move, int const pieceType)
+void PositionController::getMoveString(Position &origPosition, Move &move, PieceType const pieceType)
 {
 	QString origSquareString{};
 	QString newSquareString{};
@@ -778,7 +782,7 @@ void PositionController::getMoveString(Position &origPosition, Move &move, int c
 	move.moveString.append(getPieceChar(pieceType));
 
 	if (checkIfMovingToOppositeColorPiece(origPosition, move.fromSquareId, move.toSquareId)) {
-		if (pieceType == blackPawn || pieceType == whitePawn) {
+		if (pieceType == PieceType::blackPawn || pieceType == PieceType::whitePawn) {
 			move.moveString.append(origSquareString.at(0));
 		}
 		move.moveString.append('x');
@@ -796,7 +800,7 @@ void PositionController::getSquareString(int const &squareID, QString &squareStr
 	squareString.append(QString::number(origRow));
 }
 
-QChar PositionController::getPieceChar(int const pieceType)
+QChar PositionController::getPieceChar(PieceType const pieceType)
 {
 	QChar pieceChar{};
 	auto pieceCharSearch{ pieceChars2.find(pieceType) };
@@ -863,7 +867,7 @@ void PositionController::moveLocation(Location& location, Direction const direct
 	return;
 }
 
-void PositionController::addValidMove(Position &position, std::vector<Move>& moves, std::vector<Piece*> &pieces, int const fromSquareID, int const toSquareID, MoveType moveType, bool isActualMove)
+void PositionController::handleValidMove(Position &position, std::vector<Move>& moves, std::vector<Piece*> &pieces, int const fromSquareID, int const toSquareID, MoveType moveType, bool isActualMove)
 {
 	int error{};
 	if (fromSquareID < 0 || fromSquareID>63 || toSquareID < 0 || toSquareID>63) {
@@ -871,44 +875,54 @@ void PositionController::addValidMove(Position &position, std::vector<Move>& mov
 	}
 	QString moveString{};
 	switch (moveType) {
-		case MoveType::castleKingsideWhite:
-		case MoveType::castleKingsideBlack:
-			moveString.append("0-0");
-			break;
-		case MoveType::castleQueensideWhite:
-		case MoveType::castleQueensideBlack:
-			moveString.append("0-0-0");
-			break;
-		default: break;
+	case MoveType::castleKingsideWhite:
+	case MoveType::castleKingsideBlack:
+		moveString.append("0-0");
+		break;
+	case MoveType::castleQueensideWhite:
+	case MoveType::castleQueensideBlack:
+		moveString.append("0-0-0");
+		break;
+	case MoveType::promotion:
+	case MoveType::captureAndPromotion:
+	{
+		// Check if trying to move to a square with piece of own color
+		int const colorNotFound{ -1 };
+		int const pieceColor{ getColorFromType(position.getPiecePlacement().at(fromSquareID),colorNotFound) };
+		if (pieceColor == colorNotFound) {
+			qDebug() << "Error in addValid move case promotion";
+			return; // promotion not handled if error
+		}
+		handlePromotion(position, moves, pieces, fromSquareID, toSquareID, moveType, pieceColor, isActualMove, moveString);
+		return; // Promotion handled by calling addValidMove
+	}
+	default: break;
 	}
 
-	Move move{ fromSquareID,toSquareID, moveString, moveType };
+	insertValidMove(position, moves, pieces, fromSquareID, toSquareID, moveType, isActualMove, moveString, PieceType::noChange);
+}
 
-	int inactiveColor{ position.getActiveColorInt() == white ? black : white };
-	
-	bool moveIllegal{};
+void PositionController::insertValidMove(Position &position, std::vector<Move>& moves, std::vector<Piece*> &pieces, int const fromSquareID, int const toSquareID, MoveType const moveType, bool const isActualMove, QString moveString, PieceType const newPieceType)
+{
+	Move move{ fromSquareID,toSquareID, moveString, moveType, newPieceType };
+	int const inactiveColor{ position.getActiveColorInt() == white ? black : white };
 	if (isActualMove) {
-		moveIllegal = checkIfKingAttackedAfterMove(position, pieces, inactiveColor, move);
-	}
-	else {
-		moveIllegal = false;
-	}
-	if (!moveIllegal) {
-		moves.push_back(move);
+		if (checkIfKingAttackedAfterMove(position, pieces, inactiveColor, move) == false) {
+			moves.push_back(move);
+		}
 	}
 }
-
-void PositionController::addValidMove(Position &position, std::vector<Move>& moves, std::vector<Piece*> &pieces, int const fromSquareID, int const toSquareID, bool isActualMove)
+void PositionController::handleValidMove(Position &position, std::vector<Move>& moves, std::vector<Piece*> &pieces, int const fromSquareID, int const toSquareID, bool isActualMove)
 {
-	addValidMove(position, moves, pieces, fromSquareID, toSquareID, MoveType::normal, isActualMove);
+	handleValidMove(position, moves, pieces, fromSquareID, toSquareID, MoveType::normal, isActualMove);
 }
-void PositionController::addValidMove(Position &position, std::vector<Move>& moves, std::vector<Piece*> &pieces, Location const & origLocation, Location const & location, bool isActualMove)
+void PositionController::handleValidMove(Position &position, std::vector<Move>& moves, std::vector<Piece*> &pieces, Location const & origLocation, Location const & location, bool isActualMove)
 {
-	addValidMove(position, moves, pieces, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(location), MoveType::normal, isActualMove);
+	handleValidMove(position, moves, pieces, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(location), MoveType::normal, isActualMove);
 }
-void PositionController::addValidMove(Position &position, std::vector<Move>& moves, std::vector<Piece*> &pieces, Location const & origLocation, Location const & location, MoveType moveType, bool isActualMove)
+void PositionController::handleValidMove(Position &position, std::vector<Move>& moves, std::vector<Piece*> &pieces, Location const & origLocation, Location const & location, MoveType moveType, bool isActualMove)
 {
-	addValidMove(position, moves, pieces, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(location), moveType, isActualMove);
+	handleValidMove(position, moves, pieces, getSquareIDFromLocation(origLocation), getSquareIDFromLocation(location), moveType, isActualMove);
 }
 
 void PositionController::removePiece(std::vector<Piece*>& t_pieces, int squareID)
@@ -927,6 +941,49 @@ void PositionController::removePiece(std::vector<Piece*>& t_pieces, int squareID
 	}
 }
 
+MoveType PositionController::checkIfPromotion(Location origLocation, Location newLocation)
+{
+	if (newLocation.row == 0 || newLocation.row == squaresInARow) {
+		if (newLocation.col != origLocation.col)
+		{
+			return MoveType::captureAndPromotion;
+		}
+		else {
+			return MoveType::promotion;
+		}
+	}
+	else {
+		return MoveType::pawnMove;
+	}
+}
 
+void PositionController::handlePromotion(Position &position, std::vector<Move>& moves, std::vector<Piece*> &pieces, int const fromSquareID, int const toSquareID, MoveType moveType, int const pieceColor, bool isActualMove, QString moveString)
+{
+	if (moveType == MoveType::promotion) {
+		qDebug() << "Promotion" << isActualMove;
 
+	}
+	else if (moveType == MoveType::captureAndPromotion) {
+		qDebug() << "Capture and Promotion" << isActualMove;
+	}
 
+	std::vector<PieceType> promotionOptions{ getPromotionOptions(pieceColor) };
+	std::for_each(begin(promotionOptions), end(promotionOptions),
+		[this, &position, &moves, &pieces, fromSquareID, toSquareID, &moveType, isActualMove, &moveString](PieceType pieceType) mutable {
+		insertValidMove(position, moves, pieces, fromSquareID, toSquareID, moveType, isActualMove, moveString, pieceType);
+		qDebug() << "handling promotion";
+	});
+}
+
+std::vector<PieceType> PositionController::getPromotionOptions(int const pieceColor)
+{
+	if (pieceColor == white) {
+		return std::vector<PieceType> { PieceType::whiteQueen,PieceType::whiteRook,PieceType::whiteBishop,PieceType::whiteKnight };
+	}
+	else if (pieceColor == black) {
+		return std::vector<PieceType> { PieceType::blackQueen,PieceType::blackRook,PieceType::blackBishop,PieceType::blackKnight };
+	}
+	else {
+		return std::vector<PieceType> {};
+	}
+}

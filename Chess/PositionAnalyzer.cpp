@@ -5,19 +5,19 @@
 #include "PositionAnalyzer.h"
 #include "PositionController.h"
 
-std::map<int, int> pieceValues{
-	{ whitePawn,	1	},
-	{ whiteRook,	5	},
-	{ whiteKnight,	3	},
-	{ whiteBishop,	3	},
-	{ whiteQueen,	9	},
-	{ whiteKing,	1000},
-	{ blackPawn,	1	},
-	{ blackRook,	5	},
-	{ blackKnight,	3	},
-	{ blackBishop,	3	},
-	{ blackQueen,	9	},
-	{ blackKing,	1000},
+std::map<PieceType, int> pieceValues{
+	{ PieceType::whitePawn,	1	},
+	{ PieceType::whiteRook,	5	},
+	{ PieceType::whiteKnight,	3	},
+	{ PieceType::whiteBishop,	3	},
+	{ PieceType::whiteQueen,	9	},
+	{ PieceType::whiteKing,	1000},
+	{ PieceType::blackPawn,	1	},
+	{ PieceType::blackRook,	5	},
+	{ PieceType::blackKnight,	3	},
+	{ PieceType::blackBishop,	3	},
+	{ PieceType::blackQueen,	9	},
+	{ PieceType::blackKing,	1000},
 };
 
 PositionAnalyzer::PositionAnalyzer()
@@ -57,7 +57,7 @@ void PositionAnalyzer::analysePosition(Position &position, std::vector<Piece*>& 
 	if constexpr (DEBUG_MODE)
 	{
 		std::for_each(validMoves.begin(), validMoves.end(), [&positionController, &pieces, &position, this](Move &move) {
-			int const pieceType{ getPieceTypeFromSquareID(pieces, move.fromSquareId) };
+			PieceType const pieceType{ getPieceTypeFromSquareID(pieces, move.fromSquareId) };
 			positionController.getMoveString(position, move, pieceType);
 		});
 	}
@@ -66,7 +66,7 @@ void PositionAnalyzer::analysePosition(Position &position, std::vector<Piece*>& 
 	numOfValidMoves = validMoves.size();
 }
 
-int PositionAnalyzer::getPieceTypeFromSquareID(std::vector<Piece*>& pieces, int const squareID)
+PieceType PositionAnalyzer::getPieceTypeFromSquareID(std::vector<Piece*>& pieces, int const squareID)
 {
 	auto it = std::find_if(pieces.begin(), pieces.end(),
 		[&squareID](Piece *piece) { return (piece->getSquareID()==squareID); });
@@ -75,7 +75,7 @@ int PositionAnalyzer::getPieceTypeFromSquareID(std::vector<Piece*>& pieces, int 
 		return foundPiece->getPieceType();
 	}
 	else {
-		return 0;
+		return PieceType::empty;
 	}
 }
 

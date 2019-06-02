@@ -49,27 +49,24 @@ Chess::Chess(QWidget *parent)
 	positionAnalyzer.analysePosition(position, pieces, maxDepthWhenAnalysing);
 	updateAnalysisTable(analysisTableModel);
 
-	PromotionDialog* dialog{ new PromotionDialog() };
-	dialog->exec();
 
-	qDebug() << "piece selected: " << dialog->getPieceTypeSelected();
 
 	//Leaf leaf{ m,initialPosition };
 }
 
 
 
-std::map<int, QChar> pieceChars = {
-	{ whiteRook,    'R' },
-	{ whiteKnight,  'N' },
-	{ whiteBishop,  'B'	},
-	{ whiteQueen,   'Q' },
-	{ whiteKing,    'K' },
-	{ blackRook,    'R' },
-	{ blackKnight,  'N' },
-	{ blackBishop,  'B' },
-	{ blackQueen,   'Q' },
-	{ blackKing,    'K' }
+std::map<PieceType, QChar> pieceChars = {
+	{ PieceType::whiteRook,    'R' },
+	{ PieceType::whiteKnight,  'N' },
+	{ PieceType::whiteBishop,  'B'	},
+	{ PieceType::whiteQueen,   'Q' },
+	{ PieceType::whiteKing,    'K' },
+	{ PieceType::blackRook,    'R' },
+	{ PieceType::blackKnight,  'N' },
+	{ PieceType::blackBishop,  'B' },
+	{ PieceType::blackQueen,   'Q' },
+	{ PieceType::blackKing,    'K' }
 };
 
 //std::map<int, QPoint> squareIdToCoordinate = {
@@ -148,7 +145,7 @@ void Chess::printPieceInfo(std::vector<Piece*> &pieceVec)
 {
 	std::for_each(pieceVec.begin(), pieceVec.end(), [](auto &piece) {
 		qDebug() << "Piece: " <<
-			" type: " << piece->getPieceType() <<
+			" type: " << static_cast<int> (piece->getPieceType()) <<
 			" color: " << piece->getColor() <<
 			" xPos: " << piece->getCoordinate().rx() <<
 			" yPos: " << piece->getCoordinate().ry() <<
@@ -232,7 +229,7 @@ std::vector<Piece*> Chess::generatePieces(Position &t_position)
 	
 	int squareID = 0;
 	for (auto &pieceType : t_position.getPiecePlacement() ) {
-		if (pieceType != empty)
+		if (pieceType != PieceType::empty)
 		{
 			QPoint coordinate = getPointFromSquareID(squareID);
 			piecesVec.push_back(pieceView.generatePiece(pieceType, coordinate, squareID, this));
@@ -437,8 +434,16 @@ QString Chess::getPositionFromDialog(QInputDialog & dialog)
 	return dialog.textValue();
 }
 
-void Chess::handleMove(Move & move, Position & t_position, std::vector<Piece*>& t_pieces, int const pieceType, QPoint const &newPoint, QPoint const &origPoint)
+void Chess::handleMove(Move & move, Position & t_position, std::vector<Piece*>& t_pieces, PieceType const pieceType, QPoint const &newPoint, QPoint const &origPoint)
 {
+
+	// find out if move is promotion move
+	/*
+		PromotionDialog* dialog{ new PromotionDialog() };
+		dialog->exec();
+
+		qDebug() << "piece selected: " << dialog->getPieceTypeSelected();
+	*/
 	Position origPosition = t_position;
 	bool legalMove = positionController.validateMove(t_position, t_pieces, move);
 
@@ -447,6 +452,8 @@ void Chess::handleMove(Move & move, Position & t_position, std::vector<Piece*>& 
 	{
 		// TODO: should here also detect a rook move, to loose castling rights with that rook
 		checkIfCastling(move, t_position);
+		
+		// add promotion code check here ??
 
 		t_position = positionController.generateNewPosition(move, t_position);
 		handleLegalMove(piece, pieceType, newPoint, move, origPosition, t_position, t_pieces);
@@ -540,11 +547,13 @@ void Chess::dropEvent(QDropEvent *event)
 		QByteArray itemData = mime->data(chessMimeType());
 		QDataStream dataStream(&itemData, QIODevice::ReadOnly);
 
-		int pieceType{};
+		int pieceTypeInt{};
 		int origSquareID{};
 		QPoint origPoint{};
 		QPoint offset{};
-		dataStream >> pieceType >> origSquareID >> origPoint.rx() >> origPoint.ry() >> offset;
+		dataStream >> pieceTypeInt >> origSquareID >> origPoint.rx() >> origPoint.ry() >> offset;
+
+		PieceType pieceType{ static_cast<PieceType>(pieceTypeInt)};
 
 		QPoint droppedPoint{ event->pos() - offset };
 		QPoint newPoint = giveCoordinateToDroppedPiece(droppedPoint, origPoint);
@@ -583,7 +592,7 @@ void Chess::dropEvent(QDropEvent *event)
 	}
 }
 
-void Chess::handleLegalMove(Piece * &piece, int const pieceType, QPoint const &newPoint, Move const &move,
+void Chess::handleLegalMove(Piece * &piece, PieceType const pieceType, QPoint const &newPoint, Move const &move,
 	Position &origPosition, Position &newPosition, std::vector<Piece*>& t_pieces)
 {
 	QString moveString = move.moveString;
@@ -610,22 +619,22 @@ void Chess::checkIfCastling(Move& move, Position& newPosition)
 
 	switch (move.moveType) {
 	case MoveType::castleKingsideWhite:
-		performCastling(newPosition, { 63,61 }, pieces, whiteRook);
+		performCastling(newPosition, { 63,61 }, pieces, PieceType::whiteRook);
 		newPosition.setCastleLegalWhiteKingside(false);
 		newPosition.setCastleLegalWhiteQueenside(false);
 		break;
 	case MoveType::castleQueensideWhite:
-		performCastling(newPosition, { 56,59 }, pieces, whiteRook);
+		performCastling(newPosition, { 56,59 }, pieces, PieceType::whiteRook);
 		newPosition.setCastleLegalWhiteKingside(false);
 		newPosition.setCastleLegalWhiteQueenside(false);
 		break;
 	case MoveType::castleKingsideBlack:
-		performCastling(newPosition, { 7,5 }, pieces, blackRook);
+		performCastling(newPosition, { 7,5 }, pieces, PieceType::blackRook);
 		newPosition.setCastleLegalBlackKingside(false);
 		newPosition.setCastleLegalBlackQueenside(false);
 		break;
 	case MoveType::castleQueensideBlack:
-		performCastling(newPosition, { 0,3 }, pieces, blackRook);
+		performCastling(newPosition, { 0,3 }, pieces, PieceType::blackRook);
 		newPosition.setCastleLegalBlackKingside(false);
 		newPosition.setCastleLegalBlackQueenside(false);
 		break;
@@ -633,7 +642,12 @@ void Chess::checkIfCastling(Move& move, Position& newPosition)
 	}
 }
 
-void Chess::performCastling(Position &t_position, Move move,std::vector<Piece*>& t_pieces, int const pieceType)
+void Chess::performPromotion(Move & move, Position & newPosition)
+{
+	//if(move.toSquareId ) GUI here get from piece dropped function
+}
+
+void Chess::performCastling(Position &t_position, Move move,std::vector<Piece*>& t_pieces, PieceType const pieceType)
 {
 	positionController.removePiece(t_pieces, move.fromSquareId);
 	Piece *newRook = pieceView.generatePiece(pieceType, getPointFromSquareID(move.toSquareId),move.toSquareId, this);
@@ -643,7 +657,7 @@ void Chess::performCastling(Position &t_position, Move move,std::vector<Piece*>&
 	newRook->setAttribute(Qt::WA_DeleteOnClose);
 }
 
-void Chess::getMoveString(Position &origPosition, Position &newPosition, std::vector<Piece*>& t_pieces, QString &moveString, Move const &move, int const pieceType)
+void Chess::getMoveString(Position &origPosition, Position &newPosition, std::vector<Piece*>& t_pieces, QString &moveString, Move const &move, PieceType const pieceType)
 {
 	QString origSquareString{};
 	QString newSquareString{};
@@ -653,7 +667,7 @@ void Chess::getMoveString(Position &origPosition, Position &newPosition, std::ve
 	moveString.append(getPieceChar(pieceType));
 
 	if (positionController.checkIfMovingToOppositeColorPiece(origPosition, move.toSquareId, newPosition)) {
-		if (pieceType == blackPawn || pieceType == whitePawn) {
+		if (pieceType == PieceType::blackPawn || pieceType == PieceType::whitePawn) {
 			moveString.append(origSquareString.at(0));
 		}
 		moveString.append('x');
@@ -695,7 +709,7 @@ void Chess::getSquareString(int const &squareID, QString &squareString)
 	squareString.append(QString::number(origRow));
 }
 
-QChar Chess::getPieceChar(int const pieceType)
+QChar Chess::getPieceChar(PieceType const pieceType)
 {
 	QChar pieceChar{};
 	auto pieceCharSearch{ pieceChars.find(pieceType) };
@@ -718,7 +732,7 @@ void Chess::mousePressEvent(QMouseEvent *event)
 
 	QByteArray itemData;
 	QDataStream dataStream(&itemData, QIODevice::WriteOnly);
-	dataStream	<< piece->getPieceType()
+	dataStream	<< static_cast<int> (piece->getPieceType())
 				<< piece->getSquareID()
 				<< piece->getCoordinate().rx()
 				<< piece->getCoordinate().ry()

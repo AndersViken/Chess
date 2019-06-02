@@ -7,7 +7,7 @@
 struct specialMove
 {
 	int square;
-	int pieceOnSquareAfterMove;
+	PieceType pieceOnSquareAfterMove;
 	QString moveString;
 };
 
@@ -28,15 +28,15 @@ public:
 	Position generateNewPosition(Move &mov, Position &oldPos);
 	void updateFenString(Position &position);
 	bool validateMove(Position & position, std::vector<Piece*> pieces, Move & move);
-	bool validateMove(Position & newPosition, Position & oldPosition, Move move, int pieceType, std::vector<specialMove>& specialMoves);
+	bool validateMove(Position & newPosition, Position & oldPosition, Move move, PieceType pieceType, std::vector<specialMove>& specialMoves);
 	//QChar getFenCharFromSquareID(QString fenString, int const squareID);
 	bool validateBishopMove(Move const &move);
 	bool validateRookMove(Move const &move);
 	bool validateKnightMove(Move const &move);
 	bool validateQueenMove(Move const &move);
-	bool validateKingMove(Move const & move, Position &oldPosition, Position &newPosition, int pieceType, std::vector<specialMove> &specialMoves);
-	void moveRookWhenCastling(Position & newPosition, std::vector<specialMove>& specialMoves, int const rookOrigSquare, int const rookNewSquare, int const rookType, QString castleString);
-	bool validatePawnMove(Position &oldPosition, Move const &move, Position &newPosition, int const piecetype);
+	bool validateKingMove(Move const & move, Position &oldPosition, Position &newPosition, PieceType pieceType, std::vector<specialMove> &specialMoves);
+	void moveRookWhenCastling(Position & newPosition, std::vector<specialMove>& specialMoves, int const rookOrigSquare, int const rookNewSquare, PieceType const rookType, QString castleString);
+	bool validatePawnMove(Position &oldPosition, Move const &move, Position &newPosition, PieceType const piecetype);
 	bool checkIfMovingToOwnColorPiece(Position &oldPosition, int const newSquareID, Position &newPosition);
 	bool checkIfMovingToOwnColorPiece(Position & position, Location const activeLocation, Location const newLocation);
 	bool checkIfMovingToOppositeColorPiece(Position &oldPosition, int const newSquareID, Position &newPosition);
@@ -50,7 +50,7 @@ public:
 	int rowsMovedWithSign(Move move);
 	int colsMoved(Move move);
 	int colsMovedWithSign(Move move);
-	int getColorFromType(int pieceType, int const returnValueIfNotFound);
+	int getColorFromType(PieceType pieceType, int const returnValueIfNotFound);
 
 	std::vector<Move> getValidMoves(Position & position, std::vector<Piece*>& pieces, int const activeColor, bool isActualMove);
 
@@ -88,23 +88,28 @@ public:
 
 	void getValidMovesForKing(Position & position, std::vector<Piece*>& pieces, Piece *& piece, std::vector<Move>& moves, bool isActualMove);
 	
-	void getMoveString(Position & origPosition, Move & move, int const pieceType);
+	void getMoveString(Position & origPosition, Move & move, PieceType const pieceType);
 
 	void getSquareString(int const & squareID, QString & squareString);
 
-	QChar getPieceChar(int const pieceType);
+	QChar getPieceChar(PieceType const pieceType);
 
 	bool checkIfSquare(Location location);
 	Location getLocationFromSquareID(int const squareID);
 	int getSquareIDFromLocation(Location location);
 	void moveLocation(Location& location, Direction const direction);
-	void addValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, int const fromSquareID, int const toSquareID, MoveType moveType, bool isActualMove);
-	void addValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, int const fromSquareID, int const toSquareID, bool isActualMove);
-	void addValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, Location const & origLocation, Location const & location, bool isActualMove);
-	void addValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, Location const & origLocation, Location const & location, MoveType moveType, bool isActualMove);
+	void handleValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, int const fromSquareID, int const toSquareID, MoveType moveType, bool isActualMove);
+	void insertValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, int const fromSquareID, int const toSquareID, MoveType const moveType, bool const isActualMove, QString moveString, PieceType const newPieceType);
+	void handleValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, int const fromSquareID, int const toSquareID, bool isActualMove);
+	void handleValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, Location const & origLocation, Location const & location, bool isActualMove);
+	void handleValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, Location const & origLocation, Location const & location, MoveType moveType, bool isActualMove);
 
 	void removePiece(std::vector<Piece*>& pieceVec, int squareID);
 
+	MoveType checkIfPromotion(Location origLocation, Location newLocation);
+	void handlePromotion(Position &position, std::vector<Move>& moves, std::vector<Piece*> &pieces, int const fromSquareID, int const toSquareID, MoveType moveType, int const pieceColor, bool const isActualMove, QString moveString);
+	std::vector<PieceType> getPromotionOptions(int const pieceColor);
+	
 	void erasePieceFromVector(std::vector<Piece*>& t_pieces, int squareID);
 
 	

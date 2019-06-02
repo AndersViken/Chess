@@ -1,17 +1,18 @@
 #pragma once
 #include <qlabel.h>
+#include "PieceInfo.h"
 class Piece :
 	public QLabel
 {
 public:
 	Piece();
-	Piece(QPoint coordinate, int squareID, int pieceType, int color, QString imagePath, int imageSize, QWidget *parent);
+	Piece(QPoint coordinate, int squareID, PieceType pieceType, int color, QString imagePath, int imageSize, QWidget *parent);
 	~Piece();
 
 	QPoint	getCoordinate();
 	int		getSquareID();
-	int		getPieceType();
-	void	setPieceType(int t_pieceType) { pieceType = t_pieceType; };
+	PieceType		getPieceType();
+	void	setPieceType(PieceType t_pieceType) { pieceType = t_pieceType; };
 	int		getColor();
 	QString	getImagePath();
 	int		getImageSize();
@@ -21,7 +22,7 @@ public:
 private:
 	QPoint coordinate{};
 	int squareID{};
-	int pieceType{};
+	PieceType pieceType{};
 	int color{};
 	QString imagePath{};
 	int imageSize{};

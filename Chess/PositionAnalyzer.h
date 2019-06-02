@@ -10,7 +10,7 @@ public:
 	~PositionAnalyzer();
 
 	void analysePosition(Position & position, std::vector<Piece*>& pieces, int depthRemaining);
-	int getPieceTypeFromSquareID(std::vector<Piece*>& pieces, int const squareID);
+	PieceType getPieceTypeFromSquareID(std::vector<Piece*>& pieces, int const squareID);
 	int getPieceValueSum();
 	int getNumberOfValidMoves();
 	int getUpdatedNumberOfValidMoves(Position & t_position, std::vector<Piece*>& t_pieces);
