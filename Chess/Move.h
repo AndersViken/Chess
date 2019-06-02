@@ -1,5 +1,6 @@
 #pragma once
 #include <qstring.h>
+#include "PieceInfo.h"
 
 enum class MoveType {
 	normal,
@@ -17,17 +18,36 @@ enum class MoveType {
 class Move
 {
 public:
-	Move();
-	Move(int fromSquareId, int toSquareId);
-	Move(int fromSquareId, int toSquareId, QString moveString);
-	Move(int fromSquareId, int toSquareId, QString moveString, MoveType moveType);
-	~Move();
+	
+	Move::Move(){}
+
+	Move::Move(int fromSquareId, int toSquareId) :
+		fromSquareId(fromSquareId),
+		toSquareId(toSquareId),
+		moveString(""),
+		moveType(MoveType::normal){}
+
+	Move::Move(int fromSquareId, int toSquareId, QString moveString) :
+		fromSquareId(fromSquareId),
+		toSquareId(toSquareId),
+		moveString(moveString),
+		moveType(MoveType::normal){}
+
+	Move::Move(int fromSquareId, int toSquareId, QString moveString, MoveType moveType, PieceType promotionToPieceType) :
+		fromSquareId(fromSquareId),
+		toSquareId(toSquareId),
+		moveString(moveString),
+		moveType(moveType),
+		promotionToPieceType(promotionToPieceType){}
+	
+	Move::~Move() {}
+
 	bool operator==(const Move & lhs);
 	int fromSquareId;
 	int toSquareId;
 	QString moveString;
 	MoveType moveType;
-
+	PieceType promotionToPieceType;
 };
 
 

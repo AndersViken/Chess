@@ -899,24 +899,17 @@ void PositionController::handleValidMove(Position &position, std::vector<Move>& 
 	default: break;
 	}
 
-	insertValidMove(position, moves, pieces, fromSquareID, toSquareID, moveType, isActualMove, moveString);
+	insertValidMove(position, moves, pieces, fromSquareID, toSquareID, moveType, isActualMove, moveString, PieceType::noChange);
 }
 
-void PositionController::insertValidMove(Position &position, std::vector<Move>& moves, std::vector<Piece*> &pieces, int const fromSquareID, int const toSquareID, MoveType const moveType, bool const isActualMove, QString moveString)
+void PositionController::insertValidMove(Position &position, std::vector<Move>& moves, std::vector<Piece*> &pieces, int const fromSquareID, int const toSquareID, MoveType const moveType, bool const isActualMove, QString moveString, PieceType const newPieceType)
 {
-	Move move{ fromSquareID,toSquareID, moveString, moveType };
-
-	int inactiveColor{ position.getActiveColorInt() == white ? black : white };
-
-	bool moveIllegal{};
+	Move move{ fromSquareID,toSquareID, moveString, moveType, newPieceType };
+	int const inactiveColor{ position.getActiveColorInt() == white ? black : white };
 	if (isActualMove) {
-		moveIllegal = checkIfKingAttackedAfterMove(position, pieces, inactiveColor, move);
-	}
-	else {
-		moveIllegal = false;
-	}
-	if (!moveIllegal) {
-		moves.push_back(move);
+		if (checkIfKingAttackedAfterMove(position, pieces, inactiveColor, move) == false) {
+			moves.push_back(move);
+		}
 	}
 }
 void PositionController::handleValidMove(Position &position, std::vector<Move>& moves, std::vector<Piece*> &pieces, int const fromSquareID, int const toSquareID, bool isActualMove)
@@ -977,7 +970,7 @@ void PositionController::handlePromotion(Position &position, std::vector<Move>& 
 	std::vector<PieceType> promotionOptions{ getPromotionOptions(pieceColor) };
 	std::for_each(begin(promotionOptions), end(promotionOptions),
 		[this, &position, &moves, &pieces, fromSquareID, toSquareID, &moveType, isActualMove, &moveString](PieceType pieceType) mutable {
-		insertValidMove(position, moves, pieces, fromSquareID, toSquareID, moveType, isActualMove, moveString);
+		insertValidMove(position, moves, pieces, fromSquareID, toSquareID, moveType, isActualMove, moveString, pieceType);
 		qDebug() << "handling promotion";
 	});
 }

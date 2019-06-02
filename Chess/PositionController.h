@@ -99,7 +99,7 @@ public:
 	int getSquareIDFromLocation(Location location);
 	void moveLocation(Location& location, Direction const direction);
 	void handleValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, int const fromSquareID, int const toSquareID, MoveType moveType, bool isActualMove);
-	void insertValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, int const fromSquareID, int const toSquareID, MoveType const moveType, bool const isActualMove, QString moveString);
+	void insertValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, int const fromSquareID, int const toSquareID, MoveType const moveType, bool const isActualMove, QString moveString, PieceType const newPieceType);
 	void handleValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, int const fromSquareID, int const toSquareID, bool isActualMove);
 	void handleValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, Location const & origLocation, Location const & location, bool isActualMove);
 	void handleValidMove(Position & position, std::vector<Move>& moves, std::vector<Piece*>& pieces, Location const & origLocation, Location const & location, MoveType moveType, bool isActualMove);
