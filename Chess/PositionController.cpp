@@ -110,6 +110,9 @@ bool PositionController::validateMove(Position &position, std::vector<Piece*> pi
 
 	auto it = std::find(validMoves.begin(), validMoves.end(), move);
 	if (it != validMoves.end()) {
+
+		// Getting info about movestring and movetype (promotion etc)
+		move = static_cast<Move> (*it);
 		return true;
 	}
 	else {

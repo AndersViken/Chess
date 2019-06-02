@@ -78,10 +78,11 @@ private:
 	void setLabelBackgroundColor(const int &color, QLabel * label);
 	void setLabelColor(const int &color, QLabel * label);
 	QString Chess::getPositionFromDialog(QInputDialog & dialog);
-	void handleMove(Move & move, Position & t_position, std::vector<Piece*>& t_pieces, PieceType const pieceType, QPoint const & newPoint);
+	void handleMove(Move & move, Position & t_position, std::vector<Piece*>& t_pieces, PieceType & pieceType, QPoint const & newPoint);
 	void handleLegalMove(PieceType const pieceType, QPoint const & newPoint, Move const & move, Position & origPosition, Position & newPosition, std::vector<Piece*>& t_pieces);
+	void checkIfPromotion(Move & move, Position & newPosition, PieceType & pieceType, QPoint const &newPoint);
 	void checkIfCastling(Move & move, Position & newPosition);
-	void performPromotion(Move & move, Position & newPosition);
+	void performPromotion(Move & move, Position & newPosition, PieceType & pieceType, QPoint const &newPoint);
 	void performCastling(Position & t_position, Move move, std::vector<Piece*>& t_pieces, PieceType const pieceType);
 	void getMoveString(Position & origPosition, Position & newPosition, std::vector<Piece*>& t_pieces, QString & moveString, Move const & move, PieceType const pieceType);
 	void getSquareString(const int & origSquareID, QString &origSquareString);

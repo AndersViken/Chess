@@ -434,7 +434,7 @@ QString Chess::getPositionFromDialog(QInputDialog & dialog)
 	return dialog.textValue();
 }
 
-void Chess::handleMove(Move & move, Position & t_position, std::vector<Piece*>& t_pieces, PieceType const pieceType, QPoint const &newPoint)
+void Chess::handleMove(Move & move, Position & t_position, std::vector<Piece*>& t_pieces, PieceType& pieceType, QPoint const &newPoint)
 {
 
 	// find out if move is promotion move
@@ -450,7 +450,7 @@ void Chess::handleMove(Move & move, Position & t_position, std::vector<Piece*>& 
 		// TODO: should here also detect a rook move, to loose castling rights with that rook
 		checkIfCastling(move, t_position);
 		
-		// add promotion code check here ??
+		checkIfPromotion(move, t_position, pieceType, newPoint);
 
 		t_position = positionController.generateNewPosition(move, t_position);
 		handleLegalMove(pieceType, newPoint, move, origPosition, t_position, t_pieces);
@@ -591,7 +591,6 @@ void Chess::dropEvent(QDropEvent *event)
 void Chess::handleLegalMove(PieceType const pieceType, QPoint const &newPoint, Move const &move,
 	Position &origPosition, Position &newPosition, std::vector<Piece*>& t_pieces)
 {
-	QString moveString = move.moveString;
 	Piece * piece = pieceView.generatePiece(pieceType, newPoint, move.toSquareId, this);
 	positionController.removePiece(pieces, move.toSquareId);
 	positionController.removePiece(pieces, move.fromSquareId);
@@ -600,6 +599,7 @@ void Chess::handleLegalMove(PieceType const pieceType, QPoint const &newPoint, M
 	piece->setAttribute(Qt::WA_DeleteOnClose);
 	pieces.push_back(piece);
 	
+	QString moveString = move.moveString;
 	if (!moveString.compare("")){ // move string not filled yet
 		getMoveString(origPosition, newPosition, t_pieces, moveString, move, pieceType);
 	}
@@ -609,6 +609,14 @@ void Chess::handleLegalMove(PieceType const pieceType, QPoint const &newPoint, M
 	updateAnalysisTable(analysisTableModel);
 }
 
+void Chess::checkIfPromotion(Move& move, Position& newPosition, PieceType& pieceType, QPoint const &newPoint)
+{
+	switch (move.moveType) {
+	case MoveType::promotion:
+	case MoveType::captureAndPromotion:
+		performPromotion(move, newPosition, pieceType, newPoint);
+	}
+}
 void Chess::checkIfCastling(Move& move, Position& newPosition)
 {
 
@@ -637,9 +645,25 @@ void Chess::checkIfCastling(Move& move, Position& newPosition)
 	}
 }
 
-void Chess::performPromotion(Move & move, Position & newPosition)
+void Chess::performPromotion(Move & move, Position & newPosition, PieceType& pieceType, QPoint const &newPoint)
 {
 	//if(move.toSquareId ) GUI here get from piece dropped function
+
+	Piece * piece = pieceView.generatePiece(pieceType, newPoint, move.toSquareId, this);
+	positionController.removePiece(pieces, move.toSquareId);
+	positionController.removePiece(pieces, move.fromSquareId);
+
+	piece->show();
+	piece->setAttribute(Qt::WA_DeleteOnClose);
+	pieces.push_back(piece);
+
+	PromotionDialog* dialog{ new PromotionDialog(newPosition.getActiveColorInt()) };
+	dialog->exec();
+
+	//qDebug() << "piece selected: " << dialog->getPieceTypeSelected();
+
+	pieceType = dialog->getPieceTypeSelected();
+	delete dialog;
 }
 
 void Chess::performCastling(Position &t_position, Move move,std::vector<Piece*>& t_pieces, PieceType const pieceType)
