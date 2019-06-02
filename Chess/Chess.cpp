@@ -434,7 +434,7 @@ QString Chess::getPositionFromDialog(QInputDialog & dialog)
 	return dialog.textValue();
 }
 
-void Chess::handleMove(Move & move, Position & t_position, std::vector<Piece*>& t_pieces, PieceType const pieceType, QPoint const &newPoint, QPoint const &origPoint)
+void Chess::handleMove(Move & move, Position & t_position, std::vector<Piece*>& t_pieces, PieceType const pieceType, QPoint const &newPoint)
 {
 
 	// find out if move is promotion move
@@ -445,10 +445,7 @@ void Chess::handleMove(Move & move, Position & t_position, std::vector<Piece*>& 
 		qDebug() << "piece selected: " << dialog->getPieceTypeSelected();
 	*/
 	Position origPosition = t_position;
-	bool legalMove = positionController.validateMove(t_position, t_pieces, move);
-
-	Piece *piece;
-	if (legalMove)
+	if (positionController.validateMove(t_position, t_pieces, move))
 	{
 		// TODO: should here also detect a rook move, to loose castling rights with that rook
 		checkIfCastling(move, t_position);
@@ -456,8 +453,7 @@ void Chess::handleMove(Move & move, Position & t_position, std::vector<Piece*>& 
 		// add promotion code check here ??
 
 		t_position = positionController.generateNewPosition(move, t_position);
-		handleLegalMove(piece, pieceType, newPoint, move, origPosition, t_position, t_pieces);
-
+		handleLegalMove(pieceType, newPoint, move, origPosition, t_position, t_pieces);
 	}
 	else
 	{
@@ -560,7 +556,7 @@ void Chess::dropEvent(QDropEvent *event)
 		int newSquareID = getSquareIdFromPoint(newPoint);
 
 		Move move{ origSquareID, newSquareID };
-		handleMove(move, position, pieces, pieceType, newPoint, origPoint);
+		handleMove(move, position, pieces, pieceType, newPoint);
 		
 		if (event->source() == this) {
 			event->setDropAction(Qt::MoveAction);
@@ -592,12 +588,11 @@ void Chess::dropEvent(QDropEvent *event)
 	}
 }
 
-void Chess::handleLegalMove(Piece * &piece, PieceType const pieceType, QPoint const &newPoint, Move const &move,
+void Chess::handleLegalMove(PieceType const pieceType, QPoint const &newPoint, Move const &move,
 	Position &origPosition, Position &newPosition, std::vector<Piece*>& t_pieces)
 {
 	QString moveString = move.moveString;
-
-	piece = pieceView.generatePiece(pieceType, newPoint, move.toSquareId, this);
+	Piece * piece = pieceView.generatePiece(pieceType, newPoint, move.toSquareId, this);
 	positionController.removePiece(pieces, move.toSquareId);
 	positionController.removePiece(pieces, move.fromSquareId);
 

@@ -110,11 +110,6 @@ bool PositionController::validateMove(Position &position, std::vector<Piece*> pi
 
 	auto it = std::find(validMoves.begin(), validMoves.end(), move);
 	if (it != validMoves.end()) {
-
-		// changing the parameter move here (to get info about movestring and movetype)
-		move = static_cast<Move> (*it);
-
-		//moveType = move.moveType;
 		return true;
 	}
 	else {
@@ -678,10 +673,6 @@ bool PositionController::checkIfKingAttackedAfterMove(Position &position, std::v
 
 	return retVal;
 }
-void PositionController::checkIfListOfSquaresAttackedAfterMove(Position &position, Move move, std::vector<int> squares)
-{
-
-}
 
 
 
@@ -906,10 +897,12 @@ void PositionController::insertValidMove(Position &position, std::vector<Move>& 
 {
 	Move move{ fromSquareID,toSquareID, moveString, moveType, newPieceType };
 	int const inactiveColor{ position.getActiveColorInt() == white ? black : white };
+	bool moveIllegal = false;
 	if (isActualMove) {
-		if (checkIfKingAttackedAfterMove(position, pieces, inactiveColor, move) == false) {
-			moves.push_back(move);
-		}
+		moveIllegal = checkIfKingAttackedAfterMove(position, pieces, inactiveColor, move);
+	}
+	if (moveIllegal == false) {
+		moves.push_back(move);
 	}
 }
 void PositionController::handleValidMove(Position &position, std::vector<Move>& moves, std::vector<Piece*> &pieces, int const fromSquareID, int const toSquareID, bool isActualMove)
@@ -943,7 +936,7 @@ void PositionController::removePiece(std::vector<Piece*>& t_pieces, int squareID
 
 MoveType PositionController::checkIfPromotion(Location origLocation, Location newLocation)
 {
-	if (newLocation.row == 0 || newLocation.row == squaresInARow) {
+	if (newLocation.row == 0 || newLocation.row == squaresInARow-1) {
 		if (newLocation.col != origLocation.col)
 		{
 			return MoveType::captureAndPromotion;
