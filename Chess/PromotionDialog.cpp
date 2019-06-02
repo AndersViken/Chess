@@ -5,23 +5,35 @@
 #include "PromotionDialog.h"
 #include "GuiSetup.h"
 
-PromotionDialog::PromotionDialog()
+PromotionDialog::PromotionDialog(int const playerColor)
 {
 	setCursor(Qt::PointingHandCursor);
 	QVBoxLayout *mainLayout = new QVBoxLayout;
 
 	std::vector<QString> imageDirs{};
-	imageDirs.push_back(":/Images/whiteQueen");
-	imageDirs.push_back(":/Images/whiteKnight");
-	imageDirs.push_back(":/Images/whiteRook");
-	imageDirs.push_back(":/Images/whiteBishop");
-
 	std::vector<PieceType> pieceTypes{};
-	pieceTypes.push_back(PieceType::whiteQueen);
-	pieceTypes.push_back(PieceType::whiteKnight);
-	pieceTypes.push_back(PieceType::whiteRook);
-	pieceTypes.push_back(PieceType::whiteBishop);
+	if (playerColor == white) {
+		imageDirs.push_back(":/Images/whiteQueen");
+		imageDirs.push_back(":/Images/whiteKnight");
+		imageDirs.push_back(":/Images/whiteRook");
+		imageDirs.push_back(":/Images/whiteBishop");
 
+		pieceTypes.push_back(PieceType::whiteQueen);
+		pieceTypes.push_back(PieceType::whiteKnight);
+		pieceTypes.push_back(PieceType::whiteRook);
+		pieceTypes.push_back(PieceType::whiteBishop);
+	}
+	else {
+		imageDirs.push_back(":/Images/blackQueen");
+		imageDirs.push_back(":/Images/blackKnight");
+		imageDirs.push_back(":/Images/blackRook");
+		imageDirs.push_back(":/Images/blackBishop");
+
+		pieceTypes.push_back(PieceType::blackQueen);
+		pieceTypes.push_back(PieceType::blackKnight);
+		pieceTypes.push_back(PieceType::blackRook);
+		pieceTypes.push_back(PieceType::blackBishop);
+	}
 	int pieceNum{ 0 };
 	std::for_each(imageDirs.begin(), imageDirs.end(), [&mainLayout, &pieceTypes, &pieceNum, this](QString imageDir) {
 		PromotionImage* piece = new PromotionImage();
@@ -44,11 +56,7 @@ void PromotionDialog::mousePressEvent(QMouseEvent * event)
 	if (!piece)
 		return;
 
-	QByteArray itemData;
-	QDataStream dataStream(&itemData, QIODevice::WriteOnly);
-	dataStream << static_cast<int>(piece->getPieceType());
-
-	// not needed ?? pieceTypeSelected = piece->getPieceType();
+	setPieceTypeSelected(piece->getPieceType());
 
 	delete piece;
 	close();

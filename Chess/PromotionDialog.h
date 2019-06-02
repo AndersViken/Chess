@@ -10,15 +10,16 @@ class PromotionDialog : public QDialog
 	Q_OBJECT
 
 public:
-	PromotionDialog();
-	int getPieceTypeSelected() { return pieceTypeSelected; };
-	void setPieceTypeSelected(int t_pieceTypeSelected) { pieceTypeSelected = t_pieceTypeSelected; };
+	PromotionDialog(int const playerColor);
+	PieceType getPieceTypeSelected() { return pieceTypeSelected; };
+	void setPieceTypeSelected(PieceType t_pieceTypeSelected) { pieceTypeSelected = t_pieceTypeSelected; };
 
 private:
 	enum { numPieces = 4 };
 	std::vector<PromotionImage*> pieces{};
 	void mousePressEvent(QMouseEvent *event) override;
-	int pieceTypeSelected;
+	PieceType pieceTypeSelected;
+	PromotionImage *pieceSelected;
 };
 
 #endif // DIALOG_H

@@ -43,6 +43,7 @@ public:
 	Move::~Move() {}
 
 	bool operator==(const Move & lhs);
+	Move& operator=(const Move& other);
 	int fromSquareId;
 	int toSquareId;
 	QString moveString;
